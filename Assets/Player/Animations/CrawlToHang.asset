@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 372139b25599440f9c10346080e3ae68, type: 3}
+  m_Name: CrawlToHang
+  m_EditorClassIdentifier: 
+  frames:
+  - {fileID: 7052087424143413810, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: 8991851897322007190, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: -1982717780452378287, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: -2200974209202731923, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: 3694075171277799906, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: -3269867182355273466, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: 8400222363875573717, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: 9131849911978142607, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
+  - {fileID: 3324005421621974830, guid: 853bdde3c0b68e647bc4298e364feeaa, type: 3}
