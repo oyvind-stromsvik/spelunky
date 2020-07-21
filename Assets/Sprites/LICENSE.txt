@@ -1,0 +1,9 @@
+Unless otherwise stated all the sprites in this project are taken directly from the original Spelunky game and belong to Derek Yu and Mossmouth. And even though you can do whatever you want with the rest of this Unity project that does not apply to these sprites.
+
+I'm not sure if what I'm doing is okay as I've been unable to contact Derek Yu and get his feedback on it, but I'm hoping it is. These sprites are no more accessible here than they are in the original source code and even though I've not included the original user license I'll do my best in making sure there's no doubt that the original license still applies to them. The reason I've not included the original license is because it talks about the entire game including code, sounds etc. and I've made all of that from scratch. I'm just using the sprites from the original game, nothing else. Nonetheless I'll make sure to link the original license below.
+
+The original Spelunky (with GameMaker source code) is available here:
+https://spelunkyworld.com/original.html
+
+And the user license for the GameMaker source code can be found here: 
+https://www.spelunkyworld.com/files/COPYING.txt

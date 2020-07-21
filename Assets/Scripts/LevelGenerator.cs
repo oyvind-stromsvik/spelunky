@@ -1,0 +1,460 @@
+using UnityEngine;
+using System.Collections.Generic;
+
+public class LevelGenerator : MonoBehaviour {
+
+    public bool debug;
+
+    public SpriteRenderer boundsStraight;
+    public SpriteRenderer boundsCorner;
+
+    public GameObject circle;
+    public GameObject arrowRight;
+    public GameObject arrowDown;
+    public GameObject arrowLeft;
+
+    public int roomsHorizontal = 4;
+    public int roomsVertical = 4;
+
+    [Header(("Normal rooms"))]
+    public Room[] normalRooms;
+
+    [Header(("Special rooms"))]
+    public Room[] specialRooms;
+
+    public Room[,] Rooms { get; private set; }
+    public Tile[,] Tiles { get; private set; }
+
+    // NOTE: Changing these involves redoing all sprite assets and recreating
+    // all room prefabs. I left these at the default Spelunky values so that
+    // it's easy to recreate the same rooms here if desirable.
+    public int RoomWidth { get; } = 10;
+    public int RoomHeight { get; } = 8;
+    public int TileWidth { get; } = 16;
+    public int TileHeight { get; } = 16;
+
+    private Dictionary<string, Tile> _tilePrefabs;
+    private Dictionary<string, GameObject> _backgroundPrefabs;
+
+    private Transform _tileParent;
+    private Transform _boundsParent;
+    private Transform _backgroundParent;
+    private Transform _roomParent;
+    private Transform _debugParent;
+
+    private Vector2 _direction;
+    private Vector2 _lastDirection;
+
+    private Room firstRoom;
+    private Room lastRoom;
+    private Tile entrance;
+    private Tile exit;
+
+    private bool _hasSpawnedTrapRoom;
+    private bool _hasSpawnedSacrificalAltar;
+
+    public static LevelGenerator instance;
+
+    private void Awake() {
+        instance = this;
+
+        Object[] resourcesTiles = Resources.LoadAll("Tiles/Prefabs", typeof(Tile));
+        _tilePrefabs = new Dictionary<string, Tile>();
+        foreach (Object resource in resourcesTiles) {
+            Tile tile = (Tile) resource;
+            _tilePrefabs.Add(tile.name, tile);
+        }
+
+        Object[] resourcesBackgrounds = Resources.LoadAll("Backgrounds/Prefabs", typeof(GameObject));
+        _backgroundPrefabs = new Dictionary<string, GameObject>();
+        foreach (Object resource in resourcesBackgrounds) {
+            GameObject background = (GameObject) resource;
+            _backgroundPrefabs.Add(background.name, background);
+        }
+
+        _tileParent = GameObject.Find("_TILES").GetComponent<Transform>();
+        _boundsParent = GameObject.Find("_BOUNDS").GetComponent<Transform>();
+        _backgroundParent = GameObject.Find("_BACKGROUND").GetComponent<Transform>();
+        _roomParent = GameObject.Find("_ROOMS").GetComponent<Transform>();
+        _debugParent = GameObject.Find("_DEBUG").GetComponent<Transform>();
+
+        Rooms = new Room[roomsHorizontal, roomsVertical];
+        Tiles = new Tile[roomsHorizontal * RoomWidth, roomsVertical * RoomHeight];
+    }
+
+    private void Start() {
+        CreateLevel();
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    private void CreateLevel() {
+        if (roomsHorizontal <= 1 && roomsVertical <= 1) {
+            throw new System.Exception("A level need at least 2 rooms.");
+        }
+
+        // 1. First create the main path from entrance to exit.
+        CreateMainPathRooms();
+
+        // 2. Then create any rooms not on the main path.
+        CreateRemainingRooms();
+
+        // 3. Setup the tiles (add variations, decorations etc.)
+        InitializeTiles();
+        SetupTiles();
+
+        // 4. Create the indestructable bounds around the level.
+        CreateLevelBounds();
+
+        // 5. Create the background sprites.
+        CreateBackground();
+
+        // 6. Place the entrace and exit.
+        PlaceEntranceAndExit();
+
+        // 7. Spawn the player at the entrance.
+        FindObjectOfType<GameManager>().SpawnPlayer(entrance.transform.position);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    private void PlaceEntranceAndExit() {
+        Tile tileToSpawnEntranceOn = firstRoom.GetSuitableEntranceOrExitTile();
+        entrance = Instantiate(_tilePrefabs["Entrance"], tileToSpawnEntranceOn.transform.position + new Vector3(0, TileHeight, 0), Quaternion.identity);
+
+        Tile tileToSpawnExitOn = lastRoom.GetSuitableEntranceOrExitTile();
+        exit = Instantiate(_tilePrefabs["Exit"], tileToSpawnExitOn.transform.position + new Vector3(0, TileHeight, 0), Quaternion.identity);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    private void CreateMainPathRooms() {
+        Vector2 currentIndex = new Vector2(Random.Range(0, Rooms.GetLength(0)), Rooms.GetLength(1) - 1);
+        PickRandomDirection();
+
+        firstRoom = null;
+        lastRoom = null;
+        bool stopGeneration = false;
+        while (stopGeneration == false) {
+            Vector2 indexToCheck = new Vector2((int) currentIndex.x + (int) _direction.x, (int) currentIndex.y + (int) _direction.y);
+            // Out of bounds.
+            if (indexToCheck.x < 0 || indexToCheck.x >= Rooms.GetLength(0)) {
+                _lastDirection = _direction;
+                _direction = Vector2.down;
+            }
+            // Reached the bottom row.
+            else if (indexToCheck.y < 0) {
+                _direction = Vector2.zero;
+                Room roomToSpawn = FindSuitableRoom(currentIndex);
+                Room spawnedRoom = SpawnRoom(roomToSpawn, currentIndex);
+                InstantiateDirectionArrow(currentIndex);
+                currentIndex = indexToCheck;
+                stopGeneration = true;
+                lastRoom = spawnedRoom;
+            }
+            // Found an empty slot.
+            else if (Rooms[(int) indexToCheck.x, (int) indexToCheck.y] == null) {
+                if (firstRoom == null) {
+                    _lastDirection = Vector2.zero;
+                }
+
+                Room roomToSpawn = FindSuitableRoom(currentIndex);
+                if (roomToSpawn != null) {
+                    Room spawnedRoom = SpawnRoom(roomToSpawn, currentIndex);
+                    if (firstRoom == null) {
+                        firstRoom = spawnedRoom;
+                    }
+                    InstantiateDirectionArrow(currentIndex);
+                    currentIndex = indexToCheck;
+                }
+
+                PickRandomDirection();
+            }
+            // If all else fails try again with a different direction.
+            else {
+                PickRandomDirection();
+            }
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    private void CreateRemainingRooms() {
+        for (int x = 0; x < Rooms.GetLength(0); x++) {
+            for (int y = 0; y < Rooms.GetLength(1); y++) {
+                Vector2 currentIndex = new Vector2(x, y);
+                if (Rooms[(int) currentIndex.x, (int) currentIndex.y] == null) {
+                    Room roomToSpawn = null;
+                    if (!_hasSpawnedTrapRoom && Random.value < 0.1f) {
+                        _hasSpawnedTrapRoom = true;
+                        roomToSpawn = specialRooms[0];
+                    }
+                    else if (!_hasSpawnedSacrificalAltar && Random.value < 0.1f) {
+                        _hasSpawnedSacrificalAltar = true;
+                        roomToSpawn = specialRooms[1];
+                    }
+                    else {
+                        roomToSpawn = FindSuitableRoom(currentIndex);
+                    }
+
+                    SpawnRoom(roomToSpawn, currentIndex);
+                    if (debug) {
+                        Instantiate(circle, CurrentPosition(currentIndex, true), Quaternion.identity, _debugParent);
+                    }
+                }
+            }
+        }
+    }
+
+    private Room SpawnRoom(Room roomToSpawn, Vector2 currentIndex) {
+        Rooms[(int) currentIndex.x, (int) currentIndex.y] = Instantiate(roomToSpawn, CurrentPosition(currentIndex), Quaternion.identity, _roomParent);
+        Rooms[(int) currentIndex.x, (int) currentIndex.y].name = "Room [" + currentIndex.x + "," + currentIndex.y + "]";
+        Rooms[(int) currentIndex.x, (int) currentIndex.y].index = currentIndex;
+        return Rooms[(int) currentIndex.x, (int) currentIndex.y];
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    private void PickRandomDirection() {
+        _lastDirection = _direction;
+        if (Random.value < 0.8f) {
+            if (Random.value < 0.5f) {
+                _direction = Vector2.right;
+            }
+            else {
+                _direction = Vector2.left;
+            }
+        }
+        else {
+            _direction = Vector2.down;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="arrow"></param>
+    /// <returns></returns>
+    private Vector3 CurrentPosition(Vector2 currentIndex, bool arrow = false) {
+        if (arrow) {
+            return new Vector3(currentIndex.x * RoomWidth * TileWidth + (RoomWidth * TileWidth / 2f), currentIndex.y * RoomHeight * TileHeight + (RoomHeight * TileHeight / 2f), 0);
+        }
+
+        return new Vector3(currentIndex.x * RoomWidth * TileWidth, currentIndex.y * RoomHeight * TileHeight, 0);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    private void InstantiateDirectionArrow(Vector2 currentIndex) {
+        if (!debug) {
+            return;
+        }
+
+        if (_direction == Vector2.right) {
+            Instantiate(arrowRight, CurrentPosition(currentIndex, true), Quaternion.identity, _debugParent);
+        }
+        else if (_direction == Vector2.left) {
+            Instantiate(arrowLeft, CurrentPosition(currentIndex, true), Quaternion.identity, _debugParent);
+        }
+        else {
+            Instantiate(arrowDown, CurrentPosition(currentIndex, true), Quaternion.identity, _debugParent);
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    private Room FindSuitableRoom(Vector2 currentIndex) {
+        bool top = _lastDirection == Vector2.down || _direction == Vector2.up;
+        bool right = _lastDirection == Vector2.left || _direction == Vector2.right;
+        bool down = _direction == Vector2.down;
+        // TODO: This doesn't work. Don't spawn rooms with opening down if we're at the bottom.
+        if (currentIndex.y == 0) {
+            down = false;
+        }
+        bool left = _lastDirection == Vector2.right || _direction == Vector2.left;
+        List<Room> suitableRooms = new List<Room>();
+        foreach (Room room in normalRooms) {
+            if (top && !room.top ||
+                right && !room.right ||
+                down && !room.down ||
+                left && !room.left) {
+                continue;
+            }
+
+            suitableRooms.Add(room);
+        }
+
+        return suitableRooms.Count > 0 ? suitableRooms[Random.Range(0, suitableRooms.Count)] : null;
+    }
+
+    /// <summary>
+    /// Create an indestructable boundary around the level.
+    /// </summary>
+    private void CreateLevelBounds() {
+        // Level width/height.
+        float width = RoomWidth * roomsHorizontal * TileWidth;
+        float height = RoomHeight * roomsVertical * TileHeight;
+
+        // Straights.
+        SpriteRenderer boundsTop = Instantiate(boundsStraight, new Vector3(0, height + 48, 0), Quaternion.identity, _boundsParent);
+        boundsTop.size = new Vector2(width, 64);
+        boundsTop.GetComponent<BoxCollider2D>().size = new Vector2(width, 48);
+        boundsTop.GetComponent<BoxCollider2D>().offset = new Vector2(width / 2f, 24);
+        boundsTop.transform.localScale = new Vector3(1, -1,  1);
+        SpriteRenderer boundsRight = Instantiate(boundsStraight, new Vector3(width + 48, 0, 0), Quaternion.identity, _boundsParent);
+        boundsRight.size = new Vector2(height, 64);
+        boundsRight.GetComponent<BoxCollider2D>().size = new Vector2(height, 48);
+        boundsRight.GetComponent<BoxCollider2D>().offset = new Vector2(height / 2f, 24);
+        boundsRight.transform.localRotation = Quaternion.Euler(0, 0, 90);
+        SpriteRenderer boundsBottom = Instantiate(boundsStraight, new Vector3(0, -48, 0), Quaternion.identity, _boundsParent);
+        boundsBottom.size = new Vector2(width, 64);
+        boundsBottom.GetComponent<BoxCollider2D>().size = new Vector2(width, 48);
+        boundsBottom.GetComponent<BoxCollider2D>().offset = new Vector2(width / 2f, 24);
+        SpriteRenderer boundsLeft = Instantiate(boundsStraight, new Vector3(-48, height, 0), Quaternion.identity, _boundsParent);
+        boundsLeft.size = new Vector2(height, 64);
+        boundsLeft.GetComponent<BoxCollider2D>().size = new Vector2(height, 48);
+        boundsLeft.GetComponent<BoxCollider2D>().offset = new Vector2(height / 2f, 24);
+        boundsLeft.transform.localRotation = Quaternion.Euler(0, 0, -90);
+
+        // Corners.
+        SpriteRenderer boundsCornerTopLeft = Instantiate(boundsCorner, new Vector3(0, height + 48, 0), Quaternion.identity, _boundsParent);
+        boundsCornerTopLeft.transform.localRotation = Quaternion.Euler(0, 0, 180);
+        SpriteRenderer boundsCornerTopRight = Instantiate(boundsCorner, new Vector3(width + 48, height, 0), Quaternion.identity, _boundsParent);
+        boundsCornerTopRight.transform.localRotation = Quaternion.Euler(0, 0, 90);
+        SpriteRenderer boundsCornerBottomRight = Instantiate(boundsCorner, new Vector3(width, -48, 0), Quaternion.identity, _boundsParent);
+        boundsCornerBottomRight.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        SpriteRenderer boundsCornerBottomLeft = Instantiate(boundsCorner, new Vector3(-48, 0, 0), Quaternion.identity, _boundsParent);
+        boundsCornerBottomLeft.transform.localRotation = Quaternion.Euler(0, 0, -90);
+    }
+
+    /// <summary>
+    /// Just fill the background of the level.
+    /// </summary>
+    private void CreateBackground() {
+        for (int y = 0; y < RoomHeight * roomsVertical * TileHeight; y += 64) {
+            for (int x = 0; x < RoomWidth * roomsHorizontal * TileWidth; x += 64) {
+                Instantiate(
+                    _backgroundPrefabs["Background"],
+                    new Vector3(x, y, 0),
+                    Quaternion.identity,
+                    _backgroundParent
+                );
+
+                if (Random.value < 0.1f) {
+                    if (Random.value < 0.5f) {
+                        Instantiate(
+                            _backgroundPrefabs["BackgroundDecal"],
+                            new Vector3(x + Random.Range(-16, 16), y + Random.Range(-16, 16), 0),
+                            Quaternion.identity,
+                            _backgroundParent
+                        );
+                    }
+                    else {
+                        Instantiate(
+                            _backgroundPrefabs["BackgroundDecal_2"],
+                            new Vector3(x + Random.Range(-16, 16), y + Random.Range(-16, 16), 0),
+                            Quaternion.identity,
+                            _backgroundParent
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    private void InitializeTiles() {
+        // Find all tiles in the level.
+        Tile[] tempTiles = FindObjectsOfType<Tile>();
+        foreach (Tile tile in tempTiles) {
+            // Check if we should remove the tile.
+            if (tile.spawnProbability <= Random.Range(0, 100)) {
+                Destroy(tile.gameObject);
+                continue;
+            }
+            // Otherwise initialize the tile and add it to our tiles array for
+            // easier manipulation. For example to check if there is a tile
+            // above any given tile you can just do y + 1 to find out if there
+            // is an entry in the array.
+            int x = (int) tile.transform.position.x / TileWidth;
+            int y = (int) tile.transform.position.y / TileHeight;
+            tile.InitializeTile(x, y);
+        }
+    }
+
+    private void SetupTiles() {
+        // We have to wait until we have all the tiles before we can in the
+        // tiles array before we set them up because this depends on each tile
+        // knowing where neighboring tiles are etc.
+        for (int x = 0; x < Tiles.GetLength(0); x++) {
+            for (int y = 0; y < Tiles.GetLength(1); y++) {
+                // No tile.
+                if (Tiles[x, y] == null) {
+                    continue;
+                }
+
+                Tiles[x, y].SetupTile();
+            }
+        }
+    }
+
+    public void RemoveTiles(Tile[] tilesToRemove) {
+        int minX = int.MaxValue;
+        int maxX = -1;
+        int minY = int.MaxValue;
+        int maxY = -1;
+        foreach (Tile tile in tilesToRemove) {
+            if (tile.x < minX) {
+                minX = tile.x;
+            }
+            if (tile.x > maxX) {
+                maxX = tile.x;
+            }
+            if (tile.y < minY) {
+                minY = tile.y;
+            }
+            if (tile.y > maxY) {
+                maxY = tile.y;
+            }
+            Tiles[tile.x, tile.y] = null;
+            tile.Remove();
+        }
+
+        minX--;
+        maxX++;
+        minY--;
+        maxY++;
+
+        if (minX < 0) {
+            minX = 0;
+        }
+        if (maxX >= Tiles.GetLength(0)) {
+            maxX = Tiles.GetLength(0) - 1;
+        }
+        if (minY < 0) {
+            minY = 0;
+        }
+        if (maxY >= Tiles.GetLength(1)) {
+            maxY = Tiles.GetLength(1) - 1;
+        }
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                // No tile.
+                if (Tiles[x, y] == null) {
+                    continue;
+                }
+
+                Tiles[x, y].SetupTile();
+            }
+        }
+    }
+}

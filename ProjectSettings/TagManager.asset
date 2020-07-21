@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Dirt
+  - Ladder
+  - Rope
+  - OneWayPlatform
+  - Entrance
+  - Exit
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Obstacle
+  - Player
+  - Spike
+  - Ladder
+  - OneWayPlatform
+  - Indestructable
+  - Debris
+  - Block
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Background
+    uniqueID: 3989358653
+    locked: 0
+  - name: BackgroundDecals
+    uniqueID: 4111917155
+    locked: 0
+  - name: Objects Behind
+    uniqueID: 1172375773
+    locked: 0
+  - name: Slightly Behind
+    uniqueID: 3866940329
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Foreground
+    uniqueID: 1604189653
+    locked: 0
+  - name: Bounds
+    uniqueID: 2521378123
+    locked: 0
+  - name: UI
+    uniqueID: 2758751699
+    locked: 0
