@@ -28,8 +28,8 @@ namespace Spelunky {
         private PhysicsObject _controller;
         private SpriteAnimator _spriteAnimator;
 
-        private float _boundsSoundVelocityThreshold = 100f;
-        private float _sleepVelocityThreshold = 35f;
+        private const float BoundsSoundVelocityThreshold = 100f;
+        private const float SleepVelocityThreshold = 35f;
         private bool _sleep;
 
         public void SetVelocity(Vector2 velocity) {
@@ -41,14 +41,14 @@ namespace Spelunky {
                 bool playSound = false;
 
                 if (_controller.collisions.right || _controller.collisions.left) {
-                    if (Mathf.Abs(_velocity.x) > _boundsSoundVelocityThreshold) {
+                    if (Mathf.Abs(_velocity.x) > BoundsSoundVelocityThreshold) {
                         playSound = true;
                     }
                     _velocity.x *= -1f;
                 }
 
                 if (_controller.collisions.above || _controller.collisions.below) {
-                    if (Mathf.Abs(_velocity.y) > _boundsSoundVelocityThreshold) {
+                    if (Mathf.Abs(_velocity.y) > BoundsSoundVelocityThreshold) {
                         playSound = true;
                     }
                     _velocity.y *= -1f;
@@ -56,7 +56,7 @@ namespace Spelunky {
 
                 _velocity *= 0.5f;
 
-                if (_velocity.magnitude < _sleepVelocityThreshold && _controller.collisions.below) {
+                if (_velocity.magnitude < SleepVelocityThreshold && _controller.collisions.below) {
                     _sleep = true;
                 }
 
