@@ -1,27 +1,20 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spelunky {
     [RequireComponent (typeof (PhysicsObject))]
     public class Bomb : MonoBehaviour {
 
-        public GameObject explosion;
+        public Explosion explosion;
 
         public AudioClip bounceClip;
         public AudioClip bombTimerClip;
-        public AudioClip bombExplosionClip;
 
         public float timeToExplode;
-        public float explotionRadius;
-        public LayerMask layerMask;
 
         private AudioSource _audioSource;
 
         private Vector3 _offset;
-
-        public float maxJumpHeight;
-        public float timeToJumpApex;
 
         private Vector3 _velocity;
 
@@ -29,8 +22,25 @@ namespace Spelunky {
         private SpriteAnimator _spriteAnimator;
 
         private const float BoundsSoundVelocityThreshold = 100f;
-        private const float SleepVelocityThreshold = 35f;
-        private bool _sleep;
+
+        private void Awake() {
+            _controller = GetComponent<PhysicsObject>();
+            _audioSource = GetComponent<AudioSource>();
+            _spriteAnimator = GetComponent<SpriteAnimator>();
+        }
+
+        private void Start() {
+            StartCoroutine(DelayedExplosion());
+            _offset = new Vector3(0, 4, 0);
+        }
+
+        private void Update() {
+            CalculateVelocity();
+
+            HandleCollisions();
+
+            _controller.Move(_velocity * Time.deltaTime);
+        }
 
         public void SetVelocity(Vector2 velocity) {
             _velocity = velocity;
@@ -56,29 +66,17 @@ namespace Spelunky {
 
                 _velocity *= 0.5f;
 
-                if (_velocity.magnitude < SleepVelocityThreshold && _controller.collisions.below) {
-                    _sleep = true;
-                }
-
                 if (playSound) {
-                    _audioSource.clip = bounceClip;
-                    _audioSource.Play();
+                    _audioSource.PlayOneShot(bounceClip);
                 }
             }
         }
 
-        private void Awake() {
-            _controller = GetComponent<PhysicsObject>();
-            _audioSource = GetComponent<AudioSource>();
-            _spriteAnimator = GetComponent<SpriteAnimator>();
+        private void CalculateVelocity() {
+            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
         }
 
-        private void Start() {
-            StartCoroutine(Explode());
-            _offset = new Vector3(0, 4, 0);
-        }
-
-        private IEnumerator Explode() {
+        private IEnumerator DelayedExplosion() {
             _spriteAnimator.fps = 0;
 
             yield return new WaitForSeconds(timeToExplode - bombTimerClip.length);
@@ -91,46 +89,13 @@ namespace Spelunky {
 
             yield return new WaitForSeconds(bombTimerClip.length);
 
-            _audioSource.clip = bombExplosionClip;
-            _audioSource.Play();
+            Explode();
+        }
 
+        public void Explode() {
             Instantiate(explosion, transform.position + _offset, Quaternion.identity);
-
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position + _offset, explotionRadius, layerMask);
-            List<Tile> tilesToRemove = new List<Tile>();
-            foreach (Collider2D collider in colliders) {
-                Tile tile = collider.GetComponent<Tile>();
-                if (tile != null) {
-                    tilesToRemove.Add(tile);
-                }
-            }
-
-            LevelGenerator.instance.RemoveTiles(tilesToRemove.ToArray());
-
-            GetComponent<SpriteRenderer>().enabled = false;
-            GetComponent<PhysicsObject>().enabled = false;
-            GetComponent<Bomb>().enabled = false;
-            Destroy(gameObject, 2f);
+            Destroy(gameObject);
         }
 
-        private void OnDrawGizmos() {
-            Gizmos.DrawWireSphere(transform.position + _offset, explotionRadius);
-        }
-
-        private void Update() {
-            CalculateVelocity();
-
-            HandleCollisions();
-
-            if (_sleep) {
-                _velocity = Vector2.zero;
-            }
-
-            _controller.Move(_velocity * Time.deltaTime);
-        }
-
-        private void CalculateVelocity() {
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-        }
     }
 }

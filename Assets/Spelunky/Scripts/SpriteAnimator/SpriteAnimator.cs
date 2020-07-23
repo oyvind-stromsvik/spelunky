@@ -8,6 +8,10 @@ namespace Spelunky {
 
         public bool looping;
 
+        // Good for things like explosions etc. so we don't have to leave a blank
+        // frame at the end of every sprite sheet we make.
+        public bool showBlankFrameAfterNonLoopingAnimation;
+
         // Set this to control the speed of the animation.
         public int fps;
 
@@ -28,7 +32,6 @@ namespace Spelunky {
 
         private SpriteRenderer _spriteRenderer;
         private float _timer;
-        private int _frameCounter;
 
         private void Awake() {
             _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -48,6 +51,9 @@ namespace Spelunky {
             }
 
             if (currentFrame == currentAnimation.frames.Length && !looping) {
+                if (showBlankFrameAfterNonLoopingAnimation) {
+                    _spriteRenderer.sprite = null;
+                }
                 return;
             }
 
