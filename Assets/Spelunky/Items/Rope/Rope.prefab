@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2861309640c461686db5ea92cdbe83f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ropeTossClip: {fileID: 8300000, guid: 7b7df01678638614db818ee7a45f72bc, type: 3}
+  ropeTossClip: {fileID: 8300000, guid: e256303ae41987c44a09c801168e6e56, type: 3}
   ropeHitClip: {fileID: 8300000, guid: 59c385db56e9a1341bdc4bfc056e10c0, type: 3}
   maxRopeLength: 96
   ropeSpeed: 256

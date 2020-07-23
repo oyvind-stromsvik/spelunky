@@ -463,7 +463,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3931089949d248f99e4cd3ac0b406325, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpClip: {fileID: 8300000, guid: c1c013ef2c82c644e9a2c926acc80276, type: 3}
+  jumpClip: {fileID: 8300000, guid: 5a8604908953fe24ba06941ee380dac3, type: 3}
   landClip: {fileID: 8300000, guid: a3d8cc96a3a736b408a9d79d3f2080e0, type: 3}
   grabClip: {fileID: 8300000, guid: c77225a8b60441a4db0d1bcaca402cde, type: 3}
 --- !u!114 &-5236971530926676888
