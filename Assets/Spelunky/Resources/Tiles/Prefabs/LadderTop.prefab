@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3024687014588157433}
   - component: {fileID: 7670762331886254615}
   - component: {fileID: 4308606098490078072}
-  m_Layer: 8
+  m_Layer: 12
   m_Name: LadderTop
   m_TagString: OneWayPlatform
   m_Icon: {fileID: 0}

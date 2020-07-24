@@ -87,11 +87,11 @@ namespace Spelunky {
         }
 
         private void HandleUnsteady() {
-            RaycastHit2D hitCenter = Physics2D.Raycast(player.transform.position + Vector3.up, Vector2.down, 2, player.edgeGrabLayerMask);
+            RaycastHit2D hitCenter = Physics2D.Raycast(player.transform.position + Vector3.up, Vector2.down, 2, player.PhysicsObject.collisionMask);
             Debug.DrawRay(player.transform.position + Vector3.up, Vector2.down * 2, Color.magenta);
 
             Vector3 offsetForward = new Vector3(6 * player.facingDirection, 1, 0);
-            RaycastHit2D hitForward = Physics2D.Raycast(player.transform.position + offsetForward, Vector2.down, 2, player.edgeGrabLayerMask);
+            RaycastHit2D hitForward = Physics2D.Raycast(player.transform.position + offsetForward, Vector2.down, 2, player.PhysicsObject.collisionMask);
             Debug.DrawRay(player.transform.position + offsetForward, Vector2.down * 2, Color.green);
 
             // Play unsteady animation

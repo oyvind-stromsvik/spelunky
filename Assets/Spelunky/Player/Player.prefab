@@ -116,6 +116,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4842f8cfb4fab41408f4b7a0269613af, type: 2}
   - {fileID: 11400000, guid: 912972867ad001e4cb7272c87d737942, type: 2}
   looping: 1
+  showBlankFrameAfterNonLoopingAnimation: 0
   fps: 12
   currentFrame: 0
   defaultSprite: {fileID: 0}
@@ -300,7 +301,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 41216
+    m_Bits: 45312
   skinWidth: 0.4
   horizontalRayCount: 3
   verticalRayCount: 2
@@ -321,7 +322,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edgeGrabLayerMask:
     serializedVersion: 2
-    m_Bits: 45312
+    m_Bits: 41216
   cam: {fileID: 0}
   bomb: {fileID: 6430094435519817005, guid: 5d73f589b7d7d3b489523140e46bf32b, type: 3}
   rope: {fileID: 5904638784943168102, guid: 664121d23d46b3c43a145ba4c636c15f, type: 3}
@@ -437,7 +438,6 @@ MonoBehaviour:
   ladderLayerMask:
     serializedVersion: 2
     m_Bits: 2048
-  ladderColliders: []
 --- !u!114 &-3941064224825093986
 MonoBehaviour:
   m_ObjectHideFlags: 0

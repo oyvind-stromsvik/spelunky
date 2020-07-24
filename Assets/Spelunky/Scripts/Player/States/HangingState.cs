@@ -8,6 +8,12 @@ namespace Spelunky {
         public override void Enter() {
             base.Enter();
 
+            // The tile we were going to hang from was destroyed.
+            if (colliderToHangFrom == null) {
+                player.stateMachine.AttemptToChangeState(player.inAirState);
+                return;
+            }
+
             Vector2 hangPosition = new Vector2(colliderToHangFrom.transform.position.x - 4, colliderToHangFrom.transform.position.y + 4);
             if (player.isFacingRight) {
                 if (colliderToHangFrom.transform.position.x < player.transform.position.x) {
