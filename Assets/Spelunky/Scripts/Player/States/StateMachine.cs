@@ -1,4 +1,4 @@
-namespace Spelunky.States {
+namespace Spelunky {
     public class StateMachine {
 
         public State CurrentState { get; private set; }

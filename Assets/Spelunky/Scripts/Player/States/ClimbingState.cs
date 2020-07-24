@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Spelunky.States {
+namespace Spelunky {
     /// <summary>
     /// The state we're in when we're climbing a ladder or a rope.
     /// </summary>
@@ -9,26 +9,22 @@ namespace Spelunky.States {
 
         public ContactFilter2D ladderFilter;
         public LayerMask ladderLayerMask;
-        [HideInInspector] public List<Collider2D> ladderColliders;
 
-        private void Start() {
-            ladderColliders = new List<Collider2D>();
-        }
+        private Collider2D _closestCollider;
 
         public override bool CanEnter() {
             if (player.directionalInput.y == 0) {
                 return false;
             }
-            // TODO: This maybe makes it too hard to grab a ladder playing on a keyboard?
-            // if (Mathf.Abs(player.directionalInput.y) < Mathf.Abs(player.directionalInput.x)) {
-            //     return false;
-            // }
+            if (Mathf.Abs(player.directionalInput.y) < Mathf.Abs(player.directionalInput.x)) {
+                return false;
+            }
             if (player.recentlyJumped) {
                 return false;
             }
             // Find any nearby ladder colliders.
-            player.PhysicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
-            if (ladderColliders.Count <= 0) {
+            _closestCollider = FindClosestOverlappedLadder();
+            if (_closestCollider == null) {
                 return false;
             }
 
@@ -47,9 +43,9 @@ namespace Spelunky.States {
             base.Enter();
 
             player.PhysicsObject.collisions.fallingThroughPlatform = true;
-            float xPos = ladderColliders[0].transform.position.x;
+            float xPos = _closestCollider.transform.position.x;
             player.graphics.animator.Play("ClimbRope");
-            if (ladderColliders[0].CompareTag("Ladder")) {
+            if (_closestCollider.CompareTag("Ladder")) {
                 xPos += LevelGenerator.instance.TileWidth / 2f;
                 player.graphics.animator.Play("ClimbLadder");
             }
@@ -71,10 +67,16 @@ namespace Spelunky.States {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
-            // Find any nearby ladder colliders.
-            player.PhysicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
-            if (ladderColliders.Count <= 0) {
+            // Continously look for a ladder collider so that we can react accordingly.
+            _closestCollider = FindClosestOverlappedLadder();
+            if (_closestCollider == null) {
                 player.stateMachine.AttemptToChangeState(player.inAirState);
+            }
+            else {
+                player.graphics.animator.Play("ClimbRope");
+                if (_closestCollider.CompareTag("Ladder")) {
+                    player.graphics.animator.Play("ClimbLadder");
+                }
             }
         }
 
@@ -95,6 +97,43 @@ namespace Spelunky.States {
                 velocity.y = 0;
             }
 
+        }
+
+        /// <summary>
+        /// Find the closest ladder, in the horizontal direction, that we're currently overlapping.
+        ///
+        /// If we're standing between two ladders we want to grab the closet one, not the first one
+        /// in the list as that one could be the furthest one away.
+        /// </summary>
+        private Collider2D FindClosestOverlappedLadder() {
+            List<Collider2D> ladderColliders = new List<Collider2D>();
+            player.PhysicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
+            if (ladderColliders.Count <= 0) {
+                return null;
+            }
+
+            float closestDistance = Mathf.Infinity;
+            Collider2D closestCollider = null;
+            foreach (Collider2D ladderCollider in ladderColliders) {
+                float xPos = ladderCollider.transform.position.x;
+                if (ladderCollider.CompareTag("Ladder")) {
+                    xPos += LevelGenerator.instance.TileWidth / 2f;
+                }
+                float currentDistance = Mathf.Abs(transform.position.x - xPos);
+                if (currentDistance < closestDistance) {
+                    closestDistance = currentDistance;
+                    closestCollider = ladderCollider;
+                }
+
+                // Prioritize ropes over ladders due to the climbing animation.
+                if (currentDistance == closestDistance) {
+                    if (ladderCollider.CompareTag("Rope")) {
+                        closestCollider = ladderCollider;
+                    }
+                }
+            }
+
+            return closestCollider;
         }
 
     }

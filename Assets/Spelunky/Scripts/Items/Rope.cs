@@ -60,7 +60,7 @@ namespace Spelunky {
                 }
                 else {
                     RaycastHit2D hit = Physics2D.Raycast(_oldPos, direction, distanceThisFrame, layerMask);
-                    if (hit.collider != null) {
+                    if (hit.collider != null && hit.transform.CompareTag("OneWayPlatform") == false) {
                         OnHit();
                     }
                 }
@@ -75,6 +75,13 @@ namespace Spelunky {
         private void OnHit() {
             _hasHit = true;
             SetPositionToCenterOfNearestTile();
+
+            // Ensure ropes that are higher up are drawn in front of ropes that
+            // are lower down.
+            ropeTop.sortingOrder = (int) transform.position.y;
+            ropeMiddle.sortingOrder = (int) transform.position.y;
+            ropeEnd.sortingOrder = (int) transform.position.y;
+
             StartCoroutine(ExtendRope());
 
             _audioSource.clip = ropeHitClip;
@@ -87,7 +94,7 @@ namespace Spelunky {
 
             float ropeLength = maxRopeLength;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, maxRopeLength, layerMask);
-            if (hit.collider != null) {
+            if (hit.collider != null && hit.transform.CompareTag("OneWayPlatform") == false) {
                 ropeLength = hit.distance;
             }
 
@@ -98,7 +105,7 @@ namespace Spelunky {
             }
 
             ropeMiddle.size = new Vector2(ropeMiddle.size.x, Mathf.FloorToInt(ropeMiddle.size.y / LevelGenerator.instance.TileHeight) * LevelGenerator.instance.TileHeight);
-            ropeMiddle.GetComponent<BoxCollider2D>().size = ropeMiddle.size;
+            ropeMiddle.GetComponent<BoxCollider2D>().size = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().size.x, ropeMiddle.size.y);
             ropeMiddle.GetComponent<BoxCollider2D>().offset = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().offset.x, -1 * ropeMiddle.size.y / 2f);
             ropeEnd.gameObject.SetActive(false);
         }
