@@ -60,7 +60,7 @@ namespace Spelunky {
                 }
                 else {
                     RaycastHit2D hit = Physics2D.Raycast(_oldPos, direction, distanceThisFrame, layerMask);
-                    if (hit.collider != null) {
+                    if (hit.collider != null && hit.transform.CompareTag("OneWayPlatform") == false) {
                         OnHit();
                     }
                 }
@@ -87,7 +87,7 @@ namespace Spelunky {
 
             float ropeLength = maxRopeLength;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, maxRopeLength, layerMask);
-            if (hit.collider != null) {
+            if (hit.collider != null && hit.transform.CompareTag("OneWayPlatform") == false) {
                 ropeLength = hit.distance;
             }
 
