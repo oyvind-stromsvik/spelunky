@@ -46,10 +46,12 @@ namespace Spelunky {
         public override void Enter() {
             base.Enter();
 
+            Collider2D ladderColliderToClimb = FindClosestOverlappedLadder();
+
             player.PhysicsObject.collisions.fallingThroughPlatform = true;
-            float xPos = ladderColliders[0].transform.position.x;
+            float xPos = ladderColliderToClimb.transform.position.x;
             player.graphics.animator.Play("ClimbRope");
-            if (ladderColliders[0].CompareTag("Ladder")) {
+            if (ladderColliderToClimb.CompareTag("Ladder")) {
                 xPos += LevelGenerator.instance.TileWidth / 2f;
                 player.graphics.animator.Play("ClimbLadder");
             }
@@ -95,6 +97,34 @@ namespace Spelunky {
                 velocity.y = 0;
             }
 
+        }
+
+        /// <summary>
+        /// Find the closest ladder, in the horizontal direction, that we're currently overlapping.
+        ///
+        /// If we're standing between two ladders we want to grab the closet one, not the first one
+        /// in the list as that one could be the furthest one away.
+        /// </summary>
+        private Collider2D FindClosestOverlappedLadder() {
+            if (ladderColliders.Count <= 0) {
+                return null;
+            }
+
+            float closestDistance = Mathf.Infinity;
+            Collider2D closestCollider = null;
+            foreach (Collider2D ladderCollider in ladderColliders) {
+                float xPos = ladderCollider.transform.position.x;
+                if (ladderCollider.CompareTag("Ladder")) {
+                    xPos += LevelGenerator.instance.TileWidth / 2f;
+                }
+                float currentDistance = Mathf.Abs(transform.position.x - xPos);
+                if (currentDistance < closestDistance) {
+                    closestDistance = currentDistance;
+                    closestCollider = ladderCollider;
+                }
+            }
+
+            return closestCollider;
         }
 
     }
