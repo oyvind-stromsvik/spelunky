@@ -70,6 +70,10 @@ namespace Spelunky {
             // Continously look for a ladder collider so that we can react accordingly.
             _closestCollider = FindClosestOverlappedLadder();
             if (_closestCollider == null) {
+                // NOTE: Do we want this? It's like this in Spelunky, but isn't it better
+                // for the player to have full control over when he drops from a ladder/rope?
+                // He can just press jump and hold down at the same time and he will do the
+                // same thing.
                 player.stateMachine.AttemptToChangeState(player.inAirState);
             }
             else {
