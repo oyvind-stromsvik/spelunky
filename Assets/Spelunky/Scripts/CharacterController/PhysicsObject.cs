@@ -41,11 +41,11 @@ namespace Spelunky {
             collisions.collidedThisFrame = collisions.below || collisions.right || collisions.left || collisions.above;
         }
 
-        private void HorizontalCollisions(ref Vector2 moveAmount) {
+        private void HorizontalCollisions(ref Vector2 velocity) {
             float directionX = collisions.faceDir;
-            float rayLength = Mathf.Abs(moveAmount.x) + skinWidth;
+            float rayLength = Mathf.Abs(velocity.x) + skinWidth;
 
-            if (Mathf.Abs(moveAmount.x) < skinWidth) {
+            if (Mathf.Abs(velocity.x) < skinWidth) {
                 rayLength = 2 * skinWidth;
             }
 
@@ -61,7 +61,7 @@ namespace Spelunky {
                         continue;
                     }
 
-                    moveAmount.x = (hit.distance - skinWidth) * directionX;
+                    velocity.x = (hit.distance - skinWidth) * directionX;
                     rayLength = hit.distance;
 
                     collisions.left = directionX == -1;
@@ -70,13 +70,13 @@ namespace Spelunky {
             }
         }
 
-        private void VerticalCollisions(ref Vector2 moveAmount) {
-            float directionY = Mathf.Sign(moveAmount.y);
-            float rayLength = Mathf.Abs(moveAmount.y) + skinWidth;
+        private void VerticalCollisions(ref Vector2 velocity) {
+            float directionY = Mathf.Sign(velocity.y);
+            float rayLength = Mathf.Abs(velocity.y) + skinWidth;
 
             for (int i = 0; i < verticalRayCount; i++) {
                 Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
-                rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
+                rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
 
                 Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
@@ -92,7 +92,7 @@ namespace Spelunky {
                         }
                     }
 
-                    moveAmount.y = (hit.distance - skinWidth) * directionY;
+                    velocity.y = (hit.distance - skinWidth) * directionY;
                     rayLength = hit.distance;
 
                     collisions.below = directionY == -1;
