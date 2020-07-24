@@ -19,10 +19,9 @@ namespace Spelunky {
             if (player.directionalInput.y == 0) {
                 return false;
             }
-            // TODO: This maybe makes it too hard to grab a ladder playing on a keyboard?
-            // if (Mathf.Abs(player.directionalInput.y) < Mathf.Abs(player.directionalInput.x)) {
-            //     return false;
-            // }
+            if (Mathf.Abs(player.directionalInput.y) < Mathf.Abs(player.directionalInput.x)) {
+                return false;
+            }
             if (player.recentlyJumped) {
                 return false;
             }
