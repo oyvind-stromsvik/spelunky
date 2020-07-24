@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Spelunky.States {
+namespace Spelunky {
     public class HangingState : State {
 
         public Collider2D colliderToHangFrom;

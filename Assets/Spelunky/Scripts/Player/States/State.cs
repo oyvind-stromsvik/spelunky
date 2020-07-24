@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Spelunky.States {
+namespace Spelunky {
     public abstract class State : MonoBehaviour {
 
         [HideInInspector] public Player player;
