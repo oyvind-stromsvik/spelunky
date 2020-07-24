@@ -1,4 +1,3 @@
-using Spelunky.States;
 using UnityEngine;
 
 namespace Spelunky {

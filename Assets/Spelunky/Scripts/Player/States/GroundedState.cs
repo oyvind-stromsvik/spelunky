@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Spelunky.States {
+namespace Spelunky {
     public class GroundedState : State {
 
         public override void Enter() {

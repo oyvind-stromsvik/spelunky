@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Spelunky.States {
+namespace Spelunky {
     /// <summary>
     /// The state we're in when we're climbing a ladder or a rope.
     /// </summary>

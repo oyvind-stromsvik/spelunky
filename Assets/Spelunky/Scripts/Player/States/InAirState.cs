@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Spelunky.States {
+namespace Spelunky {
     public class InAirState : State {
 
         [HideInInspector] public RaycastHit2D lastEdgeGrabRayCastHit;
