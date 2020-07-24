@@ -105,7 +105,7 @@ namespace Spelunky {
             }
 
             ropeMiddle.size = new Vector2(ropeMiddle.size.x, Mathf.FloorToInt(ropeMiddle.size.y / LevelGenerator.instance.TileHeight) * LevelGenerator.instance.TileHeight);
-            ropeMiddle.GetComponent<BoxCollider2D>().size = ropeMiddle.size;
+            ropeMiddle.GetComponent<BoxCollider2D>().size = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().size.x, ropeMiddle.size.y);
             ropeMiddle.GetComponent<BoxCollider2D>().offset = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().offset.x, -1 * ropeMiddle.size.y / 2f);
             ropeEnd.gameObject.SetActive(false);
         }
