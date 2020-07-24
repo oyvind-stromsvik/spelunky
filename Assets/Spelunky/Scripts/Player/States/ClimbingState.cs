@@ -9,11 +9,8 @@ namespace Spelunky {
 
         public ContactFilter2D ladderFilter;
         public LayerMask ladderLayerMask;
-        [HideInInspector] public List<Collider2D> ladderColliders;
 
-        private void Start() {
-            ladderColliders = new List<Collider2D>();
-        }
+        private Collider2D _closestCollider;
 
         public override bool CanEnter() {
             if (player.directionalInput.y == 0) {
@@ -26,8 +23,8 @@ namespace Spelunky {
                 return false;
             }
             // Find any nearby ladder colliders.
-            player.PhysicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
-            if (ladderColliders.Count <= 0) {
+            _closestCollider = FindClosestOverlappedLadder();
+            if (_closestCollider == null) {
                 return false;
             }
 
@@ -45,12 +42,10 @@ namespace Spelunky {
         public override void Enter() {
             base.Enter();
 
-            Collider2D ladderColliderToClimb = FindClosestOverlappedLadder();
-
             player.PhysicsObject.collisions.fallingThroughPlatform = true;
-            float xPos = ladderColliderToClimb.transform.position.x;
+            float xPos = _closestCollider.transform.position.x;
             player.graphics.animator.Play("ClimbRope");
-            if (ladderColliderToClimb.CompareTag("Ladder")) {
+            if (_closestCollider.CompareTag("Ladder")) {
                 xPos += LevelGenerator.instance.TileWidth / 2f;
                 player.graphics.animator.Play("ClimbLadder");
             }
@@ -72,10 +67,16 @@ namespace Spelunky {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
-            // Find any nearby ladder colliders.
-            player.PhysicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
-            if (ladderColliders.Count <= 0) {
+            // Continously look for a ladder collider so that we can react accordingly.
+            _closestCollider = FindClosestOverlappedLadder();
+            if (_closestCollider == null) {
                 player.stateMachine.AttemptToChangeState(player.inAirState);
+            }
+            else {
+                player.graphics.animator.Play("ClimbRope");
+                if (_closestCollider.CompareTag("Ladder")) {
+                    player.graphics.animator.Play("ClimbLadder");
+                }
             }
         }
 
@@ -105,6 +106,8 @@ namespace Spelunky {
         /// in the list as that one could be the furthest one away.
         /// </summary>
         private Collider2D FindClosestOverlappedLadder() {
+            List<Collider2D> ladderColliders = new List<Collider2D>();
+            player.PhysicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
             if (ladderColliders.Count <= 0) {
                 return null;
             }
@@ -120,6 +123,13 @@ namespace Spelunky {
                 if (currentDistance < closestDistance) {
                     closestDistance = currentDistance;
                     closestCollider = ladderCollider;
+                }
+
+                // Prioritize ropes over ladders due to the climbing animation.
+                if (currentDistance == closestDistance) {
+                    if (ladderCollider.CompareTag("Rope")) {
+                        closestCollider = ladderCollider;
+                    }
                 }
             }
 
