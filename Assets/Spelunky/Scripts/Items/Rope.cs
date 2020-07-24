@@ -75,6 +75,13 @@ namespace Spelunky {
         private void OnHit() {
             _hasHit = true;
             SetPositionToCenterOfNearestTile();
+
+            // Ensure ropes that are higher up are drawn in front of ropes that
+            // are lower down.
+            ropeTop.sortingOrder = (int) transform.position.y;
+            ropeMiddle.sortingOrder = (int) transform.position.y;
+            ropeEnd.sortingOrder = (int) transform.position.y;
+
             StartCoroutine(ExtendRope());
 
             _audioSource.clip = ropeHitClip;
