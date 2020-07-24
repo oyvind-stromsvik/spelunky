@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace Spelunky {
-	[RequireComponent (typeof (Controller2D))]
+
 	public class Player : MonoBehaviour {
 
 		[Header("Crap")]
