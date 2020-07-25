@@ -105,6 +105,12 @@ namespace Spelunky {
             }
         }
 
+        /// <summary>
+        /// Returns the length of the animation in seconds.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
         public float GetAnimationLength(string name) {
             if (currentAnimation != null && currentAnimation.name == name) {
                 return currentAnimation.frames.Length * (1f / fps);

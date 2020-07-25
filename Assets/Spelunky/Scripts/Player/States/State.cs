@@ -27,9 +27,9 @@ namespace Spelunky {
                 player.velocity.y = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.PhysicsObject.collisions.colliderBelow != null && player.PhysicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.physicsObject.collisions.colliderBelow != null && player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
                 player.velocity.y = 0;
-                player.PhysicsObject.collisions.fallingThroughPlatform = true;
+                player.physicsObject.collisions.fallingThroughPlatform = true;
             }
 
             Invoke("ResetFallingThroughPlatform", .1f);
@@ -57,11 +57,19 @@ namespace Spelunky {
             player.ThrowRope();
         }
 
+        public virtual void OnUseInputDown() {
+            player.Use();
+        }
+
         public void ResetFallingThroughPlatform() {
-            player.PhysicsObject.collisions.fallingThroughPlatform = false;
+            player.physicsObject.collisions.fallingThroughPlatform = false;
         }
 
         public virtual void ChangePlayerVelocity(ref Vector2 velocity) {
+        }
+
+        public virtual bool LockInput() {
+            return false;
         }
     }
 }

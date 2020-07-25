@@ -4,6 +4,20 @@ namespace Spelunky {
 
 	public class Player : MonoBehaviour {
 
+		[Header("Components")]
+		public PhysicsObject physicsObject;
+		public PlayerInput input;
+		public PlayerGraphics graphics;
+		public new PlayerAudio audio;
+
+		[Header("States")]
+		public GroundedState groundedState;
+		public InAirState inAirState;
+		public HangingState hangingState;
+		public ClimbingState climbingState;
+		public CrawlToHangState crawlToHangState;
+		public EnterDoorState enterDoorState;
+
 		[Header("Crap")]
 		public LayerMask edgeGrabLayerMask;
 		public CameraFollow cam;
@@ -45,43 +59,25 @@ namespace Spelunky {
 		[HideInInspector] public float _lookTimer;
 		[HideInInspector] public float _timeBeforeLook = 1f;
 
-		public PhysicsObject PhysicsObject { get; private set; }
-		[HideInInspector] public PlayerInput input;
-		[HideInInspector] public PlayerGraphics graphics;
-		[HideInInspector] public new PlayerAudio audio;
-
-		[HideInInspector] public GroundedState groundedState;
-		[HideInInspector] public InAirState inAirState;
-		[HideInInspector] public HangingState hangingState;
-		[HideInInspector] public ClimbingState climbingState;
-		[HideInInspector] public CrawlToHangState crawlToHangState;
-		[HideInInspector] public StateMachine stateMachine = new StateMachine();
+		public StateMachine stateMachine = new StateMachine();
 
 		private void Awake() {
-			PhysicsObject = GetComponent<PhysicsObject>();
-			input = GetComponent<PlayerInput>();
-			graphics = GetComponent<PlayerGraphics>();
-			audio = GetComponent<PlayerAudio>();
-
 			_gravity = -(2 * maxJumpHeight) / Mathf.Pow (timeToJumpApex, 2);
 			_maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
 			_minJumpVelocity = Mathf.Sqrt (2 * Mathf.Abs (_gravity) * minJumpHeight);
 
-			groundedState = GetComponent<GroundedState>();
 			groundedState.player = this;
 			groundedState.enabled = false;
-			inAirState = GetComponent<InAirState>();
 			inAirState.player = this;
 			inAirState.enabled = false;
-			hangingState = GetComponent<HangingState>();
 			hangingState.player = this;
 			hangingState.enabled = false;
-			climbingState = GetComponent<ClimbingState>();
 			climbingState.player = this;
 			climbingState.enabled = false;
-			crawlToHangState = GetComponent<CrawlToHangState>();
 			crawlToHangState.player = this;
 			crawlToHangState.enabled = false;
+			enterDoorState.player = this;
+			enterDoorState.enabled = false;
 			stateMachine.AttemptToChangeState(groundedState);
 		}
 
@@ -101,9 +97,9 @@ namespace Spelunky {
 				}
 			}
 
-			PhysicsObject.Move(velocity * Time.deltaTime);
+			physicsObject.Move(velocity * Time.deltaTime);
 
-			if (PhysicsObject.collisions.above || PhysicsObject.collisions.below) {
+			if (physicsObject.collisions.above || physicsObject.collisions.below) {
 				velocity.y = 0;
 			}
 		}
@@ -136,7 +132,7 @@ namespace Spelunky {
 				bombVelocity = new Vector2(128 * facingDirection, 256);
 			}
 			else if (directionalInput.y == -1) {
-				if (PhysicsObject.collisions.below) {
+				if (physicsObject.collisions.below) {
 					bombVelocity = Vector2.zero;
 				}
 				else {
@@ -150,5 +146,23 @@ namespace Spelunky {
 		public void ThrowRope() {
 			Instantiate(rope, transform.position, Quaternion.identity);
 		}
+
+		public void Use() {
+			if (_exitDoor == null) {
+				return;
+			}
+
+			stateMachine.AttemptToChangeState(enterDoorState);
+		}
+
+		public Exit _exitDoor;
+		public void EnteredDoorway(Exit door) {
+			_exitDoor = door;
+		}
+
+		public void ExitedDoorway(Exit door) {
+			_exitDoor = null;
+		}
+
 	}
 }

@@ -22,7 +22,7 @@ namespace Spelunky {
         }
 
         private void Update() {
-            if (player.PhysicsObject.collisions.becameGroundedThisFrame) {
+            if (player.physicsObject.collisions.becameGroundedThisFrame) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
@@ -41,7 +41,7 @@ namespace Spelunky {
             RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.up * 13, direction, 9, player.edgeGrabLayerMask);
             Debug.DrawRay(transform.position + Vector3.up * 13, direction * 9, Color.cyan);
             // Grab edge.
-            if ((player.PhysicsObject.collisions.left || player.PhysicsObject.collisions.right) && player.velocity.y < 0 && hit.collider != null && lastEdgeGrabRayCastHit.collider == null) {
+            if ((player.physicsObject.collisions.left || player.physicsObject.collisions.right) && player.velocity.y < 0 && hit.collider != null && lastEdgeGrabRayCastHit.collider == null) {
                 if ((player.directionalInput.x > 0 && player.isFacingRight) || (player.directionalInput.x < 0 && !player.isFacingRight)) {
                     player.audio.Play(player.audio.grabClip);
                     player.hangingState.colliderToHangFrom = hit.collider;

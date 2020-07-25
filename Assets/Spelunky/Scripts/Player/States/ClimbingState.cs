@@ -42,7 +42,7 @@ namespace Spelunky {
         public override void Enter() {
             base.Enter();
 
-            player.PhysicsObject.collisions.fallingThroughPlatform = true;
+            player.physicsObject.collisions.fallingThroughPlatform = true;
             float xPos = _closestCollider.transform.position.x;
             player.graphics.animator.Play("ClimbRope");
             if (_closestCollider.CompareTag("Ladder")) {
@@ -63,7 +63,7 @@ namespace Spelunky {
                 player.graphics.animator.fps = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.PhysicsObject.collisions.below && !player.PhysicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.physicsObject.collisions.below && !player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
@@ -111,7 +111,7 @@ namespace Spelunky {
         /// </summary>
         private Collider2D FindClosestOverlappedLadder() {
             List<Collider2D> ladderColliders = new List<Collider2D>();
-            player.PhysicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
+            player.physicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
             if (ladderColliders.Count <= 0) {
                 return null;
             }

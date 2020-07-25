@@ -12,10 +12,6 @@ namespace Spelunky {
             StartCoroutine(CrawlToHang());
         }
 
-        private void Update() {
-
-        }
-
         private IEnumerator CrawlToHang() {
             // Find the collider we're going to grab on to.
             Vector3 offset = new Vector3(-6 * player.facingDirection, 1, 0);
