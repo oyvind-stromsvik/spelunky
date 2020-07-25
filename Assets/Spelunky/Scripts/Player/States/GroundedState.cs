@@ -18,7 +18,7 @@ namespace Spelunky {
             HandleLookUpDown();
             HandleUnsteady();
 
-            if (!player.PhysicsObject.collisions.below) {
+            if (!player.physicsObject.collisions.below) {
                 if (player.directionalInput.y < 0) {
                     player.stateMachine.AttemptToChangeState(player.crawlToHangState);
                     return;
@@ -31,7 +31,7 @@ namespace Spelunky {
             if (player.directionalInput.y > 0) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
-            else if (player.directionalInput.y < 0 && player.PhysicsObject.collisions.below && player.PhysicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            else if (player.directionalInput.y < 0 && player.physicsObject.collisions.below && player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
         }
@@ -87,15 +87,15 @@ namespace Spelunky {
         }
 
         private void HandleUnsteady() {
-            RaycastHit2D hitCenter = Physics2D.Raycast(player.transform.position + Vector3.up, Vector2.down, 2, player.PhysicsObject.collisionMask);
+            RaycastHit2D hitCenter = Physics2D.Raycast(player.transform.position + Vector3.up, Vector2.down, 2, player.physicsObject.collisionMask);
             Debug.DrawRay(player.transform.position + Vector3.up, Vector2.down * 2, Color.magenta);
 
             Vector3 offsetForward = new Vector3(6 * player.facingDirection, 1, 0);
-            RaycastHit2D hitForward = Physics2D.Raycast(player.transform.position + offsetForward, Vector2.down, 2, player.PhysicsObject.collisionMask);
+            RaycastHit2D hitForward = Physics2D.Raycast(player.transform.position + offsetForward, Vector2.down, 2, player.physicsObject.collisionMask);
             Debug.DrawRay(player.transform.position + offsetForward, Vector2.down * 2, Color.green);
 
             // Play unsteady animation
-            if (player.PhysicsObject.collisions.below && hitCenter.collider == null && hitForward.collider == null) {
+            if (player.physicsObject.collisions.below && hitCenter.collider == null && hitForward.collider == null) {
                 if (player.directionalInput.y >= 0) {
                     player.graphics.animator.Play("Unsteady");
                 }

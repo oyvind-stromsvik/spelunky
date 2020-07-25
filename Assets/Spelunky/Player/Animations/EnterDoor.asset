@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 372139b25599440f9c10346080e3ae68, type: 3}
+  m_Name: EnterDoor
+  m_EditorClassIdentifier: 
+  frames:
+  - {fileID: 7205431915496050786, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: 2112094232523635910, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: 32130773559953354, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: 5881630502645565182, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -4569835348247410295, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: 4126637387142681089, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -2344047569559910939, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: 5167437992330623368, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -5995965869544574357, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: 2822296347913605012, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: 2962346340838370354, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -1313730587325187360, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -7624972547210757774, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -8074592097051314121, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -67519154850565105, guid: a5af889d4138d7741a83650e05042727, type: 3}
+  - {fileID: -8369831010968476285, guid: a5af889d4138d7741a83650e05042727, type: 3}

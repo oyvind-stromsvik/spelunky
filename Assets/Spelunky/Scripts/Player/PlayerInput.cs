@@ -13,6 +13,10 @@ namespace Spelunky {
         }
 
         private void Update () {
+            if (_player.stateMachine.CurrentState.LockInput()) {
+                return;
+            }
+
             Vector2 directionalInput = new Vector2 (Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
             directionalInput.x = Mathf.Abs(directionalInput.x) < joystickDeadzone ? 0 : directionalInput.x;
             directionalInput.y = Mathf.Abs(directionalInput.y) < joystickDeadzone ? 0 : directionalInput.y;
@@ -32,6 +36,10 @@ namespace Spelunky {
             }
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Joystick1Button3)) {
                 _player.stateMachine.CurrentState.OnRopeInputDown();
+            }
+
+            if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Joystick1Button5)) {
+                _player.stateMachine.CurrentState.OnUseInputDown();
             }
         }
     }
