@@ -9,6 +9,7 @@ namespace Spelunky {
 		public PlayerInput input;
 		public PlayerGraphics graphics;
 		public new PlayerAudio audio;
+		public PlayerItems items;
 
 		[Header("States")]
 		public GroundedState groundedState;
@@ -144,7 +145,10 @@ namespace Spelunky {
 		}
 
 		public void ThrowRope() {
-			Instantiate(rope, transform.position, Quaternion.identity);
+			Rope ropeInstance = Instantiate(rope, transform.position, Quaternion.identity);
+			if (stateMachine.CurrentState == groundedState && directionalInput.y < 0) {
+				ropeInstance.placePosition = transform.position + (facingDirection * Vector3.right * Tile.Width);
+			}
 		}
 
 		public void Use() {

@@ -24,6 +24,11 @@ namespace Spelunky {
         public Sprite[] spriteDown;
         public Sprite[] spriteUpDown;
 
+        // NOTE: Changing these involves redoing all sprite assets.
+        //  I left these at the default Spelunky values.
+        public const int Width = 16;
+        public const int Height = 16;
+
         private void Awake() {
             _spriteRenderer = GetComponent<SpriteRenderer>();
         }
@@ -81,7 +86,12 @@ namespace Spelunky {
                 _spriteRenderer.sprite = spriteUpDown[0];
             }
             if (left) {
-                decorationLeft[0].SetActive(true);
+                if (Random.value < 0.5f) {
+                    decorationLeft[1].SetActive(true);
+                }
+                else {
+                    decorationLeft[0].SetActive(true);
+                }
             }
             if (right) {
                 decorationRight[0].SetActive(true);
@@ -95,6 +105,12 @@ namespace Spelunky {
 
         public void Remove() {
             Destroy(gameObject);
+        }
+
+        public static Vector3 GetPositionOfCenterOfNearestTile(Vector3 position) {
+            int x = Mathf.FloorToInt(Mathf.Abs(position.x) / Width) * Tile.Width + Mathf.RoundToInt(Tile.Width / 2f);
+            int y = Mathf.FloorToInt(Mathf.Abs(position.y) / Tile.Height) * Tile.Height + Mathf.RoundToInt(Tile.Height / 2f);
+            return new Vector3(x, y, 0);
         }
     }
 }

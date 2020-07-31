@@ -16,12 +16,18 @@ namespace Spelunky {
         public SpriteRenderer ropeMiddle;
         public SpriteRenderer ropeEnd;
 
+        public Vector3 placePosition;
+
         private Vector2 _velocity;
         private Vector2 _newPos;
         private Vector2 _oldPos;
         private Vector2 _originalPos;
-        bool _hasHit;
+        private bool _placed;
         private AudioSource _audioSource;
+
+        // Incremented for every new rope. Used for ensuring ropes that are
+        // placed later are drawn in front of ropes that already exist.
+        private static int _sortingOrder;
 
         private void Awake() {
             _audioSource = GetComponent<AudioSource>();
@@ -29,20 +35,21 @@ namespace Spelunky {
         }
 
         private void Start() {
-            SetPositionToCenterOfNearestTile();
-            _velocity = Vector2.up * ropeSpeed;
-            _newPos = transform.position;
-            _oldPos = _newPos;
-            _originalPos = _newPos;
+            if (placePosition != Vector3.zero) {
+                PlaceRope(placePosition);
+            }
+            else {
+                ThrowRope();
+            }
 
-            ropeEnd.transform.position += Vector3.down * Mathf.RoundToInt(LevelGenerator.instance.TileWidth / 2f);
-
-            _audioSource.clip = ropeTossClip;
-            _audioSource.Play();
+            _sortingOrder++;
+            ropeTop.sortingOrder = _sortingOrder;
+            ropeMiddle.sortingOrder = _sortingOrder;
+            ropeEnd.sortingOrder = _sortingOrder;
         }
 
         private void Update() {
-            if (_hasHit) {
+            if (_placed) {
                 return;
             }
 
@@ -56,31 +63,38 @@ namespace Spelunky {
 
             if (distanceThisFrame > 0) {
                 if (totalDistance >= maxRopeLength) {
-                    OnHit();
+                    PlaceRope(transform.position);
                 }
                 else {
                     RaycastHit2D hit = Physics2D.Raycast(_oldPos, direction, distanceThisFrame, layerMask);
                     if (hit.collider != null && hit.transform.CompareTag("OneWayPlatform") == false) {
-                        OnHit();
+                        PlaceRope(transform.position);
                     }
                 }
             }
 
-            if (!_hasHit) {
+            if (!_placed) {
                 _oldPos = transform.position;
                 transform.position = _newPos;
             }
         }
 
-        private void OnHit() {
-            _hasHit = true;
-            SetPositionToCenterOfNearestTile();
+        private void ThrowRope() {
+            transform.position = Tile.GetPositionOfCenterOfNearestTile(transform.position);
+            _velocity = Vector2.up * ropeSpeed;
+            _newPos = transform.position;
+            _oldPos = _newPos;
+            _originalPos = _newPos;
 
-            // Ensure ropes that are higher up are drawn in front of ropes that
-            // are lower down.
-            ropeTop.sortingOrder = (int) transform.position.y;
-            ropeMiddle.sortingOrder = (int) transform.position.y;
-            ropeEnd.sortingOrder = (int) transform.position.y;
+            ropeEnd.transform.position += Vector3.down * Mathf.RoundToInt(Tile.Width / 2f);
+
+            _audioSource.clip = ropeTossClip;
+            _audioSource.Play();
+        }
+
+        private void PlaceRope(Vector3 position) {
+            _placed = true;
+            transform.position = Tile.GetPositionOfCenterOfNearestTile(position);
 
             StartCoroutine(ExtendRope());
 
@@ -104,16 +118,10 @@ namespace Spelunky {
                 yield return null;
             }
 
-            ropeMiddle.size = new Vector2(ropeMiddle.size.x, Mathf.FloorToInt(ropeMiddle.size.y / LevelGenerator.instance.TileHeight) * LevelGenerator.instance.TileHeight);
+            ropeMiddle.size = new Vector2(ropeMiddle.size.x, Mathf.FloorToInt(ropeMiddle.size.y / Tile.Height) * Tile.Height);
             ropeMiddle.GetComponent<BoxCollider2D>().size = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().size.x, ropeMiddle.size.y);
             ropeMiddle.GetComponent<BoxCollider2D>().offset = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().offset.x, -1 * ropeMiddle.size.y / 2f);
             ropeEnd.gameObject.SetActive(false);
-        }
-
-        private void SetPositionToCenterOfNearestTile() {
-            int x = Mathf.FloorToInt(Mathf.Abs(transform.position.x) / LevelGenerator.instance.TileWidth) * LevelGenerator.instance.TileWidth + Mathf.RoundToInt(LevelGenerator.instance.TileWidth / 2f);
-            int y = Mathf.FloorToInt(Mathf.Abs(transform.position.y) / LevelGenerator.instance.TileHeight) * LevelGenerator.instance.TileHeight + Mathf.RoundToInt(LevelGenerator.instance.TileHeight / 2f);
-            transform.position = new Vector3(x, y, 0);
         }
     }
 }

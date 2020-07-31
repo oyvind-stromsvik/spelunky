@@ -3,35 +3,42 @@ using UnityEngine;
 namespace Spelunky {
     public class HangingState : State {
 
+        public bool grabbedWallUsingGlove;
         public Collider2D colliderToHangFrom;
+
+        public override bool CanEnter() {
+            // The tile we were going to hang from was destroyed.
+            if (colliderToHangFrom == null) {
+                return false;
+            }
+
+            return true;
+        }
 
         public override void Enter() {
             base.Enter();
 
-            // The tile we were going to hang from was destroyed.
-            if (colliderToHangFrom == null) {
-                player.stateMachine.AttemptToChangeState(player.inAirState);
-                return;
-            }
-
-            Vector2 hangPosition = new Vector2(colliderToHangFrom.transform.position.x - 4, colliderToHangFrom.transform.position.y + 4);
+            Vector2 hangPosition = new Vector2(transform.position.x, colliderToHangFrom.transform.position.y + 6);
             if (player.isFacingRight) {
                 if (colliderToHangFrom.transform.position.x < player.transform.position.x) {
                     player.graphics.FlipCharacter();
-                    hangPosition.x += 24;
                 }
             }
             else {
                 if (colliderToHangFrom.transform.position.x > player.transform.position.x) {
                     player.graphics.FlipCharacter();
                 }
-                else {
-                    hangPosition.x += 24;
-                }
             }
+
+            if (grabbedWallUsingGlove) {
+                hangPosition.y = transform.position.y;
+            }
+
             transform.position = new Vector2(hangPosition.x, hangPosition.y);
 
             player.graphics.animator.Play("Hang", true);
+
+            player.audio.Play(player.audio.grabClip);
         }
 
         private void Update() {

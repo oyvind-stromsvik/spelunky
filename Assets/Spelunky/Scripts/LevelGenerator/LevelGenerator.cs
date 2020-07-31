@@ -26,13 +26,11 @@ namespace Spelunky {
         public Room[,] Rooms { get; private set; }
         public Tile[,] Tiles { get; private set; }
 
-        // NOTE: Changing these involves redoing all sprite assets and recreating
-        // all room prefabs. I left these at the default Spelunky values so that
+        // NOTE: Changing these involves recreating all room prefabs.
+        // I left these at the default Spelunky values so that
         // it's easy to recreate the same rooms here if desirable.
         public int RoomWidth { get; } = 10;
         public int RoomHeight { get; } = 8;
-        public int TileWidth { get; } = 16;
-        public int TileHeight { get; } = 16;
 
         private Dictionary<string, Tile> _tilePrefabs;
         private Dictionary<string, GameObject> _backgroundPrefabs;
@@ -124,10 +122,10 @@ namespace Spelunky {
         /// </summary>
         private void PlaceEntranceAndExit() {
             Tile tileToSpawnEntranceOn = firstRoom.GetSuitableEntranceOrExitTile();
-            entrance = Instantiate(_tilePrefabs["Entrance"], tileToSpawnEntranceOn.transform.position + new Vector3(0, TileHeight, 0), Quaternion.identity);
+            entrance = Instantiate(_tilePrefabs["Entrance"], tileToSpawnEntranceOn.transform.position + new Vector3(0, Tile.Height, 0), Quaternion.identity);
 
             Tile tileToSpawnExitOn = lastRoom.GetSuitableEntranceOrExitTile();
-            exit = Instantiate(_tilePrefabs["Exit"], tileToSpawnExitOn.transform.position + new Vector3(0, TileHeight, 0), Quaternion.identity);
+            exit = Instantiate(_tilePrefabs["Exit"], tileToSpawnExitOn.transform.position + new Vector3(0, Tile.Height, 0), Quaternion.identity);
         }
 
         /// <summary>
@@ -244,10 +242,10 @@ namespace Spelunky {
         /// <returns></returns>
         private Vector3 CurrentPosition(Vector2 currentIndex, bool arrow = false) {
             if (arrow) {
-                return new Vector3(currentIndex.x * RoomWidth * TileWidth + (RoomWidth * TileWidth / 2f), currentIndex.y * RoomHeight * TileHeight + (RoomHeight * TileHeight / 2f), 0);
+                return new Vector3(currentIndex.x * RoomWidth * Tile.Width + (RoomWidth * Tile.Width / 2f), currentIndex.y * RoomHeight * Tile.Height + (RoomHeight * Tile.Height / 2f), 0);
             }
 
-            return new Vector3(currentIndex.x * RoomWidth * TileWidth, currentIndex.y * RoomHeight * TileHeight, 0);
+            return new Vector3(currentIndex.x * RoomWidth * Tile.Width, currentIndex.y * RoomHeight * Tile.Height, 0);
         }
 
         /// <summary>
@@ -302,8 +300,8 @@ namespace Spelunky {
         /// </summary>
         private void CreateLevelBounds() {
             // Level width/height.
-            float width = RoomWidth * roomsHorizontal * TileWidth;
-            float height = RoomHeight * roomsVertical * TileHeight;
+            float width = RoomWidth * roomsHorizontal * Tile.Width;
+            float height = RoomHeight * roomsVertical * Tile.Height;
 
             // Straights.
             SpriteRenderer boundsTop = Instantiate(boundsStraight, new Vector3(0, height + 48, 0), Quaternion.identity, _boundsParent);
@@ -341,8 +339,8 @@ namespace Spelunky {
         /// Just fill the background of the level.
         /// </summary>
         private void CreateBackground() {
-            for (int y = 0; y < RoomHeight * roomsVertical * TileHeight; y += 64) {
-                for (int x = 0; x < RoomWidth * roomsHorizontal * TileWidth; x += 64) {
+            for (int y = 0; y < RoomHeight * roomsVertical * Tile.Height; y += 64) {
+                for (int x = 0; x < RoomWidth * roomsHorizontal * Tile.Width; x += 64) {
                     Instantiate(
                         _backgroundPrefabs["Background"],
                         new Vector3(x, y, 0),
@@ -385,8 +383,8 @@ namespace Spelunky {
                 // easier manipulation. For example to check if there is a tile
                 // above any given tile you can just do y + 1 to find out if there
                 // is an entry in the array.
-                int x = (int) tile.transform.position.x / TileWidth;
-                int y = (int) tile.transform.position.y / TileHeight;
+                int x = (int) tile.transform.position.x / Tile.Width;
+                int y = (int) tile.transform.position.y / Tile.Height;
                 tile.InitializeTile(x, y);
             }
         }

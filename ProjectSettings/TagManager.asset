@@ -10,6 +10,7 @@ TagManager:
   - OneWayPlatform
   - Entrance
   - Exit
+  - Bounds
   layers:
   - Default
   - TransparentFX
@@ -27,7 +28,7 @@ TagManager:
   - Indestructable
   - Debris
   - Block
-  - 
+  - Pickups
   - 
   - 
   - 
@@ -55,6 +56,9 @@ TagManager:
     locked: 0
   - name: Slightly Behind
     uniqueID: 3866940329
+    locked: 0
+  - name: Ropes
+    uniqueID: 152053043
     locked: 0
   - name: Default
     uniqueID: 0
