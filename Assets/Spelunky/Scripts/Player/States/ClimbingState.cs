@@ -46,7 +46,7 @@ namespace Spelunky {
             float xPos = _closestCollider.transform.position.x;
             player.graphics.animator.Play("ClimbRope");
             if (_closestCollider.CompareTag("Ladder")) {
-                xPos += LevelGenerator.instance.TileWidth / 2f;
+                xPos += Tile.Width / 2f;
                 player.graphics.animator.Play("ClimbLadder");
             }
 
@@ -121,7 +121,7 @@ namespace Spelunky {
             foreach (Collider2D ladderCollider in ladderColliders) {
                 float xPos = ladderCollider.transform.position.x;
                 if (ladderCollider.CompareTag("Ladder")) {
-                    xPos += LevelGenerator.instance.TileWidth / 2f;
+                    xPos += Tile.Width / 2f;
                 }
                 float currentDistance = Mathf.Abs(transform.position.x - xPos);
                 if (currentDistance < closestDistance) {

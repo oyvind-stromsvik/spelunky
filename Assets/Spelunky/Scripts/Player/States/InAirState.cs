@@ -38,12 +38,30 @@ namespace Spelunky {
         private void HandleEdgeGrabbing() {
             Vector2 direction = Vector2.right * player.facingDirection;
 
-            RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.up * 13, direction, 9, player.edgeGrabLayerMask);
-            Debug.DrawRay(transform.position + Vector3.up * 13, direction * 9, Color.cyan);
-            // Grab edge.
-            if ((player.physicsObject.collisions.left || player.physicsObject.collisions.right) && player.velocity.y < 0 && hit.collider != null && lastEdgeGrabRayCastHit.collider == null) {
-                if ((player.directionalInput.x > 0 && player.isFacingRight) || (player.directionalInput.x < 0 && !player.isFacingRight)) {
-                    player.audio.Play(player.audio.grabClip);
+            // This was just what felt right.
+            // TODO: Maybe this isn't the best suited for when we're grabbing with the glove. Investigate this.
+            const float yOffset = 10f;
+            const float rayLength = 9f;
+
+            RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.up * yOffset, direction, rayLength, player.edgeGrabLayerMask);
+            Debug.DrawRay(transform.position + Vector3.up * yOffset, direction * rayLength, Color.cyan);
+
+            // We're currently trying to move into a wall either on the left or on the right.
+            bool movingIntoWallOnTheLeft = player.physicsObject.collisions.left && player.directionalInput.x < 0 && !player.isFacingRight;
+            bool movingIntoWallOnTheRight = player.physicsObject.collisions.right && player.directionalInput.x > 0 && player.isFacingRight;
+
+            if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.velocity.y < 0 && hit.collider != null) {
+                // If we have the glove we can grab anything.
+                if (player.items.hasGlove) {
+                    // TODO: How do we pass data to a state?
+                    player.hangingState.colliderToHangFrom = hit.collider;
+                    player.hangingState.grabbedWallUsingGlove = true;
+                    player.stateMachine.AttemptToChangeState(player.hangingState);
+                }
+                // Otherwise we can only grab ledges (tile corners).
+                // lastEdgeGrabRayCastHit.collider == null ensures we'll only grab
+                // an actual ledge with air above it and only when we're falling downwards.
+                else if (lastEdgeGrabRayCastHit.collider == null) {
                     player.hangingState.colliderToHangFrom = hit.collider;
                     player.stateMachine.AttemptToChangeState(player.hangingState);
                 }

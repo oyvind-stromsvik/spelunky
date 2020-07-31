@@ -16,10 +16,10 @@ namespace Spelunky {
             }
 
             for (int x = 0; x <= LevelGenerator.instance.RoomWidth; x++) {
-                Gizmos.DrawRay(new Vector3(transform.position.x + x * LevelGenerator.instance.TileWidth, transform.position.y, 0), Vector3.up * LevelGenerator.instance.RoomHeight * LevelGenerator.instance.TileHeight);
+                Gizmos.DrawRay(new Vector3(transform.position.x + x * Tile.Width, transform.position.y, 0), Vector3.up * LevelGenerator.instance.RoomHeight * Tile.Height);
             }
             for (int y = 0; y <= LevelGenerator.instance.RoomHeight; y++) {
-                Gizmos.DrawRay(new Vector3(transform.position.x, transform.position.y + y * LevelGenerator.instance.TileHeight, 0), Vector3.right * LevelGenerator.instance.RoomWidth * LevelGenerator.instance.TileWidth);
+                Gizmos.DrawRay(new Vector3(transform.position.x, transform.position.y + y * Tile.Height, 0), Vector3.right * LevelGenerator.instance.RoomWidth * Tile.Width);
             }
         }
 

@@ -25,7 +25,7 @@ namespace Spelunky {
         }
 
         private IEnumerator EnterDoor() {
-            transform.position = new Vector2(player._exitDoor.transform.position.x + LevelGenerator.instance.TileWidth / 2f, player._exitDoor.transform.position.y);
+            transform.position = new Vector2(player._exitDoor.transform.position.x + Tile.Width / 2f, player._exitDoor.transform.position.y);
 
             player.graphics.animator.Play("EnterDoor", true);
             player.graphics.animator.fps = 12;
