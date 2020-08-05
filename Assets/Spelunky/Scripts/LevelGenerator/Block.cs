@@ -6,44 +6,23 @@ namespace Spelunky {
 
         public AudioClip landClip;
 
-        public float maxJumpHeight;
-        public float timeToJumpApex;
-        public float speed;
-
         private Vector3 _velocity;
 
-        private float _gravity;
+        public float pushSpeed = 0f;
 
         // References.
         private AudioSource _audioSource;
-        private PhysicsObject _controller;
-
-        private float _boundsSoundVelocityThreshold = 30f;
+        public PhysicsObject physicsObject;
 
         private void Awake() {
             _audioSource = GetComponent<AudioSource>();
-            _controller = GetComponent<PhysicsObject>();
-        }
-
-        private void Start() {
-            _gravity = -(2 * maxJumpHeight) / Mathf.Pow (timeToJumpApex, 2);
+            physicsObject = GetComponent<PhysicsObject>();
         }
 
         private void HandleCollisions() {
-            if (_controller.collisions.collidedThisFrame && !_controller.collisions.collidedLastFrame) {
-                bool playSound = false;
-
-                if (_controller.collisions.below) {
-                    if (Mathf.Abs(_velocity.y) > _boundsSoundVelocityThreshold) {
-                        playSound = true;
-                        _velocity.y = 0;
-                    }
-                }
-
-                if (playSound) {
-                    _audioSource.clip = landClip;
-                    _audioSource.Play();
-                }
+            if (physicsObject.collisions.becameGroundedThisFrame) {
+                _audioSource.clip = landClip;
+                _audioSource.Play();
             }
         }
 
@@ -52,16 +31,25 @@ namespace Spelunky {
 
             HandleCollisions();
 
-            _controller.Move(_velocity);
+            physicsObject.Move(_velocity * Time.deltaTime);
 
-            if (_controller.collisions.below) {
+            if (physicsObject.collisions.below) {
                 _velocity.y = 0;
             }
         }
 
         private void CalculateVelocity() {
-            _velocity.x = speed;
-            _velocity.y += _gravity * Time.deltaTime;
+            _velocity.x = pushSpeed;
+            // If we're not grounded we snap our x position to the tile grid to avoid
+            // floating point inaccuraies in our alignment and we zero out our
+            // x velocity to avoid any further movement on the horizontal axis.
+            if (!physicsObject.collisions.below) {
+                Vector3 centerOfBlock = transform.position + (Vector3) physicsObject.collider.offset;
+                Vector3 lowerLeftCornerOfTileWeAreIn = Tile.GetPositionOfLowerLeftOfNearestTile(centerOfBlock);
+                transform.position = new Vector3(lowerLeftCornerOfTileWeAreIn.x, transform.position.y, transform.position.z);
+                _velocity.x = 0;
+            }
+            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
         }
     }
 }

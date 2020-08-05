@@ -108,8 +108,14 @@ namespace Spelunky {
         }
 
         public static Vector3 GetPositionOfCenterOfNearestTile(Vector3 position) {
-            int x = Mathf.FloorToInt(Mathf.Abs(position.x) / Width) * Tile.Width + Mathf.RoundToInt(Tile.Width / 2f);
-            int y = Mathf.FloorToInt(Mathf.Abs(position.y) / Tile.Height) * Tile.Height + Mathf.RoundToInt(Tile.Height / 2f);
+            int x = Mathf.FloorToInt(Mathf.Abs(position.x) / Width) * Width + Mathf.RoundToInt(Width / 2f);
+            int y = Mathf.FloorToInt(Mathf.Abs(position.y) / Height) * Height + Mathf.RoundToInt(Height / 2f);
+            return new Vector3(x, y, 0);
+        }
+
+        public static Vector3 GetPositionOfLowerLeftOfNearestTile(Vector3 position) {
+            int x = Mathf.FloorToInt(Mathf.Abs(position.x) / Width) * Width;
+            int y = Mathf.FloorToInt(Mathf.Abs(position.y) / Height) * Height;
             return new Vector3(x, y, 0);
         }
     }

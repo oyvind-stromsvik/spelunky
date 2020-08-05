@@ -50,6 +50,7 @@ namespace Spelunky {
 		private float _velocityXSmoothing;
 		[HideInInspector] public Vector2 directionalInput;
 		private float _speed;
+		public float pushBlockSpeed;
 
 		[HideInInspector] public bool recentlyJumped;
 		[HideInInspector] public float _lastJumpTimer;

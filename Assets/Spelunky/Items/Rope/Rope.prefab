@@ -57,6 +57,7 @@ MonoBehaviour:
   ropeTop: {fileID: 6439105719820245318}
   ropeMiddle: {fileID: 8110238460341233620}
   ropeEnd: {fileID: 7799131539829414683}
+  placePosition: {x: 0, y: 0, z: 0}
 --- !u!82 &4257643935464286157
 AudioSource:
   m_ObjectHideFlags: 0
@@ -332,7 +333,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 152053043
   m_SortingLayer: -1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: -1755862753612581883, guid: 9339b80259b3c784299f263ac3ec79fe,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -414,7 +415,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 152053043
   m_SortingLayer: -1
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: -4570153536982545689, guid: 9339b80259b3c784299f263ac3ec79fe,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

@@ -6,13 +6,15 @@ namespace Spelunky {
         public bool below;
         public bool left;
         public bool right;
+        public Collider2D colliderAbove;
+        public Collider2D colliderBelow;
+        public Collider2D colliderLeft;
+        public Collider2D colliderRight;
         public bool becameGroundedThisFrame;
         public bool wasGroundedLastFrame;
         public bool collidedLastFrame;
         public bool collidedThisFrame;
-        public Collider2D colliderBelow;
 
-        public int faceDir;
         public bool fallingThroughPlatform;
 
         public void Reset() {
@@ -20,9 +22,12 @@ namespace Spelunky {
             below = false;
             left = false;
             right = false;
+            colliderAbove = null;
+            colliderBelow = null;
+            colliderLeft = null;
+            colliderRight = null;
             becameGroundedThisFrame = false;
             collidedThisFrame = true;
-            colliderBelow = null;
         }
     }
 }
