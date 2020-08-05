@@ -21,7 +21,7 @@ namespace Spelunky {
         private PhysicsObject _controller;
         private SpriteAnimator _spriteAnimator;
 
-        private const float BoundsSoundVelocityThreshold = 100f;
+        private const float BounceSoundVelocityThreshold = 100f;
 
         private void Awake() {
             _controller = GetComponent<PhysicsObject>();
@@ -51,14 +51,14 @@ namespace Spelunky {
                 bool playSound = false;
 
                 if (_controller.collisions.right || _controller.collisions.left) {
-                    if (Mathf.Abs(_velocity.x) > BoundsSoundVelocityThreshold) {
+                    if (Mathf.Abs(_velocity.x) > BounceSoundVelocityThreshold) {
                         playSound = true;
                     }
                     _velocity.x *= -1f;
                 }
 
                 if (_controller.collisions.above || _controller.collisions.below) {
-                    if (Mathf.Abs(_velocity.y) > BoundsSoundVelocityThreshold) {
+                    if (Mathf.Abs(_velocity.y) > BounceSoundVelocityThreshold) {
                         playSound = true;
                     }
                     _velocity.y *= -1f;

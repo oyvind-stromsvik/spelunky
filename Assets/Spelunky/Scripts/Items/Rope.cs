@@ -43,9 +43,9 @@ namespace Spelunky {
             }
 
             _sortingOrder++;
-            ropeTop.sortingOrder = _sortingOrder;
+            ropeTop.sortingOrder = _sortingOrder + 1;
             ropeMiddle.sortingOrder = _sortingOrder;
-            ropeEnd.sortingOrder = _sortingOrder;
+            ropeEnd.sortingOrder = _sortingOrder + 1;
         }
 
         private void Update() {

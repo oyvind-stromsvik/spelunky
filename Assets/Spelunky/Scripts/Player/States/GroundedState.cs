@@ -3,6 +3,9 @@ using UnityEngine;
 namespace Spelunky {
     public class GroundedState : State {
 
+        public Block blockToPush;
+        private Block _lastBlockPushed;
+
         public override void Enter() {
             base.Enter();
 
@@ -34,11 +37,32 @@ namespace Spelunky {
             else if (player.directionalInput.y < 0 && player.physicsObject.collisions.below && player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
+
+            blockToPush = null;
+            if (player.directionalInput.x < 0 && player.physicsObject.collisions.left && player.physicsObject.collisions.colliderLeft.CompareTag("Block")) {
+                blockToPush = player.physicsObject.collisions.colliderLeft.GetComponent<Block>();
+            }
+            if (player.directionalInput.x > 0 && player.physicsObject.collisions.right && player.physicsObject.collisions.colliderRight.CompareTag("Block")) {
+                blockToPush = player.physicsObject.collisions.colliderRight.GetComponent<Block>();
+            }
+
+            if (blockToPush != null) {
+                blockToPush.pushSpeed = player.pushBlockSpeed * player.directionalInput.x;
+            }
+
+            if (blockToPush == null && _lastBlockPushed != null) {
+                _lastBlockPushed.pushSpeed = 0f;
+            }
+
+            _lastBlockPushed = blockToPush;
         }
 
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
-                if (player.directionalInput.y < 0) {
+                if (player.physicsObject.collisions.left || player.physicsObject.collisions.right) {
+                    player.graphics.animator.Play("Push");
+                }
+                else if (player.directionalInput.y < 0) {
                     player.graphics.animator.Play("Crawl");
                 }
                 else {

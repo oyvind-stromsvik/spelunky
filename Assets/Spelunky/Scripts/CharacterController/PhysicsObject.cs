@@ -5,11 +5,6 @@ namespace Spelunky {
 
         public CollisionInfo collisions;
 
-        public override void Start() {
-            base.Start();
-            collisions.faceDir = 1;
-        }
-
         public void Move(Vector2 velocity) {
             // Some form of terminal velocity.
             velocity.x = Mathf.Clamp(velocity.x, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
@@ -24,10 +19,9 @@ namespace Spelunky {
             collisions.Reset();
 
             if (velocity.x != 0) {
-                collisions.faceDir = (int) Mathf.Sign(velocity.x);
+                HorizontalCollisions(ref velocity);
             }
 
-            HorizontalCollisions(ref velocity);
             if (velocity.y != 0) {
                 VerticalCollisions(ref velocity);
             }
@@ -42,7 +36,7 @@ namespace Spelunky {
         }
 
         private void HorizontalCollisions(ref Vector2 velocity) {
-            float directionX = collisions.faceDir;
+            float directionX = Mathf.Sign(velocity.x);
             float rayLength = Mathf.Abs(velocity.x) + skinWidth;
 
             if (Mathf.Abs(velocity.x) < skinWidth) {
@@ -52,20 +46,37 @@ namespace Spelunky {
             for (int i = 0; i < horizontalRayCount; i++) {
                 Vector2 rayOrigin = (directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight;
                 rayOrigin += Vector2.up * (horizontalRaySpacing * i);
-                RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
+                RaycastHit2D[] hits = Physics2D.RaycastAll(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
 
                 Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
 
-                if (hit) {
-                    if (hit.distance == 0) {
-                        continue;
+                foreach (RaycastHit2D hit in hits) {
+                    if (hit) {
+                        if (hit.collider == collider) {
+                            continue;
+                        }
+
+                        if (hit.collider.CompareTag("OneWayPlatform")) {
+                            continue;
+                        }
+
+                        if (hit.distance == 0) {
+                            continue;
+                        }
+
+                        velocity.x = (hit.distance - skinWidth) * directionX;
+                        rayLength = hit.distance;
+
+                        collisions.left = directionX == -1;
+                        collisions.right = directionX == 1;
+
+                        if (collisions.left) {
+                            collisions.colliderLeft = hit.collider;
+                        }
+                        if (collisions.right) {
+                            collisions.colliderRight = hit.collider;
+                        }
                     }
-
-                    velocity.x = (hit.distance - skinWidth) * directionX;
-                    rayLength = hit.distance;
-
-                    collisions.left = directionX == -1;
-                    collisions.right = directionX == 1;
                 }
             }
         }
@@ -77,28 +88,39 @@ namespace Spelunky {
             for (int i = 0; i < verticalRayCount; i++) {
                 Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
                 rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
-                RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
+                RaycastHit2D[] hits = Physics2D.RaycastAll(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
 
                 Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
 
-                if (hit) {
-                    if (hit.collider.CompareTag("OneWayPlatform")) {
-                        if (directionY == 1 || hit.distance == 0) {
+                foreach (RaycastHit2D hit in hits) {
+                    if (hit) {
+                        if (hit.collider == collider) {
                             continue;
                         }
 
-                        if (collisions.fallingThroughPlatform) {
-                            continue;
+                        if (hit.collider.CompareTag("OneWayPlatform")) {
+                            if (directionY == 1 || hit.distance == 0) {
+                                continue;
+                            }
+
+                            if (collisions.fallingThroughPlatform) {
+                                continue;
+                            }
+                        }
+
+                        velocity.y = (hit.distance - skinWidth) * directionY;
+                        rayLength = hit.distance;
+
+                        collisions.below = directionY == -1;
+                        collisions.above = directionY == 1;
+
+                        if (collisions.below) {
+                            collisions.colliderBelow = hit.collider;
+                        }
+                        if (collisions.above) {
+                            collisions.colliderAbove = hit.collider;
                         }
                     }
-
-                    velocity.y = (hit.distance - skinWidth) * directionY;
-                    rayLength = hit.distance;
-
-                    collisions.below = directionY == -1;
-                    collisions.above = directionY == 1;
-
-                    collisions.colliderBelow = hit.collider;
                 }
             }
         }

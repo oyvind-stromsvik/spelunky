@@ -147,7 +147,7 @@ GameObject:
   - component: {fileID: -6787339454029924957}
   m_Layer: 9
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -355,6 +355,7 @@ MonoBehaviour:
   _minJumpVelocity: 0
   velocity: {x: 0, y: 0}
   directionalInput: {x: 0, y: 0}
+  pushBlockSpeed: 16
   recentlyJumped: 0
   _lastJumpTimer: 0
   isFacingRight: 0
@@ -378,8 +379,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 45312
   skinWidth: 0.4
-  horizontalRayCount: 3
-  verticalRayCount: 2
+  horizontalRayCount: 4
+  verticalRayCount: 3
   horizontalRaySpacing: 0
   verticalRaySpacing: 0
   collider: {fileID: 0}
@@ -451,6 +452,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
+  blockToPush: {fileID: 0}
 --- !u!114 &-3839825326305256150
 MonoBehaviour:
   m_ObjectHideFlags: 0
