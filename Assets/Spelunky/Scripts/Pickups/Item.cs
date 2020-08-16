@@ -1,12 +1,13 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Spelunky {
-    public class GlovePickup : MonoBehaviour {
+
+    public abstract class Item : MonoBehaviour {
 
         private void OnTriggerEnter2D(Collider2D other) {
             Player player = other.GetComponent<Player>();
             if (player != null) {
-                player.items.PickupGlove();
+                player.inventory.PickupItem(this);
                 Destroy(gameObject);
             }
         }

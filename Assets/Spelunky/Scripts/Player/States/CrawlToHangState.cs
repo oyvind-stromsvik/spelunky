@@ -14,7 +14,7 @@ namespace Spelunky {
 
         private IEnumerator CrawlToHang() {
             // Find the collider we're going to grab on to.
-            Vector3 offset = new Vector3(-6 * player.facingDirection, 1, 0);
+            Vector3 offset = new Vector3(-6 * player.graphics.facingDirection, 1, 0);
             RaycastHit2D hit = Physics2D.Raycast(transform.position + offset, Vector2.down, 2, player.edgeGrabLayerMask);
             Debug.DrawRay(transform.position + offset, Vector2.down * 4, Color.yellow);
 

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Spelunky {
     [RequireComponent (typeof (PhysicsObject))]
-    public class Bomb : MonoBehaviour {
+    public class Bomb : MonoBehaviour, IObjectController {
 
         public Explosion explosion;
 
@@ -18,13 +18,13 @@ namespace Spelunky {
 
         private Vector3 _velocity;
 
-        private PhysicsObject _controller;
+        private PhysicsObject physicsObject;
         private SpriteAnimator _spriteAnimator;
 
         private const float BounceSoundVelocityThreshold = 100f;
 
         private void Awake() {
-            _controller = GetComponent<PhysicsObject>();
+            physicsObject = GetComponent<PhysicsObject>();
             _audioSource = GetComponent<AudioSource>();
             _spriteAnimator = GetComponent<SpriteAnimator>();
         }
@@ -39,7 +39,7 @@ namespace Spelunky {
 
             HandleCollisions();
 
-            _controller.Move(_velocity * Time.deltaTime);
+            physicsObject.Move(_velocity * Time.deltaTime);
         }
 
         public void SetVelocity(Vector2 velocity) {
@@ -47,17 +47,17 @@ namespace Spelunky {
         }
 
         private void HandleCollisions() {
-            if (_controller.collisions.collidedThisFrame && !_controller.collisions.collidedLastFrame) {
+            if (physicsObject.collisions.collidedThisFrame && !physicsObject.collisions.collidedLastFrame) {
                 bool playSound = false;
 
-                if (_controller.collisions.right || _controller.collisions.left) {
+                if (physicsObject.collisions.right || physicsObject.collisions.left) {
                     if (Mathf.Abs(_velocity.x) > BounceSoundVelocityThreshold) {
                         playSound = true;
                     }
                     _velocity.x *= -1f;
                 }
 
-                if (_controller.collisions.above || _controller.collisions.below) {
+                if (physicsObject.collisions.above || physicsObject.collisions.below) {
                     if (Mathf.Abs(_velocity.y) > BounceSoundVelocityThreshold) {
                         playSound = true;
                     }
@@ -97,5 +97,8 @@ namespace Spelunky {
             Destroy(gameObject);
         }
 
+        public bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+            return false;
+        }
     }
 }

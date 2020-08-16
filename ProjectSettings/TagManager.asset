@@ -11,6 +11,8 @@ TagManager:
   - Entrance
   - Exit
   - Bounds
+  - Block
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -29,7 +31,7 @@ TagManager:
   - Debris
   - Block
   - Pickups
-  - 
+  - Enemy
   - 
   - 
   - 

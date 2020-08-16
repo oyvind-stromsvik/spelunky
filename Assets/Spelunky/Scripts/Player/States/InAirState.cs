@@ -36,7 +36,7 @@ namespace Spelunky {
         }
 
         private void HandleEdgeGrabbing() {
-            Vector2 direction = Vector2.right * player.facingDirection;
+            Vector2 direction = Vector2.right * player.graphics.facingDirection;
 
             // This was just what felt right.
             // TODO: Maybe this isn't the best suited for when we're grabbing with the glove. Investigate this.
@@ -47,12 +47,12 @@ namespace Spelunky {
             Debug.DrawRay(transform.position + Vector3.up * yOffset, direction * rayLength, Color.cyan);
 
             // We're currently trying to move into a wall either on the left or on the right.
-            bool movingIntoWallOnTheLeft = player.physicsObject.collisions.left && player.directionalInput.x < 0 && !player.isFacingRight;
-            bool movingIntoWallOnTheRight = player.physicsObject.collisions.right && player.directionalInput.x > 0 && player.isFacingRight;
+            bool movingIntoWallOnTheLeft = player.physicsObject.collisions.left && player.directionalInput.x < 0 && !player.graphics.isFacingRight;
+            bool movingIntoWallOnTheRight = player.physicsObject.collisions.right && player.directionalInput.x > 0 && player.graphics.isFacingRight;
 
             if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.velocity.y < 0 && hit.collider != null) {
                 // If we have the glove we can grab anything.
-                if (player.items.hasGlove) {
+                if (player.inventory.hasClimbingGlove) {
                     // TODO: How do we pass data to a state?
                     player.hangingState.colliderToHangFrom = hit.collider;
                     player.hangingState.grabbedWallUsingGlove = true;
