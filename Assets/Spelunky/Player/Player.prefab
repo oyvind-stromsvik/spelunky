@@ -115,6 +115,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2d4f9f0bb2108d9479808f3ccf0f9689, type: 2}
   - {fileID: 11400000, guid: 4842f8cfb4fab41408f4b7a0269613af, type: 2}
   - {fileID: 11400000, guid: 912972867ad001e4cb7272c87d737942, type: 2}
+  - {fileID: 11400000, guid: f4465a8976e868043b35daff13bb2bbc, type: 2}
   looping: 1
   showBlankFrameAfterNonLoopingAnimation: 0
   fps: 12
@@ -139,12 +140,15 @@ GameObject:
   - component: {fileID: -5236971530926676888}
   - component: {fileID: -1833860461211926048}
   - component: {fileID: -8564109920999896957}
+  - component: {fileID: -5101200405057694549}
   - component: {fileID: -138630158166356528}
   - component: {fileID: -3839825326305256150}
   - component: {fileID: 7725953637132137021}
   - component: {fileID: 4775238343344738829}
   - component: {fileID: -3941064224825093986}
   - component: {fileID: -6787339454029924957}
+  - component: {fileID: 3574339902112029639}
+  - component: {fileID: -3525105093392211172}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -160,7 +164,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1611851042852994}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.9353333, y: 0.5895333, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 782368877}
@@ -327,13 +331,15 @@ MonoBehaviour:
   input: {fileID: 8124188979697528624}
   graphics: {fileID: -5236971530926676888}
   audio: {fileID: -1833860461211926048}
-  items: {fileID: -8564109920999896957}
+  inventory: {fileID: -8564109920999896957}
+  health: {fileID: -3525105093392211172}
   groundedState: {fileID: -138630158166356528}
   inAirState: {fileID: -3839825326305256150}
   hangingState: {fileID: 7725953637132137021}
   climbingState: {fileID: 4775238343344738829}
   crawlToHangState: {fileID: -3941064224825093986}
   enterDoorState: {fileID: -6787339454029924957}
+  splatState: {fileID: 3574339902112029639}
   edgeGrabLayerMask:
     serializedVersion: 2
     m_Bits: 41216
@@ -358,8 +364,6 @@ MonoBehaviour:
   pushBlockSpeed: 16
   recentlyJumped: 0
   _lastJumpTimer: 0
-  isFacingRight: 0
-  facingDirection: -1
   _lookTimer: 0
   _timeBeforeLook: 1
   _exitDoor: {fileID: 0}
@@ -377,13 +381,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 45312
+    m_Bits: 176384
   skinWidth: 0.4
   horizontalRayCount: 4
   verticalRayCount: 3
-  horizontalRaySpacing: 0
-  verticalRaySpacing: 0
-  collider: {fileID: 0}
+  raycastsHitTriggers: 0
 --- !u!114 &8124188979697528624
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -409,8 +411,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22c7258a7f90452a933621de92d4b4bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderer: {fileID: 0}
-  animator: {fileID: 0}
+  isFacingRight: 0
+  facingDirection: -1
+  renderer: {fileID: 782368879}
+  animator: {fileID: 782368878}
 --- !u!114 &-1833860461211926048
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,7 +442,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57849608adad4af19b55de948290d679, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasGlove: 0
+  numberOfBombs: 4
+  numberOfRopes: 4
+  goldTotalAmount: 0
+  goldCurrentAmount: 0
+  hasClimbingGlove: 0
+  hasSpringBoots: 0
+  hasPitchersMitt: 0
+  items: []
+--- !u!114 &-5101200405057694549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a374219a41aa83a499c63cd25d0f5b90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &-138630158166356528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -538,3 +561,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   enterDoorClip: {fileID: 8300000, guid: 2ffb5cf8ac7475e40a2d8d0d57553580, type: 3}
+--- !u!114 &3574339902112029639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c44629606ed74c05a43ffa0d216cc8d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  splatClip: {fileID: 8300000, guid: ce97d43f667bf854ca80975db390f396, type: 3}
+--- !u!114 &-3525105093392211172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ceadb8bded4ef348b851df1884426e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invulnerabilityDuration: 1
+  maxHealth: 4

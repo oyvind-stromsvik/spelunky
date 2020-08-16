@@ -19,7 +19,7 @@ namespace Spelunky {
             base.Enter();
 
             Vector2 hangPosition = new Vector2(transform.position.x, colliderToHangFrom.transform.position.y + 6);
-            if (player.isFacingRight) {
+            if (player.graphics.isFacingRight) {
                 if (colliderToHangFrom.transform.position.x < player.transform.position.x) {
                     player.graphics.FlipCharacter();
                 }

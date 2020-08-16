@@ -1,9 +1,15 @@
 using UnityEngine;
 
 namespace Spelunky {
+    [RequireComponent (typeof (Player))]
     public abstract class State : MonoBehaviour {
 
         [HideInInspector] public Player player;
+
+        public virtual void Awake() {
+            player = GetComponent<Player>();
+            enabled = false;
+        }
 
         public virtual bool CanEnter() {
             return true;

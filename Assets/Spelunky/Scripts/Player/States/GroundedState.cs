@@ -14,6 +14,15 @@ namespace Spelunky {
             }
         }
 
+        public override void Exit() {
+            base.Exit();
+
+            if (blockToPush != null) {
+                blockToPush.pushSpeed = 0f;
+                blockToPush = null;
+            }
+        }
+
         public void Update() {
             player.groundedGraceTimer = 0;
 
@@ -114,7 +123,7 @@ namespace Spelunky {
             RaycastHit2D hitCenter = Physics2D.Raycast(player.transform.position + Vector3.up, Vector2.down, 2, player.physicsObject.collisionMask);
             Debug.DrawRay(player.transform.position + Vector3.up, Vector2.down * 2, Color.magenta);
 
-            Vector3 offsetForward = new Vector3(6 * player.facingDirection, 1, 0);
+            Vector3 offsetForward = new Vector3(player.physicsObject.Collider.size.x * player.graphics.facingDirection / 2f, 1, 0);
             RaycastHit2D hitForward = Physics2D.Raycast(player.transform.position + offsetForward, Vector2.down, 2, player.physicsObject.collisionMask);
             Debug.DrawRay(player.transform.position + offsetForward, Vector2.down * 2, Color.green);
 

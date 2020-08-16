@@ -2,7 +2,7 @@
 
 namespace Spelunky {
     [RequireComponent (typeof (PhysicsObject))]
-    public class Block : MonoBehaviour {
+    public class Block : MonoBehaviour, IObjectController {
 
         public AudioClip landClip;
 
@@ -19,6 +19,7 @@ namespace Spelunky {
             physicsObject = GetComponent<PhysicsObject>();
         }
 
+        // TODO: This method should be a callback from the physics object.
         private void HandleCollisions() {
             if (physicsObject.collisions.becameGroundedThisFrame) {
                 _audioSource.clip = landClip;
@@ -38,18 +39,31 @@ namespace Spelunky {
             }
         }
 
+        // TODO: This method should be a callback from the physics object.
         private void CalculateVelocity() {
             _velocity.x = pushSpeed;
             // If we're not grounded we snap our x position to the tile grid to avoid
             // floating point inaccuraies in our alignment and we zero out our
             // x velocity to avoid any further movement on the horizontal axis.
             if (!physicsObject.collisions.below) {
-                Vector3 centerOfBlock = transform.position + (Vector3) physicsObject.collider.offset;
+                Vector3 centerOfBlock = transform.position + (Vector3) physicsObject.Collider.offset;
                 Vector3 lowerLeftCornerOfTileWeAreIn = Tile.GetPositionOfLowerLeftOfNearestTile(centerOfBlock);
                 transform.position = new Vector3(lowerLeftCornerOfTileWeAreIn.x, transform.position.y, transform.position.z);
                 _velocity.x = 0;
             }
             _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+        }
+
+        public bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+            // TODO: This squashes the player if he pushes a block and immedaitely climbs up a ladder.
+            // TODO: Having logic like this in this callback just seems wonky.
+            if (!physicsObject.collisions.below && direction == CollisionDirection.Down && collider.CompareTag("Player")) {
+                Player player = collider.GetComponent<Player>();
+                player.Splat();
+                return true;
+            }
+
+            return false;
         }
     }
 }

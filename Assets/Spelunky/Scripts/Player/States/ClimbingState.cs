@@ -111,7 +111,7 @@ namespace Spelunky {
         /// </summary>
         private Collider2D FindClosestOverlappedLadder() {
             List<Collider2D> ladderColliders = new List<Collider2D>();
-            player.physicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
+            player.physicsObject.Collider.OverlapCollider(ladderFilter, ladderColliders);
             if (ladderColliders.Count <= 0) {
                 return null;
             }

@@ -1,15 +1,17 @@
+using System;
 using UnityEngine;
 
 namespace Spelunky {
 
-	public class Player : MonoBehaviour {
+	public class Player : MonoBehaviour, IObjectController {
 
 		[Header("Components")]
 		public PhysicsObject physicsObject;
 		public PlayerInput input;
-		public PlayerGraphics graphics;
+		public EntityVisuals graphics;
 		public new PlayerAudio audio;
-		public PlayerItems items;
+		public PlayerInventory inventory;
+		public EntityHealth health;
 
 		[Header("States")]
 		public GroundedState groundedState;
@@ -18,6 +20,7 @@ namespace Spelunky {
 		public ClimbingState climbingState;
 		public CrawlToHangState crawlToHangState;
 		public EnterDoorState enterDoorState;
+		public SplatState splatState;
 
 		[Header("Crap")]
 		public LayerMask edgeGrabLayerMask;
@@ -55,35 +58,33 @@ namespace Spelunky {
 		[HideInInspector] public bool recentlyJumped;
 		[HideInInspector] public float _lastJumpTimer;
 
-		[HideInInspector] public bool isFacingRight = false;
-		[HideInInspector] public float facingDirection = -1;
-
 		[HideInInspector] public float _lookTimer;
 		[HideInInspector] public float _timeBeforeLook = 1f;
 
 		public StateMachine stateMachine = new StateMachine();
+
+		private float _stunDuration;
 
 		private void Awake() {
 			_gravity = -(2 * maxJumpHeight) / Mathf.Pow (timeToJumpApex, 2);
 			_maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
 			_minJumpVelocity = Mathf.Sqrt (2 * Mathf.Abs (_gravity) * minJumpHeight);
 
-			groundedState.player = this;
-			groundedState.enabled = false;
-			inAirState.player = this;
-			inAirState.enabled = false;
-			hangingState.player = this;
-			hangingState.enabled = false;
-			climbingState.player = this;
-			climbingState.enabled = false;
-			crawlToHangState.player = this;
-			crawlToHangState.enabled = false;
-			enterDoorState.player = this;
-			enterDoorState.enabled = false;
+			health.HealthChanged.AddListener(OnHealthChanged);
+		}
+
+		private void Start() {
 			stateMachine.AttemptToChangeState(groundedState);
 		}
 
 		private void Update() {
+			if (directionalInput.x > 0 && !graphics.isFacingRight) {
+				graphics.FlipCharacter();
+			}
+			else if (directionalInput.x < 0 && graphics.isFacingRight) {
+				graphics.FlipCharacter();
+			}
+
 			SetPlayerSpeed();
 			CalculateVelocity();
 
@@ -104,7 +105,10 @@ namespace Spelunky {
 			if (physicsObject.collisions.above || physicsObject.collisions.below) {
 				velocity.y = 0;
 			}
+
+			_stunDuration -= Time.deltaTime;
 		}
+
 
 		private void SetPlayerSpeed() {
 			if (directionalInput.x != 0) {
@@ -121,24 +125,33 @@ namespace Spelunky {
 		}
 
 		private void CalculateVelocity() {
-			float targetVelocityX = directionalInput.x * _speed;
-			velocity.x = Mathf.SmoothDamp (velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+			if (_stunDuration <= 0f) {
+				float targetVelocityX = directionalInput.x * _speed;
+				velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+			}
+
 			velocity.y += _gravity * Time.deltaTime;
 			stateMachine.CurrentState.ChangePlayerVelocity(ref velocity);
 		}
 
 		public void ThrowBomb() {
+			if (inventory.numberOfBombs <= 0) {
+				return;
+			}
+
+			inventory.UseBomb();
+
 			Bomb bombInstance = Instantiate(bomb, transform.position, Quaternion.identity);
-			Vector2 bombVelocity = new Vector2(256 * facingDirection, 128);
+			Vector2 bombVelocity = new Vector2(256 * graphics.facingDirection, 128);
 			if (directionalInput.y == 1) {
-				bombVelocity = new Vector2(128 * facingDirection, 256);
+				bombVelocity = new Vector2(128 * graphics.facingDirection, 256);
 			}
 			else if (directionalInput.y == -1) {
 				if (physicsObject.collisions.below) {
 					bombVelocity = Vector2.zero;
 				}
 				else {
-					bombVelocity = new Vector2(128 * facingDirection, -256);
+					bombVelocity = new Vector2(128 * graphics.facingDirection, -256);
 				}
 			}
 
@@ -146,9 +159,15 @@ namespace Spelunky {
 		}
 
 		public void ThrowRope() {
+			if (inventory.numberOfRopes <= 0) {
+				return;
+			}
+
+			inventory.UseRope();
+
 			Rope ropeInstance = Instantiate(rope, transform.position, Quaternion.identity);
 			if (stateMachine.CurrentState == groundedState && directionalInput.y < 0) {
-				ropeInstance.placePosition = transform.position + (facingDirection * Vector3.right * Tile.Width);
+				ropeInstance.placePosition = transform.position + (graphics.facingDirection * Vector3.right * Tile.Width);
 			}
 		}
 
@@ -167,6 +186,52 @@ namespace Spelunky {
 
 		public void ExitedDoorway(Exit door) {
 			_exitDoor = null;
+		}
+
+		public void Splat() {
+			stateMachine.AttemptToChangeState(splatState);
+		}
+
+		public bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+			// One way platform handling.
+			if (collider.CompareTag("OneWayPlatform")) {
+				// Always ignore them if we're colliding horizontally.
+				if (direction == CollisionDirection.Left || direction == CollisionDirection.Right) {
+					return true;
+				}
+
+				// If we're colliding vertically ignore them if we're going up or if we're passing through them.
+				if (direction == CollisionDirection.Up || direction == CollisionDirection.Down) {
+					if (direction == CollisionDirection.Up) {
+						return true;
+					}
+					if (physicsObject.collisions.fallingThroughPlatform) {
+						return true;
+					}
+				}
+			}
+
+			if (collider.CompareTag("Enemy") && direction == CollisionDirection.Down) {
+				collider.GetComponent<Enemy>().EntityHealth.TakeDamage(1);
+			}
+
+			return false;
+		}
+
+		public void TakeDamage(int damage, CollisionDirection direction) {
+			if (GetComponent<EntityHealth>().IsInvulernable) {
+				return;
+			}
+
+			GetComponent<EntityHealth>().TakeDamage(damage);
+			velocity = new Vector2(128 * graphics.facingDirection * -1, 64);
+			_stunDuration = 0.5f;
+		}
+
+		private void OnHealthChanged() {
+			if (health.CurrentHealth <= 0) {
+				stateMachine.AttemptToChangeState(splatState);
+			}
 		}
 
 	}
