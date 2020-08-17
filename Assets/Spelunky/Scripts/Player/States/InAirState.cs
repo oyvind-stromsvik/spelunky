@@ -22,7 +22,7 @@ namespace Spelunky {
         }
 
         private void Update() {
-            if (player.physicsObject.collisions.becameGroundedThisFrame) {
+            if (player.physicsObject.collisionInfo.becameGroundedThisFrame) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
@@ -47,8 +47,8 @@ namespace Spelunky {
             Debug.DrawRay(transform.position + Vector3.up * yOffset, direction * rayLength, Color.cyan);
 
             // We're currently trying to move into a wall either on the left or on the right.
-            bool movingIntoWallOnTheLeft = player.physicsObject.collisions.left && player.directionalInput.x < 0 && !player.graphics.isFacingRight;
-            bool movingIntoWallOnTheRight = player.physicsObject.collisions.right && player.directionalInput.x > 0 && player.graphics.isFacingRight;
+            bool movingIntoWallOnTheLeft = player.physicsObject.collisionInfo.left && player.directionalInput.x < 0 && !player.graphics.isFacingRight;
+            bool movingIntoWallOnTheRight = player.physicsObject.collisionInfo.right && player.directionalInput.x > 0 && player.graphics.isFacingRight;
 
             if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.velocity.y < 0 && hit.collider != null) {
                 // If we have the glove we can grab anything.

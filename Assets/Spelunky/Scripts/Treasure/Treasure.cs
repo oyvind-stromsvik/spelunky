@@ -15,8 +15,15 @@ namespace Spelunky {
             }
         }
 
-        public bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+        public bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
             return false;
+        }
+
+        public void OnCollision(CollisionInfo collisionInfo) {
+        }
+
+        public void UpdateVelocity(ref Vector2 velocity) {
+
         }
     }
 }

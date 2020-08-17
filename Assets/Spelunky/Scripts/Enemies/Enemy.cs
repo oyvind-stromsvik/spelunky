@@ -19,8 +19,11 @@ namespace Spelunky {
             EntityHealth.HealthChanged.AddListener(OnHealthChanged);
         }
 
-        public virtual bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+        public virtual bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
             return false;
+        }
+
+        public void OnCollision(CollisionInfo collisionInfo) {
         }
 
         public virtual void OnHealthChanged() {
@@ -32,6 +35,10 @@ namespace Spelunky {
         private void Die() {
             Instantiate(bloodParticles, transform.position, Quaternion.identity);
             Destroy(gameObject);
+        }
+
+        public void UpdateVelocity(ref Vector2 velocity) {
+
         }
     }
 }

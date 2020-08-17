@@ -36,7 +36,7 @@ namespace Spelunky {
             _velocity = (_targetToMoveTowards.position - transform.position).normalized * moveSpeed;
         }
 
-        public override bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+        public override bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
             if (collider.CompareTag("Player")) {
                 collider.GetComponent<Player>().TakeDamage(damage, direction);
                 return true;
