@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Spelunky {
@@ -12,7 +13,9 @@ namespace Spelunky {
 
         public BoxCollider2D Collider { get; private set; }
 
-        public CollisionInfo collisions;
+        public bool useFixedUpdate;
+
+        public CollisionInfo collisionInfo;
         public LayerMask collisionMask;
         public float skinWidth;
         public int horizontalRayCount;
@@ -56,12 +59,12 @@ namespace Spelunky {
             velocity.y = Mathf.Clamp(velocity.y, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
 
             // Save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame.
-            collisions.wasGroundedLastFrame = collisions.below;
-            collisions.collidedLastFrame = collisions.below || collisions.right || collisions.left || collisions.above;
+            collisionInfo.wasGroundedLastFrame = collisionInfo.down;
+            collisionInfo.collidedLastFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
 
             UpdateRaycastOrigins();
 
-            collisions.Reset();
+            collisionInfo.Reset();
 
             if (velocity.x != 0) {
                 HorizontalCollisions(ref velocity);
@@ -74,10 +77,57 @@ namespace Spelunky {
             transform.Translate(velocity);
 
             // Set our becameGrounded state based on the previous and current collision state.
-            if (!collisions.wasGroundedLastFrame && collisions.below) {
-                collisions.becameGroundedThisFrame = true;
+            if (!collisionInfo.wasGroundedLastFrame && collisionInfo.down) {
+                collisionInfo.becameGroundedThisFrame = true;
             }
-            collisions.collidedThisFrame = collisions.below || collisions.right || collisions.left || collisions.above;
+            collisionInfo.collidedThisFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
+        }
+
+        private Vector2 _velocity;
+
+        private void FixedUpdate() {
+            if (!useFixedUpdate) {
+                return;
+            }
+
+            _controllerInterface.UpdateVelocity(ref _velocity);
+
+            _velocity *= Time.deltaTime;
+
+            // Some form of terminal velocity.
+            _velocity.x = Mathf.Clamp(_velocity.x, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
+            _velocity.y = Mathf.Clamp(_velocity.y, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
+
+            // Save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame.
+            collisionInfo.wasGroundedLastFrame = collisionInfo.down;
+            collisionInfo.collidedLastFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
+
+            UpdateRaycastOrigins();
+
+            collisionInfo.Reset();
+
+            // Because we're handling horizontal collisions first this means that if we're
+            // colliding with something both horizontally and vertically at the same time
+            // the collider we'll save in the collisionInfo will be the vertical one.
+            // I guess we'll see if this works fine or not.
+            if (_velocity.x != 0) {
+                HorizontalCollisions(ref _velocity);
+            }
+            if (_velocity.y != 0) {
+                VerticalCollisions(ref _velocity);
+            }
+
+            transform.Translate(_velocity);
+
+            // Set our becameGrounded state based on the previous and current collision state.
+            if (!collisionInfo.wasGroundedLastFrame && collisionInfo.down) {
+                collisionInfo.becameGroundedThisFrame = true;
+            }
+            collisionInfo.collidedThisFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
+
+            if (collisionInfo.collidedThisFrame) {
+                _controllerInterface.OnCollision(collisionInfo);
+            }
         }
 
         private void HorizontalCollisions(ref Vector2 velocity) {
@@ -98,22 +148,17 @@ namespace Spelunky {
                 for (int j = 0; j < hits; j++) {
                     RaycastHit2D hit = _raycastHits[j];
                     if (hit) {
-                        if (IgnoreCollision(hit.collider, collisionDirection)) {
+                        if (IgnoreCollider(hit.collider, collisionDirection)) {
                             continue;
                         }
 
                         velocity.x = (hit.distance - skinWidth) * directionX;
                         rayLength = hit.distance;
 
-                        collisions.left = directionX == -1;
-                        collisions.right = directionX == 1;
-
-                        if (collisions.left) {
-                            collisions.colliderLeft = hit.collider;
-                        }
-                        if (collisions.right) {
-                            collisions.colliderRight = hit.collider;
-                        }
+                        collisionInfo.left = directionX == -1;
+                        collisionInfo.right = directionX == 1;
+                        collisionInfo.direction = collisionDirection;
+                        collisionInfo.collider = hit.collider;
                     }
                 }
             }
@@ -133,28 +178,23 @@ namespace Spelunky {
                 for (int j = 0; j < hits; j++) {
                     RaycastHit2D hit = _raycastHits[j];
                     if (hit) {
-                        if (IgnoreCollision(hit.collider, collisionDirection)) {
+                        if (IgnoreCollider(hit.collider, collisionDirection)) {
                             continue;
                         }
 
                         velocity.y = (hit.distance - skinWidth) * directionY;
                         rayLength = hit.distance;
 
-                        collisions.below = directionY == -1;
-                        collisions.above = directionY == 1;
-
-                        if (collisions.below) {
-                            collisions.colliderBelow = hit.collider;
-                        }
-                        if (collisions.above) {
-                            collisions.colliderAbove = hit.collider;
-                        }
+                        collisionInfo.down = directionY == -1;
+                        collisionInfo.up = directionY == 1;
+                        collisionInfo.direction = collisionDirection;
+                        collisionInfo.collider = hit.collider;
                     }
                 }
             }
         }
 
-        private bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+        private bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
             if (raycastsHitTriggers == false && collider.isTrigger) {
                 return true;
             }
@@ -165,7 +205,7 @@ namespace Spelunky {
             }
 
             // Allow the controller to determine if the collider should be ignored or not.
-            if (_controllerInterface.IgnoreCollision(collider, direction)) {
+            if (_controllerInterface.IgnoreCollider(collider, direction)) {
                 return true;
             }
 

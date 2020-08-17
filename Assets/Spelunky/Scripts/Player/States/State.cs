@@ -33,9 +33,9 @@ namespace Spelunky {
                 player.velocity.y = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.physicsObject.collisions.colliderBelow != null && player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.physicsObject.collisionInfo.down && player.physicsObject.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.velocity.y = 0;
-                player.physicsObject.collisions.fallingThroughPlatform = true;
+                player.physicsObject.collisionInfo.fallingThroughPlatform = true;
             }
 
             Invoke("ResetFallingThroughPlatform", .1f);
@@ -68,7 +68,7 @@ namespace Spelunky {
         }
 
         public void ResetFallingThroughPlatform() {
-            player.physicsObject.collisions.fallingThroughPlatform = false;
+            player.physicsObject.collisionInfo.fallingThroughPlatform = false;
         }
 
         public virtual void ChangePlayerVelocity(ref Vector2 velocity) {

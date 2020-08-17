@@ -30,7 +30,7 @@ namespace Spelunky {
             HandleLookUpDown();
             HandleUnsteady();
 
-            if (!player.physicsObject.collisions.below) {
+            if (!player.physicsObject.collisionInfo.down) {
                 if (player.directionalInput.y < 0) {
                     player.stateMachine.AttemptToChangeState(player.crawlToHangState);
                     return;
@@ -43,16 +43,16 @@ namespace Spelunky {
             if (player.directionalInput.y > 0) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
-            else if (player.directionalInput.y < 0 && player.physicsObject.collisions.below && player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            else if (player.directionalInput.y < 0 && player.physicsObject.collisionInfo.down && player.physicsObject.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
 
             blockToPush = null;
-            if (player.directionalInput.x < 0 && player.physicsObject.collisions.left && player.physicsObject.collisions.colliderLeft.CompareTag("Block")) {
-                blockToPush = player.physicsObject.collisions.colliderLeft.GetComponent<Block>();
+            if (player.directionalInput.x < 0 && player.physicsObject.collisionInfo.left && player.physicsObject.collisionInfo.collider.CompareTag("Block")) {
+                blockToPush = player.physicsObject.collisionInfo.collider.GetComponent<Block>();
             }
-            if (player.directionalInput.x > 0 && player.physicsObject.collisions.right && player.physicsObject.collisions.colliderRight.CompareTag("Block")) {
-                blockToPush = player.physicsObject.collisions.colliderRight.GetComponent<Block>();
+            if (player.directionalInput.x > 0 && player.physicsObject.collisionInfo.right && player.physicsObject.collisionInfo.collider.CompareTag("Block")) {
+                blockToPush = player.physicsObject.collisionInfo.collider.GetComponent<Block>();
             }
 
             if (blockToPush != null) {
@@ -68,7 +68,7 @@ namespace Spelunky {
 
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
-                if (player.physicsObject.collisions.left || player.physicsObject.collisions.right) {
+                if (player.physicsObject.collisionInfo.left || player.physicsObject.collisionInfo.right) {
                     player.graphics.animator.Play("Push");
                 }
                 else if (player.directionalInput.y < 0) {
@@ -128,7 +128,7 @@ namespace Spelunky {
             Debug.DrawRay(player.transform.position + offsetForward, Vector2.down * 2, Color.green);
 
             // Play unsteady animation
-            if (player.physicsObject.collisions.below && hitCenter.collider == null && hitForward.collider == null) {
+            if (player.physicsObject.collisionInfo.down && hitCenter.collider == null && hitForward.collider == null) {
                 if (player.directionalInput.y >= 0) {
                     player.graphics.animator.Play("Unsteady");
                 }

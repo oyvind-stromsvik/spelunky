@@ -102,7 +102,7 @@ namespace Spelunky {
 
 			physicsObject.Move(velocity * Time.deltaTime);
 
-			if (physicsObject.collisions.above || physicsObject.collisions.below) {
+			if (physicsObject.collisionInfo.up || physicsObject.collisionInfo.down) {
 				velocity.y = 0;
 			}
 
@@ -131,6 +131,7 @@ namespace Spelunky {
 			}
 
 			velocity.y += _gravity * Time.deltaTime;
+
 			stateMachine.CurrentState.ChangePlayerVelocity(ref velocity);
 		}
 
@@ -141,14 +142,14 @@ namespace Spelunky {
 
 			inventory.UseBomb();
 
-			Bomb bombInstance = Instantiate(bomb, transform.position, Quaternion.identity);
+			Bomb bombInstance = Instantiate(bomb, transform.position + Vector3.up * 2f, Quaternion.identity);
 			Vector2 bombVelocity = new Vector2(256 * graphics.facingDirection, 128);
 			if (directionalInput.y == 1) {
 				bombVelocity = new Vector2(128 * graphics.facingDirection, 256);
 			}
 			else if (directionalInput.y == -1) {
-				if (physicsObject.collisions.below) {
-					bombVelocity = Vector2.zero;
+				if (physicsObject.collisionInfo.down) {
+					bombVelocity = new Vector2(64 * graphics.facingDirection, 0);
 				}
 				else {
 					bombVelocity = new Vector2(128 * graphics.facingDirection, -256);
@@ -192,7 +193,7 @@ namespace Spelunky {
 			stateMachine.AttemptToChangeState(splatState);
 		}
 
-		public bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+		public bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
 			// One way platform handling.
 			if (collider.CompareTag("OneWayPlatform")) {
 				// Always ignore them if we're colliding horizontally.
@@ -205,7 +206,7 @@ namespace Spelunky {
 					if (direction == CollisionDirection.Up) {
 						return true;
 					}
-					if (physicsObject.collisions.fallingThroughPlatform) {
+					if (physicsObject.collisionInfo.fallingThroughPlatform) {
 						return true;
 					}
 				}
@@ -216,6 +217,9 @@ namespace Spelunky {
 			}
 
 			return false;
+		}
+
+		public void OnCollision(CollisionInfo collisionInfo) {
 		}
 
 		public void TakeDamage(int damage, CollisionDirection direction) {
@@ -234,5 +238,8 @@ namespace Spelunky {
 			}
 		}
 
+		public void UpdateVelocity(ref Vector2 velocity) {
+
+		}
 	}
 }

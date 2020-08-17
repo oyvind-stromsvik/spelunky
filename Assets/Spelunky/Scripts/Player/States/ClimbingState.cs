@@ -42,7 +42,7 @@ namespace Spelunky {
         public override void Enter() {
             base.Enter();
 
-            player.physicsObject.collisions.fallingThroughPlatform = true;
+            player.physicsObject.collisionInfo.fallingThroughPlatform = true;
             float xPos = _closestCollider.transform.position.x;
             player.graphics.animator.Play("ClimbRope");
             if (_closestCollider.CompareTag("Ladder")) {
@@ -63,7 +63,7 @@ namespace Spelunky {
                 player.graphics.animator.fps = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.physicsObject.collisions.below && !player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.physicsObject.collisionInfo.down && !player.physicsObject.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 

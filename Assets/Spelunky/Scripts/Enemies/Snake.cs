@@ -22,14 +22,14 @@ namespace Spelunky {
 
             PhysicsObject.Move(_velocity * Time.deltaTime);
 
-            if (PhysicsObject.collisions.below) {
+            if (PhysicsObject.collisionInfo.down) {
                 _velocity.y = 0;
             }
         }
 
         private void HandleCollisions() {
-            if (PhysicsObject.collisions.collidedThisFrame) {
-                if (PhysicsObject.collisions.right || PhysicsObject.collisions.left) {
+            if (PhysicsObject.collisionInfo.collidedThisFrame) {
+                if (PhysicsObject.collisionInfo.right || PhysicsObject.collisionInfo.left) {
                     EntityVisuals.FlipCharacter();
                 }
             }
@@ -46,12 +46,12 @@ namespace Spelunky {
             Debug.DrawRay(transform.position + offsetForward, Vector2.down * 2, Color.green);
 
             // Play unsteady animation
-            if (PhysicsObject.collisions.below && hitForward.collider == null) {
+            if (PhysicsObject.collisionInfo.down && hitForward.collider == null) {
                 EntityVisuals.FlipCharacter();
             }
         }
 
-        public override bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+        public override bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
             if (collider.CompareTag("Player")) {
                 collider.GetComponent<Player>().TakeDamage(damage, direction);
                 return true;

@@ -38,7 +38,7 @@ namespace Spelunky {
 
             _idleDuration -= Time.deltaTime;
 
-            if (_flipping && PhysicsObject.collisions.becameGroundedThisFrame) {
+            if (_flipping && PhysicsObject.collisionInfo.becameGroundedThisFrame) {
                 _flipping = false;
                 _landed = true;
             }
@@ -50,7 +50,7 @@ namespace Spelunky {
             JumpTowardsTarget();
         }
 
-        public override bool IgnoreCollision(Collider2D collider, CollisionDirection direction) {
+        public override bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
             if (collider.CompareTag("Player")) {
                 collider.GetComponent<Player>().TakeDamage(damage, direction);
                 return true;
@@ -77,19 +77,19 @@ namespace Spelunky {
         }
 
         private void JumpTowardsTarget() {
-            if (PhysicsObject.collisions.becameGroundedThisFrame) {
+            if (PhysicsObject.collisionInfo.becameGroundedThisFrame) {
                 _idleDuration = Random.Range(minJumpWaitTime, maxJumpWaitTime);
             }
 
-            if (PhysicsObject.collisions.above) {
+            if (PhysicsObject.collisionInfo.up) {
                 _velocity.y = 0;
             }
 
-            if (PhysicsObject.collisions.left || PhysicsObject.collisions.right) {
+            if (PhysicsObject.collisionInfo.left || PhysicsObject.collisionInfo.right) {
                 _velocity.x *= -0.25f;
             }
 
-            if (!PhysicsObject.collisions.below) {
+            if (!PhysicsObject.collisionInfo.down) {
                 EntityVisuals.animator.looping = false;
                 if (_velocity.y > 0) {
                     EntityVisuals.animator.Play("Jump", true);

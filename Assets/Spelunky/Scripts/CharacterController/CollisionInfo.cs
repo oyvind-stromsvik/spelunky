@@ -2,14 +2,14 @@ using UnityEngine;
 
 namespace Spelunky {
     public struct CollisionInfo {
-        public bool above;
-        public bool below;
+        public bool up;
+        public bool down;
         public bool left;
         public bool right;
-        public Collider2D colliderAbove;
-        public Collider2D colliderBelow;
-        public Collider2D colliderLeft;
-        public Collider2D colliderRight;
+        // The collider we're colliding with. We can potentially collide with multiple colliders at once
+        // on multiple different sides at once, but I don't think that's ever relevant? I guess we'll see.
+        public CollisionDirection direction;
+        public Collider2D collider;
         public bool becameGroundedThisFrame;
         public bool wasGroundedLastFrame;
         public bool collidedLastFrame;
@@ -18,14 +18,12 @@ namespace Spelunky {
         public bool fallingThroughPlatform;
 
         public void Reset() {
-            above = false;
-            below = false;
+            up = false;
+            down = false;
             left = false;
             right = false;
-            colliderAbove = null;
-            colliderBelow = null;
-            colliderLeft = null;
-            colliderRight = null;
+            direction = CollisionDirection.None;
+            collider = null;
             becameGroundedThisFrame = false;
             collidedThisFrame = true;
         }
