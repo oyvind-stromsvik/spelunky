@@ -1,5 +1,5 @@
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Spelunky {
 
@@ -7,19 +7,19 @@ namespace Spelunky {
     public class PlayerUI : MonoBehaviour {
 
         private Player _player;
-        private TMP_Text _lifeAmountText;
-        private TMP_Text _bombAmountText;
-        private TMP_Text _ropeAmountText;
-        private TMP_Text _totalGoldAmountText;
-        private TMP_Text _currentGoldAmountText;
+        private Text _lifeAmountText;
+        private Text _bombAmountText;
+        private Text _ropeAmountText;
+        private Text _totalGoldAmountText;
+        private Text _currentGoldAmountText;
 
         private void Awake () {
             _player = GetComponent<Player>();
-            _lifeAmountText = GameObject.Find("LifeAmountText").GetComponent<TMP_Text>();
-            _bombAmountText = GameObject.Find("BombAmountText").GetComponent<TMP_Text>();
-            _ropeAmountText = GameObject.Find("RopeAmountText").GetComponent<TMP_Text>();
-            _totalGoldAmountText = GameObject.Find("TotalGoldAmountText").GetComponent<TMP_Text>();
-            _currentGoldAmountText = GameObject.Find("CurrentGoldAmountText").GetComponent<TMP_Text>();
+            _lifeAmountText = GameObject.Find("LifeAmountText").GetComponent<Text>();
+            _bombAmountText = GameObject.Find("BombAmountText").GetComponent<Text>();
+            _ropeAmountText = GameObject.Find("RopeAmountText").GetComponent<Text>();
+            _totalGoldAmountText = GameObject.Find("TotalGoldAmountText").GetComponent<Text>();
+            _currentGoldAmountText = GameObject.Find("CurrentGoldAmountText").GetComponent<Text>();
 
             _player.health.HealthChanged.AddListener(OnHealthChanged);
             _player.inventory.BombsChanged.AddListener(OnBombsChanged);
