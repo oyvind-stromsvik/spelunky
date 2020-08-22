@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,16 @@ namespace Spelunky {
         private Text _totalGoldAmountText;
         private Text _currentGoldAmountText;
 
+        private int _currentGoldAmount;
+        private int _totalGoldAmount;
+
+        public float timeBeforeAddingCurrentGoldToTotal;
+        private float _goldAddTimer;
+        public int goldToAddPerInterval;
+        public float goldIntervalTime;
+        private float _intervalTimer;
+
+
         private void Awake () {
             _player = GetComponent<Player>();
             _lifeAmountText = GameObject.Find("LifeAmountText").GetComponent<Text>();
@@ -24,8 +35,30 @@ namespace Spelunky {
             _player.health.HealthChanged.AddListener(OnHealthChanged);
             _player.inventory.BombsChanged.AddListener(OnBombsChanged);
             _player.inventory.RopesChanged.AddListener(OnRopesChanged);
-            _player.inventory.GoldTotalChanged.AddListener(OnGoldTotalChanged);
-            _player.inventory.GoldCurrentChanged.AddListener(OnGoldCurrentChanged);
+            _player.inventory.GoldAmountChanged.AddListener(OnGoldChanged);
+        }
+
+        private void Update() {
+            if (_currentGoldAmount <= 0) {
+                _goldAddTimer = 0;
+                _currentGoldAmountText.gameObject.SetActive(false);
+                return;
+            }
+
+            _currentGoldAmountText.gameObject.SetActive(true);
+
+            _goldAddTimer += Time.deltaTime;
+            if (_goldAddTimer < timeBeforeAddingCurrentGoldToTotal) {
+                return;
+            }
+
+            _intervalTimer += Time.deltaTime;
+            if (_intervalTimer < goldIntervalTime) {
+                return;
+            }
+
+            UpdateUIGoldAmount();
+            _intervalTimer = 0;
         }
 
         private void OnHealthChanged() {
@@ -40,12 +73,21 @@ namespace Spelunky {
             _ropeAmountText.text = _player.inventory.numberOfRopes.ToString();
         }
 
-        private void OnGoldTotalChanged() {
-            _totalGoldAmountText.text = _player.inventory.goldTotalAmount.ToString();
+        private void OnGoldChanged(int amount) {
+            _goldAddTimer = 0;
+            _intervalTimer = 0;
+            _currentGoldAmount += amount;
+            _totalGoldAmount = _player.inventory.goldAmount -_currentGoldAmount;
+            _currentGoldAmountText.text = " +" + _currentGoldAmount;
+            _totalGoldAmountText.text = _totalGoldAmount.ToString();
         }
 
-        private void OnGoldCurrentChanged() {
-            _currentGoldAmountText.text = _player.inventory.goldCurrentAmount.ToString();
+        private void UpdateUIGoldAmount() {
+            int goldToAdd = goldToAddPerInterval > _currentGoldAmount ? _currentGoldAmount : goldToAddPerInterval;
+            _currentGoldAmount -= goldToAdd;
+            _totalGoldAmount += goldToAdd;
+            _currentGoldAmountText.text = " +" + _currentGoldAmount;
+            _totalGoldAmountText.text = _totalGoldAmount.ToString();
         }
     }
 }
