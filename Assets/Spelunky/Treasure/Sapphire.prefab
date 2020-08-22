@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2460688227761819998}
   - component: {fileID: 9047466231147650945}
   - component: {fileID: 3160266283438109127}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: Sapphire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57,7 +57,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 4}
@@ -85,6 +85,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useFixedUpdate: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -102,7 +103,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5557381119469178609}
   - component: {fileID: 3368790946675641701}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
