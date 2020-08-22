@@ -379,6 +379,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useFixedUpdate: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 176384
@@ -444,8 +445,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numberOfBombs: 4
   numberOfRopes: 4
-  goldTotalAmount: 0
-  goldCurrentAmount: 0
+  goldAmount: 0
   hasClimbingGlove: 0
   hasSpringBoots: 0
   hasPitchersMitt: 0
@@ -462,6 +462,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a374219a41aa83a499c63cd25d0f5b90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeBeforeAddingCurrentGoldToTotal: 2
+  goldToAddPerInterval: 100
+  goldIntervalTime: 0.02
 --- !u!114 &-138630158166356528
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -2,18 +2,20 @@ using UnityEngine;
 using UnityEngine.Events;
 
 namespace Spelunky {
+
+    [System.Serializable]
+    public class UnityIntEvent : UnityEvent<int> { }
+
     [RequireComponent (typeof (Player))]
     public class PlayerInventory : MonoBehaviour {
 
         public UnityEvent BombsChanged { get; private set; } = new UnityEvent();
         public UnityEvent RopesChanged { get; private set; } = new UnityEvent();
-        public UnityEvent GoldTotalChanged { get; private set; } = new UnityEvent();
-        public UnityEvent GoldCurrentChanged { get; private set; } = new UnityEvent();
+        public UnityIntEvent GoldAmountChanged { get; private set; } = new UnityIntEvent();
 
         public int numberOfBombs;
         public int numberOfRopes;
-        public int goldTotalAmount;
-        public int goldCurrentAmount;
+        public int goldAmount;
 
         public bool hasClimbingGlove;
         public bool hasSpringBoots;
@@ -26,8 +28,7 @@ namespace Spelunky {
         private void Reset() {
             numberOfBombs = 4;
             numberOfRopes = 4;
-            goldTotalAmount = 0;
-            goldCurrentAmount = 0;
+            goldAmount = 0;
         }
 
         private void Start () {
@@ -35,8 +36,7 @@ namespace Spelunky {
 
             BombsChanged?.Invoke();
             RopesChanged?.Invoke();
-            GoldCurrentChanged?.Invoke();
-            GoldTotalChanged?.Invoke();
+            GoldAmountChanged?.Invoke(0);
         }
 
         public void PickupItem(Item item) {
@@ -64,10 +64,8 @@ namespace Spelunky {
         }
 
         public void PickupGold(int amount) {
-            goldCurrentAmount += amount;
-            goldTotalAmount = goldCurrentAmount;
-            GoldCurrentChanged?.Invoke();
-            GoldTotalChanged?.Invoke();
+            goldAmount += amount;
+            GoldAmountChanged?.Invoke(amount);
         }
     }
 }
