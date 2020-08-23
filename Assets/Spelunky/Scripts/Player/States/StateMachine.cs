@@ -2,7 +2,7 @@ namespace Spelunky {
     public class StateMachine {
 
         public State CurrentState { get; private set; }
-        public State LastState { get; private set; }
+        public State PreviousState { get; private set; }
 
         public void AttemptToChangeState(State newState) {
             if (CurrentState != null) {
@@ -15,10 +15,12 @@ namespace Spelunky {
                 }
 
                 CurrentState.Exit();
-                LastState = CurrentState;
+                CurrentState.enabled = false;
+                PreviousState = CurrentState;
             }
 
             CurrentState = newState;
+            CurrentState.enabled = true;
             CurrentState.Enter();
         }
     }

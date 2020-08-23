@@ -6,8 +6,6 @@ namespace Spelunky {
         public AudioClip splatClip;
 
         public override void Enter() {
-            base.Enter();
-
             player.graphics.animator.looping = false;
             player.graphics.animator.fps = 36;
             player.graphics.animator.Play("Splat", true);

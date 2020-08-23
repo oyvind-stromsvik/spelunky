@@ -16,11 +16,9 @@ namespace Spelunky {
         }
 
         public virtual void Enter() {
-            enabled = true;
         }
 
         public virtual void Exit() {
-            enabled = false;
         }
 
         public virtual void OnDirectionalInput(Vector2 input) {

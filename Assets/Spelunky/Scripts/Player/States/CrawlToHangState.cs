@@ -7,8 +7,6 @@ namespace Spelunky {
     public class CrawlToHangState : State {
 
         public override void Enter() {
-            base.Enter();
-
             StartCoroutine(CrawlToHang());
         }
 
