@@ -16,8 +16,6 @@ namespace Spelunky {
         }
 
         public override void Enter() {
-            base.Enter();
-
             Vector2 hangPosition = new Vector2(transform.position.x, colliderToHangFrom.transform.position.y + 6);
             if (player.graphics.isFacingRight) {
                 if (colliderToHangFrom.transform.position.x < player.transform.position.x) {

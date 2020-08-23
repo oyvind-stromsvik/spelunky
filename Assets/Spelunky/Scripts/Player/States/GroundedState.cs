@@ -7,16 +7,12 @@ namespace Spelunky {
         private Block _lastBlockPushed;
 
         public override void Enter() {
-            base.Enter();
-
-            if (player.stateMachine.LastState == player.inAirState) {
+            if (player.stateMachine.PreviousState == player.inAirState) {
                 player.audio.Play(player.audio.landClip);
             }
         }
 
         public override void Exit() {
-            base.Exit();
-
             if (blockToPush != null) {
                 blockToPush.pushSpeed = 0f;
                 blockToPush = null;

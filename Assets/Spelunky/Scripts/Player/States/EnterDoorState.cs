@@ -19,8 +19,6 @@ namespace Spelunky {
         }
 
         public override void Enter() {
-            base.Enter();
-
             StartCoroutine(EnterDoor());
         }
 

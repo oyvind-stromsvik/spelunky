@@ -40,8 +40,6 @@ namespace Spelunky {
         }
 
         public override void Enter() {
-            base.Enter();
-
             player.physicsObject.collisionInfo.fallingThroughPlatform = true;
             float xPos = _closestCollider.transform.position.x;
             player.graphics.animator.Play("ClimbRope");
