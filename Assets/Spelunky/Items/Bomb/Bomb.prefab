@@ -240,6 +240,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useFixedUpdate: 1
+  useGravity: 1
   collisionMask:
     serializedVersion: 2
     m_Bits: 41216

@@ -12,14 +12,14 @@ namespace Spelunky {
 
         private IEnumerator CrawlToHang() {
             // Find the collider we're going to grab on to.
-            Vector3 offset = new Vector3(-6 * player.graphics.facingDirection, 1, 0);
+            Vector3 offset = new Vector3(-6 * player.Visuals.facingDirection, 1, 0);
             RaycastHit2D hit = Physics2D.Raycast(transform.position + offset, Vector2.down, 2, player.edgeGrabLayerMask);
             Debug.DrawRay(transform.position + offset, Vector2.down * 4, Color.yellow);
 
-            player.graphics.animator.Play("CrawlToHang", true);
-            player.graphics.animator.fps = 24;
+            player.Visuals.animator.Play("CrawlToHang", true);
+            player.Visuals.animator.fps = 24;
 
-            yield return new WaitForSeconds(player.graphics.animator.GetAnimationLength("CrawlToHang"));
+            yield return new WaitForSeconds(player.Visuals.animator.GetAnimationLength("CrawlToHang"));
 
             player.hangingState.colliderToHangFrom = hit.collider;
             player.stateMachine.AttemptToChangeState(player.hangingState);

@@ -16,7 +16,7 @@ namespace Spelunky {
 
         public void Initialize(Player player) {
             _target = player;
-            _focusArea = new FocusArea(_target.physicsObject.Collider.bounds, focusAreaSize);
+            _focusArea = new FocusArea(_target.Physics.Collider.bounds, focusAreaSize);
             _initialVerticalOffset = verticalOffset;
         }
 
@@ -29,7 +29,7 @@ namespace Spelunky {
                 return;
             }
 
-            _focusArea.Update(_target.physicsObject.Collider.bounds);
+            _focusArea.Update(_target.Physics.Collider.bounds);
             Vector3 focusPosition = _focusArea.centre + Vector2.up * verticalOffset;
             focusPosition = Vector3.SmoothDamp(transform.position, focusPosition, ref _smoothVelocity, verticalSmoothTime);
             float x = focusPosition.x;

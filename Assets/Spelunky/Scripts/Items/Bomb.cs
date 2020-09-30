@@ -2,8 +2,10 @@ using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
-    [RequireComponent (typeof (PhysicsObject))]
-    public class Bomb : MonoBehaviour, IObjectController {
+    [RequireComponent (typeof (EntityPhysics))]
+    public class Bomb : MonoBehaviour {
+
+        public EntityPhysics Physics { get; private set; }
 
         public Explosion explosion;
 
@@ -14,8 +16,6 @@ namespace Spelunky {
 
         private AudioSource _audioSource;
 
-        private Vector3 _velocity;
-
         private SpriteAnimator _spriteAnimator;
 
         private const float BounceSoundVelocityThreshold = 100f;
@@ -23,14 +23,13 @@ namespace Spelunky {
         private void Awake() {
             _audioSource = GetComponent<AudioSource>();
             _spriteAnimator = GetComponent<SpriteAnimator>();
+            Physics = GetComponent<EntityPhysics>();
+
+            Physics.OnCollisionEvent.AddListener(OnCollision);
         }
 
         private void Start() {
             StartCoroutine(DelayedExplosion());
-        }
-
-        public void SetVelocity(Vector2 velocity) {
-            _velocity = velocity;
         }
 
         private IEnumerator DelayedExplosion() {
@@ -54,37 +53,28 @@ namespace Spelunky {
             Destroy(gameObject);
         }
 
-        public bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
-            return false;
-        }
-
-        public void OnCollision(CollisionInfo collisionInfo) {
+        private void OnCollision(CollisionInfo collisionInfo) {
             bool playSound = false;
 
             if (collisionInfo.left || collisionInfo.right) {
-                if (Mathf.Abs(_velocity.x) > BounceSoundVelocityThreshold) {
+                if (Mathf.Abs(Physics.velocity.x) > BounceSoundVelocityThreshold) {
                     playSound = true;
                 }
-                _velocity.x *= -1f;
+                Physics.velocity.x *= -1f;
             }
 
             if (collisionInfo.up || collisionInfo.down) {
-                if (Mathf.Abs(_velocity.y) > BounceSoundVelocityThreshold) {
+                if (Mathf.Abs(Physics.velocity.y) > BounceSoundVelocityThreshold) {
                     playSound = true;
                 }
-                _velocity.y *= -1f;
+                Physics.velocity.y *= -1f;
             }
 
-            _velocity *= 0.5f;
+            Physics.velocity *= 0.5f;
 
             if (playSound) {
                 _audioSource.PlayOneShot(bounceClip);
             }
-        }
-
-        public void UpdateVelocity(ref Vector2 velocity) {
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-            velocity = _velocity;
         }
     }
 }

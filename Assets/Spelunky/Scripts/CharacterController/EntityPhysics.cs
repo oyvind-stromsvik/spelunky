@@ -1,10 +1,16 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Spelunky {
 
-    [RequireComponent(typeof(IObjectController), typeof(BoxCollider2D))]
-    public class PhysicsObject : MonoBehaviour {
+    [System.Serializable]
+    public class UnityCollisionInfoEvent : UnityEvent<CollisionInfo> { }
+
+    [RequireComponent(typeof(BoxCollider2D))]
+    public class EntityPhysics : MonoBehaviour {
+
+        public UnityCollisionInfoEvent OnCollisionEvent { get; private set; } = new UnityCollisionInfoEvent();
 
         private struct RaycastOrigins {
             public Vector2 topLeft, topRight;
@@ -14,6 +20,7 @@ namespace Spelunky {
         public BoxCollider2D Collider { get; private set; }
 
         public bool useFixedUpdate;
+        public bool useGravity;
 
         public CollisionInfo collisionInfo;
         public LayerMask collisionMask;
@@ -26,7 +33,6 @@ namespace Spelunky {
         private float _horizontalRaySpacing;
         private float _verticalRaySpacing;
         private RaycastOrigins _raycastOrigins;
-        private IObjectController _controllerInterface;
 
         // The max number of colliders that our raycasts will register hits with at once.
         private const int MaxCollisions = 32;
@@ -41,11 +47,6 @@ namespace Spelunky {
         }
 
         private void Awake() {
-            _controllerInterface = GetComponent<IObjectController>();
-            if (_controllerInterface == null) {
-                Debug.LogError("No controller interface assigned to physics object.");
-            }
-
             Collider = GetComponent<BoxCollider2D>();
         }
 
@@ -53,51 +54,21 @@ namespace Spelunky {
             CalculateRaySpacing();
         }
 
-        public void Move(Vector2 velocity) {
-            // Some form of terminal velocity.
-            velocity.x = Mathf.Clamp(velocity.x, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
-            velocity.y = Mathf.Clamp(velocity.y, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
-
-            // Save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame.
-            collisionInfo.wasGroundedLastFrame = collisionInfo.down;
-            collisionInfo.collidedLastFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
-
-            UpdateRaycastOrigins();
-
-            collisionInfo.Reset();
-
-            if (velocity.x != 0) {
-                HorizontalCollisions(ref velocity);
-            }
-
-            if (velocity.y != 0) {
-                VerticalCollisions(ref velocity);
-            }
-
-            transform.Translate(velocity);
-
-            // Set our becameGrounded state based on the previous and current collision state.
-            if (!collisionInfo.wasGroundedLastFrame && collisionInfo.down) {
-                collisionInfo.becameGroundedThisFrame = true;
-            }
-            collisionInfo.collidedThisFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
-        }
-
-        private Vector2 _velocity;
+        public Vector2 velocity;
 
         private void FixedUpdate() {
             if (!useFixedUpdate) {
                 return;
             }
 
-            _controllerInterface.UpdateVelocity(ref _velocity);
+            if (useGravity) {
+                velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+            }
 
-            _velocity *= Time.deltaTime;
+            Move(velocity * Time.deltaTime);
+        }
 
-            // Some form of terminal velocity.
-            _velocity.x = Mathf.Clamp(_velocity.x, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
-            _velocity.y = Mathf.Clamp(_velocity.y, PhysicsManager.gravity.y, -PhysicsManager.gravity.y);
-
+        public void Move(Vector2 moveDelta) {
             // Save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame.
             collisionInfo.wasGroundedLastFrame = collisionInfo.down;
             collisionInfo.collidedLastFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
@@ -106,18 +77,15 @@ namespace Spelunky {
 
             collisionInfo.Reset();
 
-            // Because we're handling horizontal collisions first this means that if we're
-            // colliding with something both horizontally and vertically at the same time
-            // the collider we'll save in the collisionInfo will be the vertical one.
-            // I guess we'll see if this works fine or not.
-            if (_velocity.x != 0) {
-                HorizontalCollisions(ref _velocity);
-            }
-            if (_velocity.y != 0) {
-                VerticalCollisions(ref _velocity);
+            if (moveDelta.x != 0) {
+                HorizontalCollisions(ref moveDelta);
             }
 
-            transform.Translate(_velocity);
+            if (moveDelta.y != 0) {
+                VerticalCollisions(ref moveDelta);
+            }
+
+            transform.Translate(moveDelta);
 
             // Set our becameGrounded state based on the previous and current collision state.
             if (!collisionInfo.wasGroundedLastFrame && collisionInfo.down) {
@@ -126,16 +94,16 @@ namespace Spelunky {
             collisionInfo.collidedThisFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
 
             if (collisionInfo.collidedThisFrame) {
-                _controllerInterface.OnCollision(collisionInfo);
+                OnCollisionEvent?.Invoke(collisionInfo);
             }
         }
 
-        private void HorizontalCollisions(ref Vector2 velocity) {
-            float directionX = Mathf.Sign(velocity.x);
-            CollisionDirection collisionDirection = velocity.x > 0 ? CollisionDirection.Right : CollisionDirection.Left;
-            float rayLength = Mathf.Abs(velocity.x) + skinWidth;
+        private void HorizontalCollisions(ref Vector2 moveDelta) {
+            float directionX = Mathf.Sign(moveDelta.x);
+            CollisionDirection collisionDirection = moveDelta.x > 0 ? CollisionDirection.Right : CollisionDirection.Left;
+            float rayLength = Mathf.Abs(moveDelta.x) + skinWidth;
 
-            if (Mathf.Abs(velocity.x) < skinWidth) {
+            if (Mathf.Abs(moveDelta.x) < skinWidth) {
                 rayLength = 2 * skinWidth;
             }
 
@@ -152,7 +120,7 @@ namespace Spelunky {
                             continue;
                         }
 
-                        velocity.x = (hit.distance - skinWidth) * directionX;
+                        moveDelta.x = (hit.distance - skinWidth) * directionX;
                         rayLength = hit.distance;
 
                         collisionInfo.left = directionX == -1;
@@ -164,14 +132,14 @@ namespace Spelunky {
             }
         }
 
-        private void VerticalCollisions(ref Vector2 velocity) {
-            float directionY = Mathf.Sign(velocity.y);
-            CollisionDirection collisionDirection = velocity.y > 0 ? CollisionDirection.Up : CollisionDirection.Down;
-            float rayLength = Mathf.Abs(velocity.y) + skinWidth;
+        private void VerticalCollisions(ref Vector2 moveDelta) {
+            float directionY = Mathf.Sign(moveDelta.y);
+            CollisionDirection collisionDirection = moveDelta.y > 0 ? CollisionDirection.Up : CollisionDirection.Down;
+            float rayLength = Mathf.Abs(moveDelta.y) + skinWidth;
 
             for (int i = 0; i < verticalRayCount; i++) {
                 Vector2 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
-                rayOrigin += Vector2.right * (_verticalRaySpacing * i + velocity.x);
+                rayOrigin += Vector2.right * (_verticalRaySpacing * i + moveDelta.x);
                 int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up * directionY, _raycastHits, rayLength, collisionMask);
                 Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
 
@@ -182,7 +150,7 @@ namespace Spelunky {
                             continue;
                         }
 
-                        velocity.y = (hit.distance - skinWidth) * directionY;
+                        moveDelta.y = (hit.distance - skinWidth) * directionY;
                         rayLength = hit.distance;
 
                         collisionInfo.down = directionY == -1;
@@ -204,9 +172,22 @@ namespace Spelunky {
                 return true;
             }
 
-            // Allow the controller to determine if the collider should be ignored or not.
-            if (_controllerInterface.IgnoreCollider(collider, direction)) {
-                return true;
+            // One way platform handling.
+            if (collider.CompareTag("OneWayPlatform")) {
+                // Always ignore them if we're colliding horizontally.
+                if (direction == CollisionDirection.Left || direction == CollisionDirection.Right) {
+                    return true;
+                }
+
+                // If we're colliding vertically ignore them if we're going up or if we're passing through them.
+                if (direction == CollisionDirection.Up || direction == CollisionDirection.Down) {
+                    if (direction == CollisionDirection.Up) {
+                        return true;
+                    }
+                    if (collisionInfo.fallingThroughPlatform) {
+                        return true;
+                    }
+                }
             }
 
             return false;

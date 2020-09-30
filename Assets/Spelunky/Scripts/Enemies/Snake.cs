@@ -20,16 +20,16 @@ namespace Spelunky {
 
             CalculateVelocity();
 
-            PhysicsObject.Move(_velocity * Time.deltaTime);
+            EntityPhysics.Move(_velocity * Time.deltaTime);
 
-            if (PhysicsObject.collisionInfo.down) {
+            if (EntityPhysics.collisionInfo.down) {
                 _velocity.y = 0;
             }
         }
 
         private void HandleCollisions() {
-            if (PhysicsObject.collisionInfo.collidedThisFrame) {
-                if (PhysicsObject.collisionInfo.right || PhysicsObject.collisionInfo.left) {
+            if (EntityPhysics.collisionInfo.collidedThisFrame) {
+                if (EntityPhysics.collisionInfo.right || EntityPhysics.collisionInfo.left) {
                     EntityVisuals.FlipCharacter();
                 }
             }
@@ -41,23 +41,14 @@ namespace Spelunky {
         }
 
         private void HandleUnsteady() {
-            Vector3 offsetForward = new Vector3(PhysicsObject.Collider.size.x * EntityVisuals.facingDirection / 2f, 1, 0);
-            RaycastHit2D hitForward = Physics2D.Raycast(transform.position + offsetForward, Vector2.down, 2, PhysicsObject.collisionMask);
+            Vector3 offsetForward = new Vector3(EntityPhysics.Collider.size.x * EntityVisuals.facingDirection / 2f, 1, 0);
+            RaycastHit2D hitForward = Physics2D.Raycast(transform.position + offsetForward, Vector2.down, 2, EntityPhysics.collisionMask);
             Debug.DrawRay(transform.position + offsetForward, Vector2.down * 2, Color.green);
 
             // Play unsteady animation
-            if (PhysicsObject.collisionInfo.down && hitForward.collider == null) {
+            if (EntityPhysics.collisionInfo.down && hitForward.collider == null) {
                 EntityVisuals.FlipCharacter();
             }
-        }
-
-        public override bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
-            if (collider.CompareTag("Player")) {
-                collider.GetComponent<Player>().TakeDamage(damage, direction);
-                return true;
-            }
-
-            return false;
         }
     }
 }

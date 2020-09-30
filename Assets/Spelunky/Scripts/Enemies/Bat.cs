@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Spelunky {
     public class Bat : Enemy
@@ -29,20 +28,11 @@ namespace Spelunky {
             }
 
             CalculateVelocity();
-            PhysicsObject.Move(_velocity * Time.deltaTime);
+            EntityPhysics.Move(_velocity * Time.deltaTime);
         }
 
         private void CalculateVelocity() {
             _velocity = (_targetToMoveTowards.position - transform.position).normalized * moveSpeed;
-        }
-
-        public override bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
-            if (collider.CompareTag("Player")) {
-                collider.GetComponent<Player>().TakeDamage(damage, direction);
-                return true;
-            }
-
-            return false;
         }
 
         private void OnTriggerEnter2D(Collider2D other) {

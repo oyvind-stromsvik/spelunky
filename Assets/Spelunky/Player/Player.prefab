@@ -327,7 +327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f1317bcb3ab44f3b9c7892dcd80bfe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  physicsObject: {fileID: 8645646398547493291}
+  entityPhysics: {fileID: 8645646398547493291}
   input: {fileID: 8124188979697528624}
   graphics: {fileID: -5236971530926676888}
   audio: {fileID: -1833860461211926048}

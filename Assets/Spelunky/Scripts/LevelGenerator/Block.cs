@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    [RequireComponent (typeof (PhysicsObject))]
-    public class Block : MonoBehaviour, IObjectController {
+    [RequireComponent (typeof (EntityPhysics))]
+    public class Block : MonoBehaviour {
 
         public AudioClip landClip;
 
@@ -12,16 +12,16 @@ namespace Spelunky {
 
         // References.
         private AudioSource _audioSource;
-        public PhysicsObject physicsObject;
+        public EntityPhysics entityPhysics;
 
         private void Awake() {
             _audioSource = GetComponent<AudioSource>();
-            physicsObject = GetComponent<PhysicsObject>();
+            entityPhysics = GetComponent<EntityPhysics>();
         }
 
         // TODO: This method should be a callback from the physics object.
         private void HandleCollisions() {
-            if (physicsObject.collisionInfo.becameGroundedThisFrame) {
+            if (entityPhysics.collisionInfo.becameGroundedThisFrame) {
                 _audioSource.clip = landClip;
                 _audioSource.Play();
             }
@@ -32,9 +32,9 @@ namespace Spelunky {
 
             HandleCollisions();
 
-            physicsObject.Move(_velocity * Time.deltaTime);
+            entityPhysics.Move(_velocity * Time.deltaTime);
 
-            if (physicsObject.collisionInfo.down) {
+            if (entityPhysics.collisionInfo.down) {
                 _velocity.y = 0;
             }
         }
@@ -45,8 +45,8 @@ namespace Spelunky {
             // If we're not grounded we snap our x position to the tile grid to avoid
             // floating point inaccuraies in our alignment and we zero out our
             // x velocity to avoid any further movement on the horizontal axis.
-            if (!physicsObject.collisionInfo.down) {
-                Vector3 centerOfBlock = transform.position + (Vector3) physicsObject.Collider.offset;
+            if (!entityPhysics.collisionInfo.down) {
+                Vector3 centerOfBlock = transform.position + (Vector3) entityPhysics.Collider.offset;
                 Vector3 lowerLeftCornerOfTileWeAreIn = Tile.GetPositionOfLowerLeftOfNearestTile(centerOfBlock);
                 transform.position = new Vector3(lowerLeftCornerOfTileWeAreIn.x, transform.position.y, transform.position.z);
                 _velocity.x = 0;
@@ -54,23 +54,11 @@ namespace Spelunky {
             _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
         }
 
-        public bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
-            // TODO: This squashes the player if he pushes a block and immedaitely climbs up a ladder.
-            // TODO: Having logic like this in this callback just seems wonky.
-            if (!physicsObject.collisionInfo.down && direction == CollisionDirection.Down && collider.CompareTag("Player")) {
-                Player player = collider.GetComponent<Player>();
-                player.Splat();
-                return true;
-            }
-
-            return false;
-        }
-
         public void OnCollision(CollisionInfo collisionInfo) {
-        }
-
-        public void UpdateVelocity(ref Vector2 velocity) {
-
+            if (collisionInfo.direction == CollisionDirection.Down && collisionInfo.collider.CompareTag("Player")) {
+                Player player = collisionInfo.collider.GetComponent<Player>();
+                player.Splat();
+            }
         }
     }
 }
