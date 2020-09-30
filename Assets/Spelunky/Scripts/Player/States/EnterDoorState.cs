@@ -25,17 +25,17 @@ namespace Spelunky {
         private IEnumerator EnterDoor() {
             transform.position = new Vector2(player._exitDoor.transform.position.x + Tile.Width / 2f, player._exitDoor.transform.position.y);
 
-            player.graphics.animator.Play("EnterDoor", true);
-            player.graphics.animator.fps = 12;
+            player.Visuals.animator.Play("EnterDoor", true);
+            player.Visuals.animator.fps = 12;
 
-            player.audio.Play(enterDoorClip);
+            player.Audio.Play(enterDoorClip);
 
-            Color color = player.graphics.renderer.color;
-            float animationLength = player.graphics.animator.GetAnimationLength("EnterDoor");
+            Color color = player.Visuals.renderer.color;
+            float animationLength = player.Visuals.animator.GetAnimationLength("EnterDoor");
             float t = 0;
             while (t <= animationLength) {
                 t += Time.deltaTime;
-                player.graphics.renderer.color = Color.Lerp(color, Color.black, t.Remap(0f, animationLength, 0f, 1f));
+                player.Visuals.renderer.color = Color.Lerp(color, Color.black, t.Remap(0f, animationLength, 0f, 1f));
                 yield return null;
             }
 

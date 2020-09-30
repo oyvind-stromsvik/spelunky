@@ -40,28 +40,28 @@ namespace Spelunky {
         }
 
         public override void Enter() {
-            player.physicsObject.collisionInfo.fallingThroughPlatform = true;
+            player.Physics.collisionInfo.fallingThroughPlatform = true;
             float xPos = _closestCollider.transform.position.x;
-            player.graphics.animator.Play("ClimbRope");
+            player.Visuals.animator.Play("ClimbRope");
             if (_closestCollider.CompareTag("Ladder")) {
                 xPos += Tile.Width / 2f;
-                player.graphics.animator.Play("ClimbLadder");
+                player.Visuals.animator.Play("ClimbLadder");
             }
 
             transform.position = new Vector3(xPos, transform.position.y, 0);
-            player.audio.Play(player.audio.grabClip);
+            player.Audio.Play(player.Audio.grabClip);
         }
 
         private void Update() {
             if (player.directionalInput.y != 0) {
                 // Set the framerate of the climbing animation dynamically based on our climbing speed.
-                player.graphics.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
+                player.Visuals.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
             }
             else {
-                player.graphics.animator.fps = 0;
+                player.Visuals.animator.fps = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.physicsObject.collisionInfo.down && !player.physicsObject.collisionInfo.collider.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && !player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
@@ -75,9 +75,9 @@ namespace Spelunky {
                 player.stateMachine.AttemptToChangeState(player.inAirState);
             }
             else {
-                player.graphics.animator.Play("ClimbRope");
+                player.Visuals.animator.Play("ClimbRope");
                 if (_closestCollider.CompareTag("Ladder")) {
-                    player.graphics.animator.Play("ClimbLadder");
+                    player.Visuals.animator.Play("ClimbLadder");
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace Spelunky {
         /// </summary>
         private Collider2D FindClosestOverlappedLadder() {
             List<Collider2D> ladderColliders = new List<Collider2D>();
-            player.physicsObject.Collider.OverlapCollider(ladderFilter, ladderColliders);
+            player.Physics.Collider.OverlapCollider(ladderFilter, ladderColliders);
             if (ladderColliders.Count <= 0) {
                 return null;
             }

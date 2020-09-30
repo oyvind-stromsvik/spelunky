@@ -34,11 +34,11 @@ namespace Spelunky {
             }
 
             _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-            PhysicsObject.Move(_velocity * Time.deltaTime);
+            EntityPhysics.Move(_velocity * Time.deltaTime);
 
             _idleDuration -= Time.deltaTime;
 
-            if (_flipping && PhysicsObject.collisionInfo.becameGroundedThisFrame) {
+            if (_flipping && EntityPhysics.collisionInfo.becameGroundedThisFrame) {
                 _flipping = false;
                 _landed = true;
             }
@@ -49,16 +49,6 @@ namespace Spelunky {
 
             JumpTowardsTarget();
         }
-
-        public override bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
-            if (collider.CompareTag("Player")) {
-                collider.GetComponent<Player>().TakeDamage(damage, direction);
-                return true;
-            }
-
-            return false;
-        }
-
 
         private void DetectTargetWhenHanging() {
             if (_targetToMoveTowards) {
@@ -77,19 +67,19 @@ namespace Spelunky {
         }
 
         private void JumpTowardsTarget() {
-            if (PhysicsObject.collisionInfo.becameGroundedThisFrame) {
+            if (EntityPhysics.collisionInfo.becameGroundedThisFrame) {
                 _idleDuration = Random.Range(minJumpWaitTime, maxJumpWaitTime);
             }
 
-            if (PhysicsObject.collisionInfo.up) {
+            if (EntityPhysics.collisionInfo.up) {
                 _velocity.y = 0;
             }
 
-            if (PhysicsObject.collisionInfo.left || PhysicsObject.collisionInfo.right) {
+            if (EntityPhysics.collisionInfo.left || EntityPhysics.collisionInfo.right) {
                 _velocity.x *= -0.25f;
             }
 
-            if (!PhysicsObject.collisionInfo.down) {
+            if (!EntityPhysics.collisionInfo.down) {
                 EntityVisuals.animator.looping = false;
                 if (_velocity.y > 0) {
                     EntityVisuals.animator.Play("Jump", true);

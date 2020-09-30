@@ -1,6 +1,7 @@
 using UnityEngine;
 
 namespace Spelunky {
+    [RequireComponent (typeof (Player))]
     public class PlayerAudio : MonoBehaviour {
 
         public AudioClip jumpClip;

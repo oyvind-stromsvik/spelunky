@@ -31,14 +31,14 @@ namespace Spelunky {
                 player.velocity.y = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.physicsObject.collisionInfo.down && player.physicsObject.collisionInfo.collider.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.velocity.y = 0;
-                player.physicsObject.collisionInfo.fallingThroughPlatform = true;
+                player.Physics.collisionInfo.fallingThroughPlatform = true;
             }
 
             Invoke("ResetFallingThroughPlatform", .1f);
 
-            player.audio.Play(player.audio.jumpClip);
+            player.Audio.Play(player.Audio.jumpClip);
             player.recentlyJumped = true;
             // Increase the grace timer so it's impossible to accidentally double jump.
             // TODO: Can the above variable be used for this purpose?
@@ -66,7 +66,7 @@ namespace Spelunky {
         }
 
         public void ResetFallingThroughPlatform() {
-            player.physicsObject.collisionInfo.fallingThroughPlatform = false;
+            player.Physics.collisionInfo.fallingThroughPlatform = false;
         }
 
         public virtual void ChangePlayerVelocity(ref Vector2 velocity) {

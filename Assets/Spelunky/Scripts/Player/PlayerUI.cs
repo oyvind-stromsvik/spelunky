@@ -32,10 +32,10 @@ namespace Spelunky {
             _totalGoldAmountText = GameObject.Find("TotalGoldAmountText").GetComponent<Text>();
             _currentGoldAmountText = GameObject.Find("CurrentGoldAmountText").GetComponent<Text>();
 
-            _player.health.HealthChanged.AddListener(OnHealthChanged);
-            _player.inventory.BombsChanged.AddListener(OnBombsChanged);
-            _player.inventory.RopesChanged.AddListener(OnRopesChanged);
-            _player.inventory.GoldAmountChanged.AddListener(OnGoldChanged);
+            _player.Health.HealthChangedEvent.AddListener(OnHealthChanged);
+            _player.Inventory.BombsChangedEvent.AddListener(OnBombsChanged);
+            _player.Inventory.RopesChangedEvent.AddListener(OnRopesChanged);
+            _player.Inventory.GoldAmountChangedEvent.AddListener(OnGoldChanged);
         }
 
         private void Update() {
@@ -62,22 +62,22 @@ namespace Spelunky {
         }
 
         private void OnHealthChanged() {
-            _lifeAmountText.text = _player.health.CurrentHealth.ToString();
+            _lifeAmountText.text = _player.Health.CurrentHealth.ToString();
         }
 
         private void OnBombsChanged() {
-            _bombAmountText.text = _player.inventory.numberOfBombs.ToString();
+            _bombAmountText.text = _player.Inventory.numberOfBombs.ToString();
         }
 
         private void OnRopesChanged() {
-            _ropeAmountText.text = _player.inventory.numberOfRopes.ToString();
+            _ropeAmountText.text = _player.Inventory.numberOfRopes.ToString();
         }
 
         private void OnGoldChanged(int amount) {
             _goldAddTimer = 0;
             _intervalTimer = 0;
             _currentGoldAmount += amount;
-            _totalGoldAmount = _player.inventory.goldAmount -_currentGoldAmount;
+            _totalGoldAmount = _player.Inventory.goldAmount -_currentGoldAmount;
             _currentGoldAmountText.text = " +" + _currentGoldAmount;
             _totalGoldAmountText.text = _totalGoldAmount.ToString();
         }

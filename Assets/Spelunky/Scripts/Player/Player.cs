@@ -1,17 +1,17 @@
-using System;
 using UnityEngine;
 
 namespace Spelunky {
 
-	public class Player : MonoBehaviour, IObjectController {
+	[RequireComponent(typeof(EntityPhysics), typeof(EntityHealth), typeof(EntityVisuals))]
+	public class Player : MonoBehaviour {
 
-		[Header("Components")]
-		public PhysicsObject physicsObject;
-		public PlayerInput input;
-		public EntityVisuals graphics;
-		public new PlayerAudio audio;
-		public PlayerInventory inventory;
-		public EntityHealth health;
+		public EntityVisuals Visuals { get; private set; }
+		public EntityPhysics Physics { get; private set; }
+		public EntityHealth Health { get; private set; }
+
+		public PlayerInput Input { get; private set; }
+		public PlayerAudio Audio { get; private set; }
+		public PlayerInventory Inventory { get; private set; }
 
 		[Header("States")]
 		public GroundedState groundedState;
@@ -70,7 +70,16 @@ namespace Spelunky {
 			_maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
 			_minJumpVelocity = Mathf.Sqrt (2 * Mathf.Abs (_gravity) * minJumpHeight);
 
-			health.HealthChanged.AddListener(OnHealthChanged);
+			Visuals  = GetComponent<EntityVisuals>();
+			Physics = GetComponent<EntityPhysics>();
+			Health = GetComponent<EntityHealth>();
+
+			Input = GetComponent<PlayerInput>();
+			Audio = GetComponent<PlayerAudio>();
+			Inventory = GetComponent<PlayerInventory>();
+
+			Health.HealthChangedEvent.AddListener(OnHealthChanged);
+			Physics.OnCollisionEvent.AddListener(OnCollision);
 		}
 
 		private void Start() {
@@ -78,11 +87,11 @@ namespace Spelunky {
 		}
 
 		private void Update() {
-			if (directionalInput.x > 0 && !graphics.isFacingRight) {
-				graphics.FlipCharacter();
+			if (directionalInput.x > 0 && !Visuals.isFacingRight) {
+				Visuals.FlipCharacter();
 			}
-			else if (directionalInput.x < 0 && graphics.isFacingRight) {
-				graphics.FlipCharacter();
+			else if (directionalInput.x < 0 && Visuals.isFacingRight) {
+				Visuals.FlipCharacter();
 			}
 
 			SetPlayerSpeed();
@@ -100,9 +109,9 @@ namespace Spelunky {
 				}
 			}
 
-			physicsObject.Move(velocity * Time.deltaTime);
+			Physics.Move(velocity * Time.deltaTime);
 
-			if (physicsObject.collisionInfo.up || physicsObject.collisionInfo.down) {
+			if (Physics.collisionInfo.up || Physics.collisionInfo.down) {
 				velocity.y = 0;
 			}
 
@@ -136,39 +145,39 @@ namespace Spelunky {
 		}
 
 		public void ThrowBomb() {
-			if (inventory.numberOfBombs <= 0) {
+			if (Inventory.numberOfBombs <= 0) {
 				return;
 			}
 
-			inventory.UseBomb();
+			Inventory.UseBomb();
 
 			Bomb bombInstance = Instantiate(bomb, transform.position + Vector3.up * 2f, Quaternion.identity);
-			Vector2 bombVelocity = new Vector2(256 * graphics.facingDirection, 128);
+			Vector2 bombVelocity = new Vector2(256 * Visuals.facingDirection, 128);
 			if (directionalInput.y == 1) {
-				bombVelocity = new Vector2(128 * graphics.facingDirection, 256);
+				bombVelocity = new Vector2(128 * Visuals.facingDirection, 256);
 			}
 			else if (directionalInput.y == -1) {
-				if (physicsObject.collisionInfo.down) {
-					bombVelocity = new Vector2(64 * graphics.facingDirection, 0);
+				if (Physics.collisionInfo.down) {
+					bombVelocity = new Vector2(64 * Visuals.facingDirection, 0);
 				}
 				else {
-					bombVelocity = new Vector2(128 * graphics.facingDirection, -256);
+					bombVelocity = new Vector2(128 * Visuals.facingDirection, -256);
 				}
 			}
 
-			bombInstance.SetVelocity(bombVelocity);
+			bombInstance.Physics.velocity = bombVelocity;
 		}
 
 		public void ThrowRope() {
-			if (inventory.numberOfRopes <= 0) {
+			if (Inventory.numberOfRopes <= 0) {
 				return;
 			}
 
-			inventory.UseRope();
+			Inventory.UseRope();
 
 			Rope ropeInstance = Instantiate(rope, transform.position, Quaternion.identity);
 			if (stateMachine.CurrentState == groundedState && directionalInput.y < 0) {
-				ropeInstance.placePosition = transform.position + (graphics.facingDirection * Vector3.right * Tile.Width);
+				ropeInstance.placePosition = transform.position + (Visuals.facingDirection * Vector3.right * Tile.Width);
 			}
 		}
 
@@ -193,33 +202,10 @@ namespace Spelunky {
 			stateMachine.AttemptToChangeState(splatState);
 		}
 
-		public bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
-			// One way platform handling.
-			if (collider.CompareTag("OneWayPlatform")) {
-				// Always ignore them if we're colliding horizontally.
-				if (direction == CollisionDirection.Left || direction == CollisionDirection.Right) {
-					return true;
-				}
-
-				// If we're colliding vertically ignore them if we're going up or if we're passing through them.
-				if (direction == CollisionDirection.Up || direction == CollisionDirection.Down) {
-					if (direction == CollisionDirection.Up) {
-						return true;
-					}
-					if (physicsObject.collisionInfo.fallingThroughPlatform) {
-						return true;
-					}
-				}
-			}
-
-			if (collider.CompareTag("Enemy") && direction == CollisionDirection.Down) {
-				collider.GetComponent<Enemy>().EntityHealth.TakeDamage(1);
-			}
-
-			return false;
-		}
-
 		public void OnCollision(CollisionInfo collisionInfo) {
+			if (collisionInfo.collider.CompareTag("Enemy") && collisionInfo.direction == CollisionDirection.Down) {
+				collisionInfo.collider.GetComponent<Enemy>().EntityHealth.TakeDamage(1);
+			}
 		}
 
 		public void TakeDamage(int damage, CollisionDirection direction) {
@@ -228,18 +214,14 @@ namespace Spelunky {
 			}
 
 			GetComponent<EntityHealth>().TakeDamage(damage);
-			velocity = new Vector2(128 * graphics.facingDirection * -1, 64);
+			velocity = new Vector2(128 * Visuals.facingDirection * -1, 64);
 			_stunDuration = 0.5f;
 		}
 
 		private void OnHealthChanged() {
-			if (health.CurrentHealth <= 0) {
+			if (Health.CurrentHealth <= 0) {
 				stateMachine.AttemptToChangeState(splatState);
 			}
-		}
-
-		public void UpdateVelocity(ref Vector2 velocity) {
-
 		}
 	}
 }

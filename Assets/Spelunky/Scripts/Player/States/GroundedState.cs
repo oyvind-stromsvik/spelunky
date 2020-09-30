@@ -8,7 +8,7 @@ namespace Spelunky {
 
         public override void Enter() {
             if (player.stateMachine.PreviousState == player.inAirState) {
-                player.audio.Play(player.audio.landClip);
+                player.Audio.Play(player.Audio.landClip);
             }
         }
 
@@ -26,7 +26,7 @@ namespace Spelunky {
             HandleLookUpDown();
             HandleUnsteady();
 
-            if (!player.physicsObject.collisionInfo.down) {
+            if (!player.Physics.collisionInfo.down) {
                 if (player.directionalInput.y < 0) {
                     player.stateMachine.AttemptToChangeState(player.crawlToHangState);
                     return;
@@ -39,16 +39,16 @@ namespace Spelunky {
             if (player.directionalInput.y > 0) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
-            else if (player.directionalInput.y < 0 && player.physicsObject.collisionInfo.down && player.physicsObject.collisionInfo.collider.CompareTag("OneWayPlatform")) {
+            else if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
 
             blockToPush = null;
-            if (player.directionalInput.x < 0 && player.physicsObject.collisionInfo.left && player.physicsObject.collisionInfo.collider.CompareTag("Block")) {
-                blockToPush = player.physicsObject.collisionInfo.collider.GetComponent<Block>();
+            if (player.directionalInput.x < 0 && player.Physics.collisionInfo.left && player.Physics.collisionInfo.collider.CompareTag("Block")) {
+                blockToPush = player.Physics.collisionInfo.collider.GetComponent<Block>();
             }
-            if (player.directionalInput.x > 0 && player.physicsObject.collisionInfo.right && player.physicsObject.collisionInfo.collider.CompareTag("Block")) {
-                blockToPush = player.physicsObject.collisionInfo.collider.GetComponent<Block>();
+            if (player.directionalInput.x > 0 && player.Physics.collisionInfo.right && player.Physics.collisionInfo.collider.CompareTag("Block")) {
+                blockToPush = player.Physics.collisionInfo.collider.GetComponent<Block>();
             }
 
             if (blockToPush != null) {
@@ -64,32 +64,32 @@ namespace Spelunky {
 
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
-                if (player.physicsObject.collisionInfo.left || player.physicsObject.collisionInfo.right) {
-                    player.graphics.animator.Play("Push");
+                if (player.Physics.collisionInfo.left || player.Physics.collisionInfo.right) {
+                    player.Visuals.animator.Play("Push");
                 }
                 else if (player.directionalInput.y < 0) {
-                    player.graphics.animator.Play("Crawl");
+                    player.Visuals.animator.Play("Crawl");
                 }
                 else {
-                    player.graphics.animator.Play("Run");
+                    player.Visuals.animator.Play("Run");
                 }
 
                 if (player.directionalInput.y < 0) {
-                    player.graphics.animator.fps = 12;
+                    player.Visuals.animator.fps = 12;
                 }
                 else if (player.sprinting) {
-                    player.graphics.animator.fps = 18;
+                    player.Visuals.animator.fps = 18;
                 }
                 else {
-                    player.graphics.animator.fps = 12;
+                    player.Visuals.animator.fps = 12;
                 }
             }
             else {
                 if (player.directionalInput.y < 0) {
-                    player.graphics.animator.Play("Duck");
+                    player.Visuals.animator.Play("Duck");
                 }
                 else {
-                    player.graphics.animator.Play("Idle");
+                    player.Visuals.animator.Play("Idle");
                 }
             }
         }
@@ -102,7 +102,7 @@ namespace Spelunky {
             if (player.directionalInput.y != 0) {
                 player._lookTimer += Time.deltaTime;
                 if (player.directionalInput.y > 0) {
-                    player.graphics.animator.Play("LookUp");
+                    player.Visuals.animator.Play("LookUp");
                 }
                 if (player._lookTimer > player._timeBeforeLook) {
                     float offset = Mathf.Lerp(0, 64f * Mathf.Sign(player.directionalInput.y), Time.deltaTime * 128);
@@ -116,17 +116,17 @@ namespace Spelunky {
         }
 
         private void HandleUnsteady() {
-            RaycastHit2D hitCenter = Physics2D.Raycast(player.transform.position + Vector3.up, Vector2.down, 2, player.physicsObject.collisionMask);
+            RaycastHit2D hitCenter = Physics2D.Raycast(player.transform.position + Vector3.up, Vector2.down, 2, player.Physics.collisionMask);
             Debug.DrawRay(player.transform.position + Vector3.up, Vector2.down * 2, Color.magenta);
 
-            Vector3 offsetForward = new Vector3(player.physicsObject.Collider.size.x * player.graphics.facingDirection / 2f, 1, 0);
-            RaycastHit2D hitForward = Physics2D.Raycast(player.transform.position + offsetForward, Vector2.down, 2, player.physicsObject.collisionMask);
+            Vector3 offsetForward = new Vector3(player.Physics.Collider.size.x * player.Visuals.facingDirection / 2f, 1, 0);
+            RaycastHit2D hitForward = Physics2D.Raycast(player.transform.position + offsetForward, Vector2.down, 2, player.Physics.collisionMask);
             Debug.DrawRay(player.transform.position + offsetForward, Vector2.down * 2, Color.green);
 
             // Play unsteady animation
-            if (player.physicsObject.collisionInfo.down && hitCenter.collider == null && hitForward.collider == null) {
+            if (player.Physics.collisionInfo.down && hitCenter.collider == null && hitForward.collider == null) {
                 if (player.directionalInput.y >= 0) {
-                    player.graphics.animator.Play("Unsteady");
+                    player.Visuals.animator.Play("Unsteady");
                 }
             }
         }

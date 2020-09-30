@@ -9,9 +9,9 @@ namespace Spelunky {
     [RequireComponent (typeof (Player))]
     public class PlayerInventory : MonoBehaviour {
 
-        public UnityEvent BombsChanged { get; private set; } = new UnityEvent();
-        public UnityEvent RopesChanged { get; private set; } = new UnityEvent();
-        public UnityIntEvent GoldAmountChanged { get; private set; } = new UnityIntEvent();
+        public UnityEvent BombsChangedEvent { get; private set; } = new UnityEvent();
+        public UnityEvent RopesChangedEvent { get; private set; } = new UnityEvent();
+        public UnityIntEvent GoldAmountChangedEvent { get; private set; } = new UnityIntEvent();
 
         public int numberOfBombs;
         public int numberOfRopes;
@@ -20,8 +20,6 @@ namespace Spelunky {
         public bool hasClimbingGlove;
         public bool hasSpringBoots;
         public bool hasPitchersMitt;
-
-        public Item[] items;
 
         private Player _player;
 
@@ -34,38 +32,34 @@ namespace Spelunky {
         private void Start () {
             _player = GetComponent<Player>();
 
-            BombsChanged?.Invoke();
-            RopesChanged?.Invoke();
-            GoldAmountChanged?.Invoke(0);
-        }
-
-        public void PickupItem(Item item) {
-
+            BombsChangedEvent?.Invoke();
+            RopesChangedEvent?.Invoke();
+            GoldAmountChangedEvent?.Invoke(0);
         }
 
         public void UseBomb() {
             numberOfBombs--;
-            BombsChanged?.Invoke();
+            BombsChangedEvent?.Invoke();
         }
 
         public void UseRope() {
             numberOfRopes--;
-            RopesChanged?.Invoke();
+            RopesChangedEvent?.Invoke();
         }
 
         public void PickupBombs(int amount) {
             numberOfBombs += amount;
-            BombsChanged?.Invoke();
+            BombsChangedEvent?.Invoke();
         }
 
         public void PickupRopes(int amount) {
             numberOfRopes += amount;
-            RopesChanged?.Invoke();
+            RopesChangedEvent?.Invoke();
         }
 
         public void PickupGold(int amount) {
             goldAmount += amount;
-            GoldAmountChanged?.Invoke(amount);
+            GoldAmountChangedEvent?.Invoke(amount);
         }
     }
 }

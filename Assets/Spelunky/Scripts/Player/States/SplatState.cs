@@ -6,11 +6,11 @@ namespace Spelunky {
         public AudioClip splatClip;
 
         public override void Enter() {
-            player.graphics.animator.looping = false;
-            player.graphics.animator.fps = 36;
-            player.graphics.animator.Play("Splat", true);
-            player.audio.Play(splatClip);
-            player.physicsObject.Collider.enabled = false;
+            player.Visuals.animator.looping = false;
+            player.Visuals.animator.fps = 36;
+            player.Visuals.animator.Play("Splat", true);
+            player.Audio.Play(splatClip);
+            player.Physics.Collider.enabled = false;
         }
 
         public override bool LockInput() {

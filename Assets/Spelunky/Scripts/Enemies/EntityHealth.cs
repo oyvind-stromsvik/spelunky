@@ -1,11 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace Spelunky {
     public class EntityHealth : MonoBehaviour {
 
-        public UnityEvent HealthChanged { get; private set; } = new UnityEvent();
+        public UnityEvent HealthChangedEvent { get; private set; } = new UnityEvent();
 
         public float invulnerabilityDuration;
         private float _invulnerabilityTimer;
@@ -39,14 +38,14 @@ namespace Spelunky {
             if (CurrentHealth < 0) {
                 CurrentHealth = 0;
             }
-            HealthChanged?.Invoke();
+            HealthChangedEvent?.Invoke();
 
             _invulnerabilityTimer = 0f;
         }
 
         public void SetHealth(int value) {
             CurrentHealth = value;
-            HealthChanged?.Invoke();
+            HealthChangedEvent?.Invoke();
         }
     }
 }
