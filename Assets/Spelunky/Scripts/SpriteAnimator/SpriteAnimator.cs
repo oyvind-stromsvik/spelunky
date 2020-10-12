@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
@@ -21,25 +22,24 @@ namespace Spelunky {
         [HideInInspector]
         public int currentFrame;
 
-        // The default sprite is the one we've assigned to the sprite renderer.
-        // Store it here so we can put it back later if we need to. We'll lose the
-        // one on the sprite renderer when we play an animation.
-        [HideInInspector]
-        public Sprite defaultSprite;
-
         [HideInInspector]
         public SpriteAnimation currentAnimation;
 
         private SpriteRenderer _spriteRenderer;
         private float _timer;
 
+        private bool _playOnceUninterrupted;
+
         private void Awake() {
             _spriteRenderer = GetComponent<SpriteRenderer>();
-            defaultSprite = _spriteRenderer.sprite;
             currentAnimation = animations[0];
         }
 
         private void Update() {
+            if (_playOnceUninterrupted) {
+                return;
+            }
+
             // Don't do anything if there is no animation assigned.
             if (currentAnimation == null) {
                 return;
@@ -60,16 +60,14 @@ namespace Spelunky {
             // This is a really clever way of handling looping.
             // Taken from GameMaker, and inspired by Daniel Linssen's code.
             currentFrame %= currentAnimation.frames.Length;
+            _spriteRenderer.sprite = currentAnimation.frames[currentFrame];
 
-            // If the framerate is zero don't calculate the next frame, just keep
-            // returning the current frame. We can change the current frame
-            // from outside this script and animate the sprite this way as well.
+            // If the framerate is zero don't calculate the next frame.
+            // We can change the current frame from outside this script
+            // and animate the sprite this way as well.
             if (fps == 0) {
-                _spriteRenderer.sprite = currentAnimation.frames[currentFrame];
                 return;
             }
-
-            _spriteRenderer.sprite = currentAnimation.frames[currentFrame];
 
             _timer += Time.deltaTime;
             if (_timer >= (1f / fps)) {
@@ -105,6 +103,39 @@ namespace Spelunky {
             }
         }
 
+        public void PlayOnceUninterrupted(string playOnceName, int playOnceFps) {
+            StartCoroutine(DoPlayOnceUninterrupted(playOnceName, playOnceFps));
+        }
+
+        private IEnumerator DoPlayOnceUninterrupted(string playOnceName, int playOnceFps) {
+            _playOnceUninterrupted = true;
+
+            SpriteAnimation playOnceAnimation = null;
+            int playOnceCurrentFrame = 0;
+
+            foreach (SpriteAnimation animation in animations) {
+                if (animation.name == playOnceName) {
+                    playOnceAnimation = animation;
+                    playOnceCurrentFrame = 0;
+                    _spriteRenderer.sprite = playOnceAnimation.frames[playOnceCurrentFrame];
+                    break;
+                }
+            }
+
+            float t = 0;
+            while (playOnceCurrentFrame < playOnceAnimation.frames.Length) {
+                _spriteRenderer.sprite = playOnceAnimation.frames[playOnceCurrentFrame];
+                t += Time.deltaTime;
+                if (t >= (1f / playOnceFps)) {
+                    t = 0;
+                    playOnceCurrentFrame++;
+                }
+                yield return null;
+            }
+
+            _playOnceUninterrupted = false;
+        }
+
         /// <summary>
         /// Returns the length of the animation in seconds.
         /// </summary>
@@ -119,6 +150,26 @@ namespace Spelunky {
             foreach (SpriteAnimation animation in animations) {
                 if (animation.name == name) {
                     return animation.frames.Length * (1f / fps);
+                }
+            }
+
+            throw new NullReferenceException();
+        }
+
+        /// <summary>
+        /// Returns the length of the animation in seconds.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public float GetAnimationLength(string name, int fpsToCheckWith) {
+            if (currentAnimation != null && currentAnimation.name == name) {
+                return currentAnimation.frames.Length * (1f / fpsToCheckWith);
+            }
+
+            foreach (SpriteAnimation animation in animations) {
+                if (animation.name == name) {
+                    return animation.frames.Length * (1f / fpsToCheckWith);
                 }
             }
 

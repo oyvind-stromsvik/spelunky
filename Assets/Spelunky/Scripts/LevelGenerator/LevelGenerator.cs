@@ -333,6 +333,8 @@ namespace Spelunky {
             boundsCornerBottomRight.transform.localRotation = Quaternion.Euler(0, 0, 0);
             SpriteRenderer boundsCornerBottomLeft = Instantiate(boundsCorner, new Vector3(-48, 0, 0), Quaternion.identity, _boundsParent);
             boundsCornerBottomLeft.transform.localRotation = Quaternion.Euler(0, 0, -90);
+
+            // Fill the rest. 2 layers of just corners outside the inner "frame".
         }
 
         /// <summary>

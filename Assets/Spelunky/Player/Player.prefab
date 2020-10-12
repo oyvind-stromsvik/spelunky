@@ -116,11 +116,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4842f8cfb4fab41408f4b7a0269613af, type: 2}
   - {fileID: 11400000, guid: 912972867ad001e4cb7272c87d737942, type: 2}
   - {fileID: 11400000, guid: f4465a8976e868043b35daff13bb2bbc, type: 2}
+  - {fileID: 11400000, guid: 6f2e9122c9d389e43b06752c069b3209, type: 2}
   looping: 1
   showBlankFrameAfterNonLoopingAnimation: 0
   fps: 12
   currentFrame: 0
-  defaultSprite: {fileID: 0}
   currentAnimation: {fileID: 0}
 --- !u!1 &1611851042852994
 GameObject:
@@ -168,6 +168,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 782368877}
+  - {fileID: 8558270721840197621}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -327,12 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f1317bcb3ab44f3b9c7892dcd80bfe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entityPhysics: {fileID: 8645646398547493291}
-  input: {fileID: 8124188979697528624}
-  graphics: {fileID: -5236971530926676888}
-  audio: {fileID: -1833860461211926048}
-  inventory: {fileID: -8564109920999896957}
-  health: {fileID: -3525105093392211172}
+  whipCollider: {fileID: 3122557621806279139}
   groundedState: {fileID: -138630158166356528}
   inAirState: {fileID: -3839825326305256150}
   hangingState: {fileID: 7725953637132137021}
@@ -351,8 +347,8 @@ MonoBehaviour:
   timeToJumpApex: 0.3
   accelerationTime: 0.05
   climbSpeed: 32
-  crawlSpeed: 32
-  runSpeed: 64
+  crawlSpeed: 24
+  runSpeed: 48
   sprintSpeed: 96
   sprinting: 0
   groundedGracePeriod: 0.05
@@ -380,6 +376,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useFixedUpdate: 0
+  useGravity: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 176384
@@ -387,6 +384,7 @@ MonoBehaviour:
   horizontalRayCount: 4
   verticalRayCount: 3
   raycastsHitTriggers: 0
+  velocity: {x: 0, y: 0}
 --- !u!114 &8124188979697528624
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -431,6 +429,7 @@ MonoBehaviour:
   jumpClip: {fileID: 8300000, guid: 5a8604908953fe24ba06941ee380dac3, type: 3}
   landClip: {fileID: 8300000, guid: a3d8cc96a3a736b408a9d79d3f2080e0, type: 3}
   grabClip: {fileID: 8300000, guid: c77225a8b60441a4db0d1bcaca402cde, type: 3}
+  whipClip: {fileID: 8300000, guid: d841ef127a7e4884a87824b6fa097082, type: 3}
 --- !u!114 &-8564109920999896957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -449,7 +448,6 @@ MonoBehaviour:
   hasClimbingGlove: 0
   hasSpringBoots: 0
   hasPitchersMitt: 0
-  items: []
 --- !u!114 &-5101200405057694549
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -592,3 +590,74 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   invulnerabilityDuration: 1
   maxHealth: 4
+--- !u!1 &390950007307755326
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8558270721840197621}
+  - component: {fileID: 3122557621806279139}
+  - component: {fileID: 7559943637196607543}
+  m_Layer: 9
+  m_Name: WhipCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8558270721840197621
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390950007307755326}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4163819210205938}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &3122557621806279139
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390950007307755326}
+  m_Enabled: 0
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -3, y: 10}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 42, y: 20}
+  m_EdgeRadius: 0
+--- !u!114 &7559943637196607543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390950007307755326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1fb1145e51a497cb3417eb4fdbb6814, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 1

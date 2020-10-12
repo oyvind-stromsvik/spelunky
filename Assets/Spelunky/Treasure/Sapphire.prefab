@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95a18b829aaefdc44ae4a8e891221d83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pickUpSound: {fileID: 8300000, guid: fbe719dd32b4a254baa847e66007623a, type: 3}
   value: 2000
 --- !u!61 &9047466231147650945
 BoxCollider2D:
@@ -86,6 +87,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useFixedUpdate: 0
+  useGravity: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -93,6 +95,7 @@ MonoBehaviour:
   horizontalRayCount: 3
   verticalRayCount: 3
   raycastsHitTriggers: 0
+  velocity: {x: 0, y: 0}
 --- !u!1 &6303742950289801370
 GameObject:
   m_ObjectHideFlags: 0

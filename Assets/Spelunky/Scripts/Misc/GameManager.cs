@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    public class GameManager : MonoBehaviour {
+    public class GameManager : Singleton<GameManager> {
 
         public Player player;
         public CameraFollow playerCamera;
