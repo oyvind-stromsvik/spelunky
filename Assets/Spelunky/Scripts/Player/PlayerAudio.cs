@@ -3,7 +3,6 @@ using UnityEngine;
 namespace Spelunky {
 
     public class PlayerAudio : MonoBehaviour {
-
         public AudioClip jumpClip;
         public AudioClip landClip;
         public AudioClip grabClip;
@@ -19,4 +18,5 @@ namespace Spelunky {
             _audioSource.PlayOneShot(clip, volume);
         }
     }
+
 }

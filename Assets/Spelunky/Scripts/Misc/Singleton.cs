@@ -1,13 +1,10 @@
 using UnityEngine;
 
 public class Singleton<T> : MonoBehaviour where T : Component {
-
-    static T instance;
+    private static T instance;
 
     public static T Instance {
-        get {
-            return instance;
-        }
+        get { return instance; }
     }
 
     public virtual void Awake() {

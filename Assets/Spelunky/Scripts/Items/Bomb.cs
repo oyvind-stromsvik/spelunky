@@ -2,7 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
-    [RequireComponent (typeof (EntityPhysics))]
+
+    [RequireComponent(typeof(EntityPhysics))]
     public class Bomb : MonoBehaviour {
 
         public EntityPhysics Physics { get; private set; }
@@ -65,6 +66,7 @@ namespace Spelunky {
                 if (Mathf.Abs(Physics.velocity.x) > BounceSoundVelocityThreshold) {
                     playSound = true;
                 }
+
                 Physics.velocity.x *= -1f;
             }
 
@@ -72,6 +74,7 @@ namespace Spelunky {
                 if (Mathf.Abs(Physics.velocity.y) > BounceSoundVelocityThreshold) {
                     playSound = true;
                 }
+
                 Physics.velocity.y *= -1f;
             }
 
@@ -82,4 +85,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

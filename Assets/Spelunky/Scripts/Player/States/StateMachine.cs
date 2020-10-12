@@ -1,6 +1,6 @@
 namespace Spelunky {
-    public class StateMachine {
 
+    public class StateMachine {
         public State CurrentState { get; private set; }
         public State PreviousState { get; private set; }
 
@@ -24,4 +24,5 @@ namespace Spelunky {
             CurrentState.Enter();
         }
     }
+
 }

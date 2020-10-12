@@ -4,8 +4,8 @@ using UnityEngine;
 // TODO: This is actually a transition between grounded and hanging.
 //   Figure out a way how to solve this more elegantly?
 namespace Spelunky {
-    public class CrawlToHangState : State {
 
+    public class CrawlToHangState : State {
         public override void Enter() {
             StartCoroutine(CrawlToHang());
         }
@@ -29,4 +29,5 @@ namespace Spelunky {
             velocity = Vector2.zero;
         }
     }
+
 }

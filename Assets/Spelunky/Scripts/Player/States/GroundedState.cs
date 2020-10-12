@@ -1,8 +1,8 @@
 using UnityEngine;
 
 namespace Spelunky {
-    public class GroundedState : State {
 
+    public class GroundedState : State {
         public Block blockToPush;
         private Block _lastBlockPushed;
 
@@ -47,6 +47,7 @@ namespace Spelunky {
             if (player.directionalInput.x < 0 && player.Physics.collisionInfo.left && player.Physics.collisionInfo.collider.CompareTag("Block")) {
                 blockToPush = player.Physics.collisionInfo.collider.GetComponent<Block>();
             }
+
             if (player.directionalInput.x > 0 && player.Physics.collisionInfo.right && player.Physics.collisionInfo.collider.CompareTag("Block")) {
                 blockToPush = player.Physics.collisionInfo.collider.GetComponent<Block>();
             }
@@ -104,6 +105,7 @@ namespace Spelunky {
                 if (player.directionalInput.y > 0) {
                     player.Visuals.animator.Play("LookUp");
                 }
+
                 if (player._lookTimer > player._timeBeforeLook) {
                     float offset = Mathf.Lerp(0, 64f * Mathf.Sign(player.directionalInput.y), Time.deltaTime * 128);
                     player.cam.SetVerticalOffset(offset);
@@ -131,4 +133,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

@@ -1,9 +1,9 @@
 using UnityEngine;
 
 namespace Spelunky {
-    [RequireComponent (typeof (Player))]
-    public abstract class State : MonoBehaviour {
 
+    [RequireComponent(typeof(Player))]
+    public abstract class State : MonoBehaviour {
         [HideInInspector] public Player player;
 
         public virtual void Awake() {
@@ -80,4 +80,5 @@ namespace Spelunky {
             return false;
         }
     }
+
 }

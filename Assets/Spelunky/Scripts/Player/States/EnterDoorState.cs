@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Spelunky {
+
     /// <summary>
     /// The state we're in when we're entering a door (exiting a level).
     /// </summary>
     public class EnterDoorState : State {
-
         public AudioClip enterDoorClip;
 
         public override bool CanEnter() {
@@ -47,4 +47,5 @@ namespace Spelunky {
             return true;
         }
     }
+
 }

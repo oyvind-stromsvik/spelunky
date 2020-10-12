@@ -1,4 +1,5 @@
 namespace Spelunky {
+
     public enum CollisionDirection {
         None,
         Up,
@@ -6,4 +7,5 @@ namespace Spelunky {
         Down,
         Left
     }
+
 }

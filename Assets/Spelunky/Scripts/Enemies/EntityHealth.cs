@@ -2,8 +2,8 @@
 using UnityEngine.Events;
 
 namespace Spelunky {
-    public class EntityHealth : MonoBehaviour {
 
+    public class EntityHealth : MonoBehaviour {
         public UnityEvent HealthChangedEvent { get; private set; } = new UnityEvent();
 
         public float invulnerabilityDuration;
@@ -13,7 +13,7 @@ namespace Spelunky {
         public int CurrentHealth { get; private set; }
 
         public bool IsInvulernable {
-            get { return _invulnerabilityTimer <= invulnerabilityDuration;  }
+            get { return _invulnerabilityTimer <= invulnerabilityDuration; }
         }
 
         private void Reset() {
@@ -38,6 +38,7 @@ namespace Spelunky {
             if (CurrentHealth < 0) {
                 CurrentHealth = 0;
             }
+
             HealthChangedEvent?.Invoke();
 
             _invulnerabilityTimer = 0f;
@@ -48,4 +49,5 @@ namespace Spelunky {
             HealthChangedEvent?.Invoke();
         }
     }
+
 }

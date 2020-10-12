@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    public class Bat : Enemy
-    {
+
+    public class Bat : Enemy {
         public float moveSpeed;
         public int damage;
 
@@ -42,4 +42,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

@@ -2,12 +2,15 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 public class AudioManager : Singleton<AudioManager> {
-
     public AudioMixerGroup sfxGroup;
     public AudioMixerGroup ambientGroup;
     public AudioMixerGroup musicGroup;
 
-    public enum AudioGroup { SFX, Ambient, Music };
+    public enum AudioGroup {
+        SFX,
+        Ambient,
+        Music
+    };
 
     private const float defaultMinDistance = 5f;
     private const float defaultMaxDistance = 50f;
@@ -55,7 +58,7 @@ public class AudioManager : Singleton<AudioManager> {
         Destroy(go, clip.length);
     }
 
-    void ApplyAudioSourceSettings(AudioSource source, AudioGroup group, float pitch = 1f, float minDistance = defaultMinDistance, float maxDistance = defaultMaxDistance, bool loop = looping) {
+    private void ApplyAudioSourceSettings(AudioSource source, AudioGroup group, float pitch = 1f, float minDistance = defaultMinDistance, float maxDistance = defaultMaxDistance, bool loop = looping) {
         source.pitch = pitch;
         source.dopplerLevel = 0;
         source.minDistance = minDistance;

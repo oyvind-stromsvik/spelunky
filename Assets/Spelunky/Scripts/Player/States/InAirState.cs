@@ -1,8 +1,8 @@
 using UnityEngine;
 
 namespace Spelunky {
-    public class InAirState : State {
 
+    public class InAirState : State {
         [HideInInspector] public RaycastHit2D lastEdgeGrabRayCastHit;
 
         public override void OnDirectionalInput(Vector2 input) {
@@ -73,6 +73,6 @@ namespace Spelunky {
         private void TryToClimb() {
             player.stateMachine.AttemptToChangeState(player.climbingState);
         }
-
     }
+
 }

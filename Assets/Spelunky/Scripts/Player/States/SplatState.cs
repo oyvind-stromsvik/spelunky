@@ -1,8 +1,8 @@
 using UnityEngine;
 
 namespace Spelunky {
-    public class SplatState : State {
 
+    public class SplatState : State {
         public AudioClip splatClip;
 
         public override void Enter() {
@@ -17,4 +17,5 @@ namespace Spelunky {
             return true;
         }
     }
+
 }

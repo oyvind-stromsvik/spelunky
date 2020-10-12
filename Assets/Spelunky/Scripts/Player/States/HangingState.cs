@@ -1,8 +1,8 @@
 using UnityEngine;
 
 namespace Spelunky {
-    public class HangingState : State {
 
+    public class HangingState : State {
         public bool grabbedWallUsingGlove;
         public Collider2D colliderToHangFrom;
 
@@ -51,6 +51,7 @@ namespace Spelunky {
                 if (player.directionalInput.y > 0) {
                     player.Visuals.animator.Play("HangLookUp");
                 }
+
                 if (player._lookTimer > player._timeBeforeLook) {
                     float offset = Mathf.Lerp(0, 64f * Mathf.Sign(player.directionalInput.y), Time.deltaTime * 128);
                     player.cam.SetVerticalOffset(offset);
@@ -77,4 +78,5 @@ namespace Spelunky {
             player.stateMachine.AttemptToChangeState(player.inAirState);
         }
     }
+
 }

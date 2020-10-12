@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spelunky {
+
     /// <summary>
     /// The state we're in when we're climbing a ladder or a rope.
     /// </summary>
     public class ClimbingState : State {
-
         public ContactFilter2D ladderFilter;
         public LayerMask ladderLayerMask;
 
@@ -16,12 +16,15 @@ namespace Spelunky {
             if (player.directionalInput.y == 0) {
                 return false;
             }
+
             if (Mathf.Abs(player.directionalInput.y) < Mathf.Abs(player.directionalInput.x)) {
                 return false;
             }
+
             if (player.recentlyJumped) {
                 return false;
             }
+
             // Find any nearby ladder colliders.
             _closestCollider = FindClosestOverlappedLadder();
             if (_closestCollider == null) {
@@ -53,8 +56,8 @@ namespace Spelunky {
         }
 
         private void Update() {
-            if (player.directionalInput.y != 0) {
-                // Set the framerate of the climbing animation dynamically based on our climbing speed.
+            if (player.directionalInput.y != 0) // Set the framerate of the climbing animation dynamically based on our climbing speed.
+            {
                 player.Visuals.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
             }
             else {
@@ -93,6 +96,7 @@ namespace Spelunky {
             if (player.directionalInput.y > 0) {
                 direction = Vector2.up;
             }
+
             RaycastHit2D hit = Physics2D.Raycast(position, direction, 9, ladderLayerMask);
             Debug.DrawRay(position, direction * 9, Color.magenta);
             if (hit.collider == null) {
@@ -121,6 +125,7 @@ namespace Spelunky {
                 if (ladderCollider.CompareTag("Ladder")) {
                     xPos += Tile.Width / 2f;
                 }
+
                 float currentDistance = Mathf.Abs(transform.position.x - xPos);
                 if (currentDistance < closestDistance) {
                     closestDistance = currentDistance;
@@ -137,6 +142,6 @@ namespace Spelunky {
 
             return closestCollider;
         }
-
     }
+
 }
