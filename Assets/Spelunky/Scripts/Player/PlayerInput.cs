@@ -41,6 +41,10 @@ namespace Spelunky {
             if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Joystick1Button5)) {
                 _player.stateMachine.CurrentState.OnUseInputDown();
             }
+
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.Joystick1Button2)) {
+                _player.stateMachine.CurrentState.OnAttackInputDown();
+            }
         }
     }
 }

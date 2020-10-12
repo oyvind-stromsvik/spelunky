@@ -65,6 +65,10 @@ namespace Spelunky {
             player.Use();
         }
 
+        public virtual void OnAttackInputDown() {
+            player.Attack();
+        }
+
         public void ResetFallingThroughPlatform() {
             player.Physics.collisionInfo.fallingThroughPlatform = false;
         }

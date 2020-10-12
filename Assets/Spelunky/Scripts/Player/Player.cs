@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
@@ -12,6 +13,8 @@ namespace Spelunky {
 		public PlayerInput Input { get; private set; }
 		public PlayerAudio Audio { get; private set; }
 		public PlayerInventory Inventory { get; private set; }
+
+		public Collider2D whipCollider;
 
 		[Header("States")]
 		public GroundedState groundedState;
@@ -187,6 +190,29 @@ namespace Spelunky {
 			}
 
 			stateMachine.AttemptToChangeState(enterDoorState);
+		}
+
+		private bool _isAttacking;
+
+		public void Attack() {
+			if (_isAttacking) {
+				return;
+			}
+
+			StartCoroutine(DoAttack());
+		}
+
+		private IEnumerator DoAttack() {
+			_isAttacking = true;
+			whipCollider.enabled = true;
+
+			Visuals.animator.PlayOnceUninterrupted("AttackWithWhip", 24);
+			Audio.Play(Audio.whipClip, 0.7f);
+
+			yield return new WaitForSeconds(Visuals.animator.GetAnimationLength("AttackWithWhip", 24));
+
+			_isAttacking = false;
+			whipCollider.enabled = false;
 		}
 
 		public Exit _exitDoor;

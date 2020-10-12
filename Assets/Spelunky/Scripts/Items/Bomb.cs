@@ -48,7 +48,12 @@ namespace Spelunky {
             Explode();
         }
 
-        public void Explode() {
+        public void Explode(float delay = 0f) {
+            StartCoroutine(DoExplode(delay));
+        }
+
+        private IEnumerator DoExplode(float delay = 0f) {
+            yield return new WaitForSeconds(delay);
             Instantiate(explosion, transform.position + new Vector3(0, 4, 0), Quaternion.identity);
             Destroy(gameObject);
         }
