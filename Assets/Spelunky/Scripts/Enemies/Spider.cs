@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    public class Spider : Enemy {
 
+    public class Spider : Enemy {
         public float minJumpWaitTime;
         public float maxJumpWaitTime;
         public Vector2 jumpVelocity;
@@ -103,6 +103,6 @@ namespace Spelunky {
             float sign = Mathf.Sign(_targetToMoveTowards.position.x - transform.position.x);
             _velocity = new Vector2(jumpVelocity.x * sign, jumpVelocity.y);
         }
-
     }
+
 }

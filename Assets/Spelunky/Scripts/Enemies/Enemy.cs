@@ -4,7 +4,6 @@ namespace Spelunky {
 
     [RequireComponent(typeof(EntityPhysics), typeof(EntityHealth), typeof(EntityVisuals))]
     public class Enemy : MonoBehaviour {
-
         public GameObject bloodParticles;
 
         public EntityPhysics EntityPhysics { get; private set; }
@@ -30,4 +29,5 @@ namespace Spelunky {
             Destroy(gameObject);
         }
     }
+
 }

@@ -1,11 +1,14 @@
 using UnityEngine;
 
 namespace Spelunky {
+
     public struct CollisionInfo {
         public bool up;
         public bool down;
         public bool left;
+
         public bool right;
+
         // The collider we're colliding with. We can potentially collide with multiple colliders at once
         // on multiple different sides at once, but I don't think that's ever relevant? I guess we'll see.
         public CollisionDirection direction;
@@ -28,4 +31,5 @@ namespace Spelunky {
             collidedThisFrame = true;
         }
     }
+
 }

@@ -4,9 +4,8 @@ using UnityEngine.UI;
 
 namespace Spelunky {
 
-    [RequireComponent (typeof (Player))]
+    [RequireComponent(typeof(Player))]
     public class PlayerUI : MonoBehaviour {
-
         private Player _player;
         private Text _lifeAmountText;
         private Text _bombAmountText;
@@ -23,8 +22,7 @@ namespace Spelunky {
         public float goldIntervalTime;
         private float _intervalTimer;
 
-
-        private void Awake () {
+        private void Awake() {
             _player = GetComponent<Player>();
             _lifeAmountText = GameObject.Find("LifeAmountText").GetComponent<Text>();
             _bombAmountText = GameObject.Find("BombAmountText").GetComponent<Text>();
@@ -77,7 +75,7 @@ namespace Spelunky {
             _goldAddTimer = 0;
             _intervalTimer = 0;
             _currentGoldAmount += amount;
-            _totalGoldAmount = _player.Inventory.goldAmount -_currentGoldAmount;
+            _totalGoldAmount = _player.Inventory.goldAmount - _currentGoldAmount;
             _currentGoldAmountText.text = " +" + _currentGoldAmount;
             _totalGoldAmountText.text = _totalGoldAmount.ToString();
         }
@@ -90,4 +88,5 @@ namespace Spelunky {
             _totalGoldAmountText.text = _totalGoldAmount.ToString();
         }
     }
+
 }

@@ -4,12 +4,12 @@ using UnityEngine.Events;
 
 namespace Spelunky {
 
-    [System.Serializable]
-    public class UnityCollisionInfoEvent : UnityEvent<CollisionInfo> { }
+    [Serializable]
+    public class UnityCollisionInfoEvent : UnityEvent<CollisionInfo> {
+    }
 
     [RequireComponent(typeof(BoxCollider2D))]
     public class EntityPhysics : MonoBehaviour {
-
         public UnityCollisionInfoEvent OnCollisionEvent { get; private set; } = new UnityCollisionInfoEvent();
 
         private struct RaycastOrigins {
@@ -91,6 +91,7 @@ namespace Spelunky {
             if (!collisionInfo.wasGroundedLastFrame && collisionInfo.down) {
                 collisionInfo.becameGroundedThisFrame = true;
             }
+
             collisionInfo.collidedThisFrame = collisionInfo.down || collisionInfo.right || collisionInfo.left || collisionInfo.up;
 
             if (collisionInfo.collidedThisFrame) {
@@ -108,7 +109,7 @@ namespace Spelunky {
             }
 
             for (int i = 0; i < horizontalRayCount; i++) {
-                Vector2 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
+                Vector2 rayOrigin = directionX == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
                 rayOrigin += Vector2.up * (_horizontalRaySpacing * i);
                 int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.right * directionX, _raycastHits, rayLength, collisionMask);
                 Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
@@ -138,7 +139,7 @@ namespace Spelunky {
             float rayLength = Mathf.Abs(moveDelta.y) + skinWidth;
 
             for (int i = 0; i < verticalRayCount; i++) {
-                Vector2 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
+                Vector2 rayOrigin = directionY == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
                 rayOrigin += Vector2.right * (_verticalRaySpacing * i + moveDelta.x);
                 int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up * directionY, _raycastHits, rayLength, collisionMask);
                 Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
@@ -184,6 +185,7 @@ namespace Spelunky {
                     if (direction == CollisionDirection.Up) {
                         return true;
                     }
+
                     if (collisionInfo.fallingThroughPlatform) {
                         return true;
                     }
@@ -210,4 +212,5 @@ namespace Spelunky {
             _verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
         }
     }
+
 }

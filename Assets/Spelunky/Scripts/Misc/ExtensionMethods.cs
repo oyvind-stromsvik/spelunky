@@ -2,8 +2,8 @@ using UnityEngine;
 
 // TODO: Create a github UPM package from this so I can share it between my projects.
 namespace Spelunky {
-    public static class ExtensionMethods {
 
+    public static class ExtensionMethods {
         /// <summary>
         /// Reset a transform the same way you can in the inspector.
         /// </summary>
@@ -27,4 +27,5 @@ namespace Spelunky {
             return b1 + (value - a1) * (b2 - b1) / (a2 - a1);
         }
     }
+
 }

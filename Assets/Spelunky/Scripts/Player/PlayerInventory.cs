@@ -4,11 +4,11 @@ using UnityEngine.Events;
 namespace Spelunky {
 
     [System.Serializable]
-    public class UnityIntEvent : UnityEvent<int> { }
+    public class UnityIntEvent : UnityEvent<int> {
+    }
 
-    [RequireComponent (typeof (Player))]
+    [RequireComponent(typeof(Player))]
     public class PlayerInventory : MonoBehaviour {
-
         public UnityEvent BombsChangedEvent { get; private set; } = new UnityEvent();
         public UnityEvent RopesChangedEvent { get; private set; } = new UnityEvent();
         public UnityIntEvent GoldAmountChangedEvent { get; private set; } = new UnityIntEvent();
@@ -29,7 +29,7 @@ namespace Spelunky {
             goldAmount = 0;
         }
 
-        private void Start () {
+        private void Start() {
             _player = GetComponent<Player>();
 
             BombsChangedEvent?.Invoke();
@@ -62,4 +62,5 @@ namespace Spelunky {
             GoldAmountChangedEvent?.Invoke(amount);
         }
     }
+
 }

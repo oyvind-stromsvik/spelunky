@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    public class Caveman : Enemy
-    {
+
+    public class Caveman : Enemy {
         public float moveSpeed;
         public int damage;
 
@@ -51,4 +51,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    public class CameraFollow : MonoBehaviour {
 
+    public class CameraFollow : MonoBehaviour {
         public float verticalOffset;
         public float verticalSmoothTime;
         public Vector2 focusAreaSize;
@@ -37,15 +37,19 @@ namespace Spelunky {
             if (x < 112) {
                 x = 112;
             }
+
             if (x > 640 - 112) {
                 x = 640 - 112;
             }
+
             if (y < 52) {
                 y = 52;
             }
+
             if (y > 512 - 52) {
                 y = 512 - 52;
             }
+
             Vector3 position = new Vector3(x, y, -10);
             transform.position = position;
         }
@@ -96,4 +100,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

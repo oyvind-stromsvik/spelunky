@@ -3,8 +3,8 @@ using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
-    public class SpriteAnimator : MonoBehaviour {
 
+    public class SpriteAnimator : MonoBehaviour {
         public SpriteAnimation[] animations;
 
         public bool looping;
@@ -19,11 +19,9 @@ namespace Spelunky {
         // Set this to control the current frame of the animation. F. ex. setting
         // fps to 0 and this to 0 let's us show only the initial frame of the animation
         // for as long as we wish.
-        [HideInInspector]
-        public int currentFrame;
+        [HideInInspector] public int currentFrame;
 
-        [HideInInspector]
-        public SpriteAnimation currentAnimation;
+        [HideInInspector] public SpriteAnimation currentAnimation;
 
         private SpriteRenderer _spriteRenderer;
         private float _timer;
@@ -54,6 +52,7 @@ namespace Spelunky {
                 if (showBlankFrameAfterNonLoopingAnimation) {
                     _spriteRenderer.sprite = null;
                 }
+
                 return;
             }
 
@@ -70,7 +69,7 @@ namespace Spelunky {
             }
 
             _timer += Time.deltaTime;
-            if (_timer >= (1f / fps)) {
+            if (_timer >= 1f / fps) {
                 _timer = 0;
                 currentFrame++;
             }
@@ -126,10 +125,11 @@ namespace Spelunky {
             while (playOnceCurrentFrame < playOnceAnimation.frames.Length) {
                 _spriteRenderer.sprite = playOnceAnimation.frames[playOnceCurrentFrame];
                 t += Time.deltaTime;
-                if (t >= (1f / playOnceFps)) {
+                if (t >= 1f / playOnceFps) {
                     t = 0;
                     playOnceCurrentFrame++;
                 }
+
                 yield return null;
             }
 
@@ -176,4 +176,5 @@ namespace Spelunky {
             throw new NullReferenceException();
         }
     }
+
 }

@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    public class GameManager : Singleton<GameManager> {
 
+    public class GameManager : Singleton<GameManager> {
         public Player player;
         public CameraFollow playerCamera;
 
@@ -15,4 +15,5 @@ namespace Spelunky {
             playerInstance.cam = camInstance;
         }
     }
+
 }

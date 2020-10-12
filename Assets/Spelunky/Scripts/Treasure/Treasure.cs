@@ -4,7 +4,6 @@ namespace Spelunky {
 
     [RequireComponent(typeof(EntityPhysics))]
     public class Treasure : MonoBehaviour {
-
         public AudioClip pickUpSound;
         public int value;
 
@@ -17,4 +16,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

@@ -1,7 +1,8 @@
 using UnityEngine;
 
 namespace Spelunky {
-    public class PitchersMitt : MonoBehaviour {
 
+    public class PitchersMitt : MonoBehaviour {
     }
+
 }

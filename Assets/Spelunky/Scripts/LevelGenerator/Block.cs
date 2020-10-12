@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    [RequireComponent (typeof (EntityPhysics))]
-    public class Block : MonoBehaviour {
 
+    [RequireComponent(typeof(EntityPhysics))]
+    public class Block : MonoBehaviour {
         public AudioClip landClip;
 
         private Vector3 _velocity;
@@ -51,6 +51,7 @@ namespace Spelunky {
                 transform.position = new Vector3(lowerLeftCornerOfTileWeAreIn.x, transform.position.y, transform.position.z);
                 _velocity.x = 0;
             }
+
             _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
         }
 
@@ -61,4 +62,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

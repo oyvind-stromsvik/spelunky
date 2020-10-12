@@ -2,8 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
-    public class Rope : MonoBehaviour {
 
+    public class Rope : MonoBehaviour {
         public AudioClip ropeTossClip;
         public AudioClip ropeHitClip;
 
@@ -124,4 +124,5 @@ namespace Spelunky {
             ropeEnd.gameObject.SetActive(false);
         }
     }
+
 }
