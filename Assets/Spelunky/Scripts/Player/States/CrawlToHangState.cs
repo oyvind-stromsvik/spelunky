@@ -17,7 +17,6 @@ namespace Spelunky {
             Debug.DrawRay(transform.position + offset, Vector2.down * 4, Color.yellow);
 
             player.Visuals.animator.Play("CrawlToHang", true);
-            player.Visuals.animator.fps = 24;
 
             yield return new WaitForSeconds(player.Visuals.animator.GetAnimationLength("CrawlToHang"));
 

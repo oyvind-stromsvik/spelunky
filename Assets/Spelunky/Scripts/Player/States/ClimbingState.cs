@@ -56,14 +56,6 @@ namespace Spelunky {
         }
 
         private void Update() {
-            if (player.directionalInput.y != 0) // Set the framerate of the climbing animation dynamically based on our climbing speed.
-            {
-                player.Visuals.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
-            }
-            else {
-                player.Visuals.animator.fps = 0;
-            }
-
             if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && !player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
@@ -82,6 +74,14 @@ namespace Spelunky {
                 if (_closestCollider.CompareTag("Ladder")) {
                     player.Visuals.animator.Play("ClimbLadder");
                 }
+            }
+
+            if (player.directionalInput.y != 0) // Set the framerate of the climbing animation dynamically based on our climbing speed.
+            {
+                player.Visuals.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
+            }
+            else {
+                player.Visuals.animator.fps = 0;
             }
         }
 

@@ -75,14 +75,8 @@ namespace Spelunky {
                     player.Visuals.animator.Play("Run");
                 }
 
-                if (player.directionalInput.y < 0) {
-                    player.Visuals.animator.fps = 12;
-                }
-                else if (player.sprinting) {
+                if (player.sprinting) {
                     player.Visuals.animator.fps = 18;
-                }
-                else {
-                    player.Visuals.animator.fps = 12;
                 }
             }
             else {

@@ -15,3 +15,7 @@ MonoBehaviour:
   frames:
   - {fileID: 3747785254445226531, guid: 5170bef371f66e440809351cf2314096, type: 3}
   - {fileID: 5882346234257769270, guid: 5170bef371f66e440809351cf2314096, type: 3}
+  fps: 24
+  looping: 1
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0

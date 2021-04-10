@@ -17,3 +17,7 @@ MonoBehaviour:
   - {fileID: -7385789195546760866, guid: f544098d09bcdd64d93afbe7c90c0999, type: 3}
   - {fileID: 3234629978573100161, guid: f544098d09bcdd64d93afbe7c90c0999, type: 3}
   - {fileID: 6373048116405451881, guid: f544098d09bcdd64d93afbe7c90c0999, type: 3}
+  fps: 12
+  looping: 1
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0

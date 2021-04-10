@@ -30,16 +30,14 @@ namespace Spelunky {
         }
 
         private void Start() {
+            _spriteAnimator.Stop();
             StartCoroutine(DelayedExplosion());
         }
 
         private IEnumerator DelayedExplosion() {
-            _spriteAnimator.fps = 0;
-
             yield return new WaitForSeconds(timeToExplode - bombTimerClip.length);
 
             _spriteAnimator.Play("BombArmed");
-            _spriteAnimator.fps = 24;
 
             _audioSource.clip = bombTimerClip;
             _audioSource.Play();

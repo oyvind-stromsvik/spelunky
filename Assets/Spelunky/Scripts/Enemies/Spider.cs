@@ -60,7 +60,6 @@ namespace Spelunky {
 
             if (hit.collider != null) {
                 _targetToMoveTowards = hit.transform;
-                EntityVisuals.animator.fps = 24;
                 EntityVisuals.animator.Play("Flip", true);
                 _flipping = true;
             }
@@ -80,7 +79,6 @@ namespace Spelunky {
             }
 
             if (!EntityPhysics.collisionInfo.down) {
-                EntityVisuals.animator.looping = false;
                 if (_velocity.y > 0) {
                     EntityVisuals.animator.Play("Jump", true);
                 }
@@ -90,8 +88,6 @@ namespace Spelunky {
             }
             else {
                 _velocity = Vector2.zero;
-                EntityVisuals.animator.fps = 12;
-                EntityVisuals.animator.looping = true;
                 EntityVisuals.animator.Play("Idle");
                 if (_idleDuration <= 0f) {
                     DoSingleJump();
