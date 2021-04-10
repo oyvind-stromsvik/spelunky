@@ -7,13 +7,8 @@ namespace Spelunky {
     public class SpriteAnimator : MonoBehaviour {
         public SpriteAnimation[] animations;
 
-        public bool looping;
-
-        // Good for things like explosions etc. so we don't have to leave a blank
-        // frame at the end of every sprite sheet we make.
-        public bool showBlankFrameAfterNonLoopingAnimation;
-
-        // Set this to control the speed of the animation.
+        // Set this to override the speed of the current animation.
+        // Useful for having a dynamic fps based on move speed etc.
         public int fps;
 
         // Set this to control the current frame of the animation. F. ex. setting
@@ -28,12 +23,23 @@ namespace Spelunky {
 
         private bool _playOnceUninterrupted;
 
+        // Store this here because we can have a non-looping ping pong animation
+        // and in that case we allow it to play once forwards and once in reverse
+        // before we stop it.
+        private bool _pingPong;
+        // If the current animation is set to ping pong and is now supposed to
+        // be played in reverse.
+        private bool _reverse;
+
         private void Awake() {
             _spriteRenderer = GetComponent<SpriteRenderer>();
             currentAnimation = animations[0];
         }
 
         private void Update() {
+            // For enabling playing an uninterrupted animation like a weapon
+            // attack even if we're telling the animator to play other animations
+            // like walking, running or jumping at the same time.
             if (_playOnceUninterrupted) {
                 return;
             }
@@ -48,17 +54,32 @@ namespace Spelunky {
                 return;
             }
 
-            if (currentFrame == currentAnimation.frames.Length && !looping) {
-                if (showBlankFrameAfterNonLoopingAnimation) {
+            if (ReachedEndOfAnimation()) {
+                if (currentAnimation.showBlankFrameAtTheEnd) {
                     _spriteRenderer.sprite = null;
                 }
 
-                return;
+                // The current animation is set to ping pong so switch its direction.
+                if (_pingPong) {
+                    _reverse = !_reverse;
+                }
+                // The animation is not looping.
+                if (!currentAnimation.looping) {
+                    // If it's ping ponging let it loop once more before we stop it.
+                    if (_pingPong) {
+                        _pingPong = false;
+                    }
+                    else {
+                        Stop();
+                    }
+                }
             }
 
             // This is a really clever way of handling looping.
             // Taken from GameMaker, and inspired by Daniel Linssen's code.
             currentFrame %= currentAnimation.frames.Length;
+
+            // Set the current sprite.
             _spriteRenderer.sprite = currentAnimation.frames[currentFrame];
 
             // If the framerate is zero don't calculate the next frame.
@@ -68,14 +89,23 @@ namespace Spelunky {
                 return;
             }
 
+            IncreaseFrameCount();
+        }
+
+        private void IncreaseFrameCount() {
             _timer += Time.deltaTime;
-            if (_timer >= 1f / fps) {
+            if (_timer >= (1f / fps)) {
                 _timer = 0;
-                currentFrame++;
+                if (_reverse) {
+                    currentFrame--;
+                }
+                else {
+                    currentFrame++;
+                }
             }
         }
 
-        public void Play(string name, bool reset = false) {
+        public void Play(string name, bool reset = false, float speed = 1) {
             if (currentAnimation != null && currentAnimation.name == name) {
                 return;
             }
@@ -84,6 +114,9 @@ namespace Spelunky {
             foreach (SpriteAnimation animation in animations) {
                 if (animation.name == name) {
                     currentAnimation = animation;
+                    fps = Mathf.RoundToInt(Mathf.Abs(currentAnimation.fps * speed));
+                    _reverse = speed < 0;
+                    _pingPong = currentAnimation.pingPong;
 
                     if (reset) {
                         // Switch over to the new animation immediately. Otherwise
@@ -119,6 +152,10 @@ namespace Spelunky {
                     _spriteRenderer.sprite = playOnceAnimation.frames[playOnceCurrentFrame];
                     break;
                 }
+            }
+
+            if (playOnceAnimation == null) {
+                yield break;
             }
 
             float t = 0;
@@ -174,6 +211,22 @@ namespace Spelunky {
             }
 
             throw new NullReferenceException();
+        }
+
+        public bool ReachedEndOfAnimation() {
+            if (currentFrame == (currentAnimation.frames.Length - 1) && !currentAnimation.looping) {
+                return true;
+            }
+
+            if (_reverse && currentFrame == 0) {
+                return true;
+            }
+
+            return false;
+        }
+
+        public void Stop() {
+            currentAnimation = null;
         }
     }
 

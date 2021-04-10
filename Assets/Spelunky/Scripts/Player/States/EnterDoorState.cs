@@ -26,7 +26,6 @@ namespace Spelunky {
             transform.position = new Vector2(player._exitDoor.transform.position.x + Tile.Width / 2f, player._exitDoor.transform.position.y);
 
             player.Visuals.animator.Play("EnterDoor", true);
-            player.Visuals.animator.fps = 12;
 
             player.Audio.Play(enterDoorClip);
 

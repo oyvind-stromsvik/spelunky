@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   frames:
   - {fileID: 21300000, guid: db7c74025dd9ac04db6c4ea36c9af856, type: 3}
+  fps: 12
+  looping: 1
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0
