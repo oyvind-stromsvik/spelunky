@@ -92,16 +92,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 782368876}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f9157fafb79476bbf459f9cc7395d98, type: 3}
+  m_Script: {fileID: 11500000, guid: 63e55705684df834e80421c395716e14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animations:
   - {fileID: 11400000, guid: 77cb5e0a566c3b14bb57de6adb7f0f63, type: 2}
-  looping: 1
-  showBlankFrameAfterNonLoopingAnimation: 0
-  fps: 12
+  fps: 0
   currentFrame: 0
-  defaultSprite: {fileID: 0}
   currentAnimation: {fileID: 0}
 --- !u!1 &1611851042852994
 GameObject:
@@ -297,12 +294,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useFixedUpdate: 0
+  useGravity: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 45824
   skinWidth: 0.4
   horizontalRayCount: 3
   verticalRayCount: 3
+  raycastsHitTriggers: 0
+  velocity: {x: 0, y: 0}
 --- !u!114 &1619121511715360887
 MonoBehaviour:
   m_ObjectHideFlags: 0

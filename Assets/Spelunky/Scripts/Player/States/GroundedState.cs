@@ -66,13 +66,13 @@ namespace Spelunky {
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
                 if (player.Physics.collisionInfo.left || player.Physics.collisionInfo.right) {
-                    player.Visuals.animator.Play("Push");
+                    player.Visuals.animator.Play("Push", 1, false);
                 }
                 else if (player.directionalInput.y < 0) {
-                    player.Visuals.animator.Play("Crawl");
+                    player.Visuals.animator.Play("Crawl", 1, false);
                 }
                 else {
-                    player.Visuals.animator.Play("Run");
+                    player.Visuals.animator.Play("Run", 1, false);
                 }
 
                 if (player.sprinting) {
@@ -84,7 +84,7 @@ namespace Spelunky {
                     player.Visuals.animator.Play("Duck");
                 }
                 else {
-                    player.Visuals.animator.Play("Idle");
+                    player.Visuals.animator.Play("Idle", 1, false);
                 }
             }
         }
@@ -122,7 +122,7 @@ namespace Spelunky {
             // Play unsteady animation
             if (player.Physics.collisionInfo.down && hitCenter.collider == null && hitForward.collider == null) {
                 if (player.directionalInput.y >= 0) {
-                    player.Visuals.animator.Play("Unsteady");
+                    player.Visuals.animator.Play("Unsteady", 1, false);
                 }
             }
         }

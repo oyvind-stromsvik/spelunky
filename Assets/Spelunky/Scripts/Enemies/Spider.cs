@@ -60,7 +60,7 @@ namespace Spelunky {
 
             if (hit.collider != null) {
                 _targetToMoveTowards = hit.transform;
-                EntityVisuals.animator.Play("Flip", true);
+                EntityVisuals.animator.Play("Flip");
                 _flipping = true;
             }
         }
@@ -80,10 +80,10 @@ namespace Spelunky {
 
             if (!EntityPhysics.collisionInfo.down) {
                 if (_velocity.y > 0) {
-                    EntityVisuals.animator.Play("Jump", true);
+                    EntityVisuals.animator.Play("Jump");
                 }
                 else {
-                    EntityVisuals.animator.Play("Fall", true);
+                    EntityVisuals.animator.Play("Fall");
                 }
             }
             else {

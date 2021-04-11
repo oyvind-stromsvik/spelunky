@@ -34,7 +34,7 @@ namespace Spelunky {
 
             transform.position = new Vector2(hangPosition.x, hangPosition.y);
 
-            player.Visuals.animator.Play("Hang", true);
+            player.Visuals.animator.Play("Hang");
 
             player.Audio.Play(player.Audio.grabClip);
         }

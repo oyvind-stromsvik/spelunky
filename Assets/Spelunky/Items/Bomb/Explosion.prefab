@@ -239,14 +239,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6910937128966827683}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f9157fafb79476bbf459f9cc7395d98, type: 3}
+  m_Script: {fileID: 11500000, guid: 63e55705684df834e80421c395716e14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animations:
   - {fileID: 11400000, guid: 44a97dcd31b45b94c8ea23c0c93c877b, type: 2}
-  looping: 0
-  showBlankFrameAfterNonLoopingAnimation: 1
-  fps: 24
+  fps: 0
   currentFrame: 0
-  defaultSprite: {fileID: 0}
   currentAnimation: {fileID: 0}
