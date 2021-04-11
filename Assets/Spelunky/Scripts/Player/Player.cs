@@ -201,10 +201,10 @@ namespace Spelunky {
             _isAttacking = true;
             whipCollider.enabled = true;
 
-            Visuals.animator.PlayOnceUninterrupted("AttackWithWhip", 24);
+            Visuals.animator.PlayOnceUninterrupted("AttackWithWhip");
             Audio.Play(Audio.whipClip, 0.7f);
 
-            yield return new WaitForSeconds(Visuals.animator.GetAnimationLength("AttackWithWhip", 24));
+            yield return new WaitForSeconds(Visuals.animator.GetAnimationLength("AttackWithWhip"));
 
             _isAttacking = false;
             whipCollider.enabled = false;

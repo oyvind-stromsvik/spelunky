@@ -70,9 +70,9 @@ namespace Spelunky {
                 player.stateMachine.AttemptToChangeState(player.inAirState);
             }
             else {
-                player.Visuals.animator.Play("ClimbRope");
+                player.Visuals.animator.Play("ClimbRope", 1, false);
                 if (_closestCollider.CompareTag("Ladder")) {
-                    player.Visuals.animator.Play("ClimbLadder");
+                    player.Visuals.animator.Play("ClimbLadder", 1, false);
                 }
             }
 

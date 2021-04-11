@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.twiik.spriteanimator": {
+      "version": "file:C:/Users/admin/Dropbox (Ny Media AS)/STUFFLE/Unity Projects/WIP/PackageProject/Packages/SpriteAnimator",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,

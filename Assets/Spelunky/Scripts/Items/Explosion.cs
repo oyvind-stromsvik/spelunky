@@ -11,12 +11,16 @@ namespace Spelunky {
 
         // References.
         private AudioSource _audioSource;
+        private SpriteAnimator _spriteAnimator;
 
         private void Awake() {
             _audioSource = GetComponent<AudioSource>();
+            _spriteAnimator = GetComponentInChildren<SpriteAnimator>();
         }
 
         public void Start() {
+            _spriteAnimator.Play("Explosion");
+
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, explosionRadius, layerMask);
             List<Tile> tilesToRemove = new List<Tile>();
             foreach (Collider2D collider in colliders) {

@@ -30,7 +30,6 @@ namespace Spelunky {
         }
 
         private void Start() {
-            _spriteAnimator.Stop();
             StartCoroutine(DelayedExplosion());
         }
 

@@ -16,7 +16,7 @@ namespace Spelunky {
             RaycastHit2D hit = Physics2D.Raycast(transform.position + offset, Vector2.down, 2, player.edgeGrabLayerMask);
             Debug.DrawRay(transform.position + offset, Vector2.down * 4, Color.yellow);
 
-            player.Visuals.animator.Play("CrawlToHang", true);
+            player.Visuals.animator.Play("CrawlToHang");
 
             yield return new WaitForSeconds(player.Visuals.animator.GetAnimationLength("CrawlToHang"));
 

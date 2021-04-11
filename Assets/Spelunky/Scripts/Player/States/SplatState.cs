@@ -6,7 +6,7 @@ namespace Spelunky {
         public AudioClip splatClip;
 
         public override void Enter() {
-            player.Visuals.animator.Play("Splat", true);
+            player.Visuals.animator.Play("Splat");
             player.Audio.Play(splatClip);
             player.Physics.Collider.enabled = false;
         }
