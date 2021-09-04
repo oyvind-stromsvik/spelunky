@@ -2,9 +2,9 @@
   "dependencies": {
     "com.twiik.spriteanimator": "file:C:/Users/admin/Dropbox (Ny Media AS)/STUFFLE/Unity Projects/WIP/PackageProject/Packages/SpriteAnimator",
     "com.unity.2d.sprite": "1.0.0",
-    "com.unity.ide.rider": "2.0.5",
+    "com.unity.ide.rider": "3.0.7",
     "com.unity.ide.visualstudio": "2.0.11",
-    "com.unity.render-pipelines.universal": "7.3.1",
+    "com.unity.render-pipelines.universal": "10.6.0",
     "com.unity.ugui": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
