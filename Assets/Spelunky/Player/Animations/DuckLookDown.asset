@@ -9,8 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 372139b25599440f9c10346080e3ae68, type: 3}
+  m_Script: {fileID: 11500000, guid: 68c4f7c00eaf86b4baa85a30ab291174, type: 3}
   m_Name: DuckLookDown
   m_EditorClassIdentifier: 
   frames:
   - {fileID: 21300000, guid: 59f21e8ad5500054d9901a7aca51521e, type: 3}
+  fps: 12
+  looping: 0
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0

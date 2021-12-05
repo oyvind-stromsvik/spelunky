@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 372139b25599440f9c10346080e3ae68, type: 3}
+  m_Script: {fileID: 11500000, guid: 68c4f7c00eaf86b4baa85a30ab291174, type: 3}
   m_Name: Run
   m_EditorClassIdentifier: 
   frames:
@@ -19,3 +19,7 @@ MonoBehaviour:
   - {fileID: 5304202850863732263, guid: 532aecad68dfc9e4ba143f992d30e55a, type: 3}
   - {fileID: 2833043080597125133, guid: 532aecad68dfc9e4ba143f992d30e55a, type: 3}
   - {fileID: -2217414122262695004, guid: 532aecad68dfc9e4ba143f992d30e55a, type: 3}
+  fps: 12
+  looping: 1
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0

@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spelunky {
+
     /// <summary>
     /// The state we're in when we're climbing a ladder or a rope.
     /// </summary>
     public class ClimbingState : State {
-
         public ContactFilter2D ladderFilter;
         public LayerMask ladderLayerMask;
 
@@ -16,12 +16,15 @@ namespace Spelunky {
             if (player.directionalInput.y == 0) {
                 return false;
             }
+
             if (Mathf.Abs(player.directionalInput.y) < Mathf.Abs(player.directionalInput.x)) {
                 return false;
             }
+
             if (player.recentlyJumped) {
                 return false;
             }
+
             // Find any nearby ladder colliders.
             _closestCollider = FindClosestOverlappedLadder();
             if (_closestCollider == null) {
@@ -40,30 +43,20 @@ namespace Spelunky {
         }
 
         public override void Enter() {
-            base.Enter();
-
-            player.physicsObject.collisions.fallingThroughPlatform = true;
+            player.Physics.collisionInfo.fallingThroughPlatform = true;
             float xPos = _closestCollider.transform.position.x;
-            player.graphics.animator.Play("ClimbRope");
+            player.Visuals.animator.Play("ClimbRope");
             if (_closestCollider.CompareTag("Ladder")) {
                 xPos += Tile.Width / 2f;
-                player.graphics.animator.Play("ClimbLadder");
+                player.Visuals.animator.Play("ClimbLadder");
             }
 
             transform.position = new Vector3(xPos, transform.position.y, 0);
-            player.audio.Play(player.audio.grabClip);
+            player.Audio.Play(player.Audio.grabClip);
         }
 
         private void Update() {
-            if (player.directionalInput.y != 0) {
-                // Set the framerate of the climbing animation dynamically based on our climbing speed.
-                player.graphics.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
-            }
-            else {
-                player.graphics.animator.fps = 0;
-            }
-
-            if (player.directionalInput.y < 0 && player.physicsObject.collisions.below && !player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && !player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
@@ -77,10 +70,18 @@ namespace Spelunky {
                 player.stateMachine.AttemptToChangeState(player.inAirState);
             }
             else {
-                player.graphics.animator.Play("ClimbRope");
+                player.Visuals.animator.Play("ClimbRope", 1, false);
                 if (_closestCollider.CompareTag("Ladder")) {
-                    player.graphics.animator.Play("ClimbLadder");
+                    player.Visuals.animator.Play("ClimbLadder", 1, false);
                 }
+            }
+
+            if (player.directionalInput.y != 0) // Set the framerate of the climbing animation dynamically based on our climbing speed.
+            {
+                player.Visuals.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
+            }
+            else {
+                player.Visuals.animator.fps = 0;
             }
         }
 
@@ -95,6 +96,7 @@ namespace Spelunky {
             if (player.directionalInput.y > 0) {
                 direction = Vector2.up;
             }
+
             RaycastHit2D hit = Physics2D.Raycast(position, direction, 9, ladderLayerMask);
             Debug.DrawRay(position, direction * 9, Color.magenta);
             if (hit.collider == null) {
@@ -111,7 +113,7 @@ namespace Spelunky {
         /// </summary>
         private Collider2D FindClosestOverlappedLadder() {
             List<Collider2D> ladderColliders = new List<Collider2D>();
-            player.physicsObject.collider.OverlapCollider(ladderFilter, ladderColliders);
+            player.Physics.Collider.OverlapCollider(ladderFilter, ladderColliders);
             if (ladderColliders.Count <= 0) {
                 return null;
             }
@@ -123,6 +125,7 @@ namespace Spelunky {
                 if (ladderCollider.CompareTag("Ladder")) {
                     xPos += Tile.Width / 2f;
                 }
+
                 float currentDistance = Mathf.Abs(transform.position.x - xPos);
                 if (currentDistance < closestDistance) {
                     closestDistance = currentDistance;
@@ -139,6 +142,6 @@ namespace Spelunky {
 
             return closestCollider;
         }
-
     }
+
 }

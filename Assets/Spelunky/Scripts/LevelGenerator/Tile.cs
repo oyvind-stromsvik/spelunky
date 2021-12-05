@@ -1,11 +1,10 @@
 using UnityEngine;
 
 namespace Spelunky {
+
     [RequireComponent(typeof(SpriteRenderer))]
     public class Tile : MonoBehaviour {
-
-        [Tooltip("The probably for this tile to spawn. Setting this to 25 means the tile is 75% likely to be removed when the level is generated.")]
-        [Range(0, 100)]
+        [Tooltip("The probably for this tile to spawn. Setting this to 25 means the tile is 75% likely to be removed when the level is generated.")] [Range(0, 100)]
         public int spawnProbability = 100;
 
         public int x { get; private set; }
@@ -13,8 +12,7 @@ namespace Spelunky {
 
         private SpriteRenderer _spriteRenderer;
 
-        [Header("For dynamic tile graphics")]
-        public bool hasDecorations;
+        [Header("For dynamic tile graphics")] public bool hasDecorations;
         public GameObject[] decorationUp;
         public GameObject[] decorationRight;
         public GameObject[] decorationDown;
@@ -57,12 +55,15 @@ namespace Spelunky {
             if (y < LevelGenerator.instance.Tiles.GetLength(1) - 1 && (LevelGenerator.instance.Tiles[x, y + 1] == null || !LevelGenerator.instance.Tiles[x, y + 1].hasDecorations)) {
                 up = true;
             }
+
             if (x < LevelGenerator.instance.Tiles.GetLength(0) - 1 && (LevelGenerator.instance.Tiles[x + 1, y] == null || !LevelGenerator.instance.Tiles[x + 1, y].hasDecorations)) {
                 right = true;
             }
+
             if (y > 0 && (LevelGenerator.instance.Tiles[x, y - 1] == null || !LevelGenerator.instance.Tiles[x, y - 1].hasDecorations)) {
                 down = true;
             }
+
             if (x > 0 && (LevelGenerator.instance.Tiles[x - 1, y] == null || !LevelGenerator.instance.Tiles[x - 1, y].hasDecorations)) {
                 left = true;
             }
@@ -76,15 +77,19 @@ namespace Spelunky {
                 else {
                     decorationUp[0].SetActive(true);
                 }
+
                 _spriteRenderer.sprite = spriteUp[0];
             }
+
             if (down) {
                 decorationDown[0].SetActive(true);
                 _spriteRenderer.sprite = spriteDown[0];
             }
+
             if (up && down) {
                 _spriteRenderer.sprite = spriteUpDown[0];
             }
+
             if (left) {
                 if (Random.value < 0.5f) {
                     decorationLeft[1].SetActive(true);
@@ -93,9 +98,11 @@ namespace Spelunky {
                     decorationLeft[0].SetActive(true);
                 }
             }
+
             if (right) {
                 decorationRight[0].SetActive(true);
             }
+
             if (!up && !down) {
                 if (Random.value < 0.1f) {
                     _spriteRenderer.sprite = alternatives[0];
@@ -119,4 +126,5 @@ namespace Spelunky {
             return new Vector3(x, y, 0);
         }
     }
+
 }

@@ -127,7 +127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d8500673985461fab175b0cdec51f34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnProbability: 90
+  spawnProbability: 100
   hasDecorations: 1
   decorationUp:
   - {fileID: 705921914299089337}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c4f7c00eaf86b4baa85a30ab291174, type: 3}
+  m_Name: Splat
+  m_EditorClassIdentifier: 
+  frames:
+  - {fileID: 3575667593051264364, guid: 7a6b07f254f69d74283299835d19f105, type: 3}
+  - {fileID: 5700133136444788116, guid: 7a6b07f254f69d74283299835d19f105, type: 3}
+  - {fileID: -1675444205892039869, guid: 7a6b07f254f69d74283299835d19f105, type: 3}
+  - {fileID: -1036441582567821602, guid: 7a6b07f254f69d74283299835d19f105, type: 3}
+  - {fileID: 8932212215797296999, guid: 7a6b07f254f69d74283299835d19f105, type: 3}
+  - {fileID: 1485638293358931120, guid: 7a6b07f254f69d74283299835d19f105, type: 3}
+  fps: 36
+  looping: 0
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0

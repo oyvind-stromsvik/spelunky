@@ -30,7 +30,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6430094435519817004}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 678.02094, y: 302.60394, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -239,15 +239,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useFixedUpdate: 1
+  useGravity: 1
   collisionMask:
     serializedVersion: 2
     m_Bits: 41216
   skinWidth: 0.4
   horizontalRayCount: 2
   verticalRayCount: 2
-  horizontalRaySpacing: 0
-  verticalRaySpacing: 0
-  collider: {fileID: 0}
+  raycastsHitTriggers: 0
+  velocity: {x: 0, y: 0}
 --- !u!114 &-863267888061364889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -257,13 +258,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6430094435519817004}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f9157fafb79476bbf459f9cc7395d98, type: 3}
+  m_Script: {fileID: 11500000, guid: 63e55705684df834e80421c395716e14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animations:
   - {fileID: 11400000, guid: 1711743042dc3ba4a96dbed2e88c2cb9, type: 2}
-  looping: 1
-  fps: 12
+  fps: 0
   currentFrame: 0
-  defaultSprite: {fileID: 0}
   currentAnimation: {fileID: 0}
