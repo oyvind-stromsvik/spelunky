@@ -2,8 +2,11 @@ using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
-    [RequireComponent (typeof (PhysicsObject))]
+
+    [RequireComponent(typeof(EntityPhysics))]
     public class Bomb : MonoBehaviour {
+
+        public EntityPhysics Physics { get; private set; }
 
         public Explosion explosion;
 
@@ -14,75 +17,26 @@ namespace Spelunky {
 
         private AudioSource _audioSource;
 
-        private Vector3 _offset;
-
-        private Vector3 _velocity;
-
-        private PhysicsObject _controller;
         private SpriteAnimator _spriteAnimator;
 
         private const float BounceSoundVelocityThreshold = 100f;
 
         private void Awake() {
-            _controller = GetComponent<PhysicsObject>();
             _audioSource = GetComponent<AudioSource>();
             _spriteAnimator = GetComponent<SpriteAnimator>();
+            Physics = GetComponent<EntityPhysics>();
+
+            Physics.OnCollisionEvent.AddListener(OnCollision);
         }
 
         private void Start() {
             StartCoroutine(DelayedExplosion());
-            _offset = new Vector3(0, 4, 0);
-        }
-
-        private void Update() {
-            CalculateVelocity();
-
-            HandleCollisions();
-
-            _controller.Move(_velocity * Time.deltaTime);
-        }
-
-        public void SetVelocity(Vector2 velocity) {
-            _velocity = velocity;
-        }
-
-        private void HandleCollisions() {
-            if (_controller.collisions.collidedThisFrame && !_controller.collisions.collidedLastFrame) {
-                bool playSound = false;
-
-                if (_controller.collisions.right || _controller.collisions.left) {
-                    if (Mathf.Abs(_velocity.x) > BounceSoundVelocityThreshold) {
-                        playSound = true;
-                    }
-                    _velocity.x *= -1f;
-                }
-
-                if (_controller.collisions.above || _controller.collisions.below) {
-                    if (Mathf.Abs(_velocity.y) > BounceSoundVelocityThreshold) {
-                        playSound = true;
-                    }
-                    _velocity.y *= -1f;
-                }
-
-                _velocity *= 0.5f;
-
-                if (playSound) {
-                    _audioSource.PlayOneShot(bounceClip);
-                }
-            }
-        }
-
-        private void CalculateVelocity() {
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
         }
 
         private IEnumerator DelayedExplosion() {
-            _spriteAnimator.fps = 0;
-
             yield return new WaitForSeconds(timeToExplode - bombTimerClip.length);
 
             _spriteAnimator.Play("BombArmed");
-            _spriteAnimator.fps = 24;
 
             _audioSource.clip = bombTimerClip;
             _audioSource.Play();
@@ -92,10 +46,41 @@ namespace Spelunky {
             Explode();
         }
 
-        public void Explode() {
-            Instantiate(explosion, transform.position + _offset, Quaternion.identity);
+        public void Explode(float delay = 0f) {
+            StartCoroutine(DoExplode(delay));
+        }
+
+        private IEnumerator DoExplode(float delay = 0f) {
+            yield return new WaitForSeconds(delay);
+            Instantiate(explosion, transform.position + new Vector3(0, 4, 0), Quaternion.identity);
             Destroy(gameObject);
         }
 
+        private void OnCollision(CollisionInfo collisionInfo) {
+            bool playSound = false;
+
+            if (collisionInfo.left || collisionInfo.right) {
+                if (Mathf.Abs(Physics.velocity.x) > BounceSoundVelocityThreshold) {
+                    playSound = true;
+                }
+
+                Physics.velocity.x *= -1f;
+            }
+
+            if (collisionInfo.up || collisionInfo.down) {
+                if (Mathf.Abs(Physics.velocity.y) > BounceSoundVelocityThreshold) {
+                    playSound = true;
+                }
+
+                Physics.velocity.y *= -1f;
+            }
+
+            Physics.velocity *= 0.5f;
+
+            if (playSound) {
+                _audioSource.PlayOneShot(bounceClip);
+            }
+        }
     }
+
 }

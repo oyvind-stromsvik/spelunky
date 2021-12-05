@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c4f7c00eaf86b4baa85a30ab291174, type: 3}
+  m_Name: AttackWithWhip
+  m_EditorClassIdentifier: 
+  frames:
+  - {fileID: 5454018280674833658, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: -433406063395629704, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: -3144716194148662350, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: 2244216439305458313, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: 6306416151778488805, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: 1214633551801856960, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: -2502364640234247385, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: -3275365926141979921, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  - {fileID: 6979130622598356396, guid: 823c189372ebd3a4b955f410d98da2fd, type: 3}
+  fps: 24
+  looping: 0
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0

@@ -1,8 +1,8 @@
 using UnityEngine;
 
 namespace Spelunky {
-    public class HangingState : State {
 
+    public class HangingState : State {
         public bool grabbedWallUsingGlove;
         public Collider2D colliderToHangFrom;
 
@@ -16,17 +16,15 @@ namespace Spelunky {
         }
 
         public override void Enter() {
-            base.Enter();
-
             Vector2 hangPosition = new Vector2(transform.position.x, colliderToHangFrom.transform.position.y + 6);
-            if (player.isFacingRight) {
+            if (player.Visuals.isFacingRight) {
                 if (colliderToHangFrom.transform.position.x < player.transform.position.x) {
-                    player.graphics.FlipCharacter();
+                    player.Visuals.FlipCharacter();
                 }
             }
             else {
                 if (colliderToHangFrom.transform.position.x > player.transform.position.x) {
-                    player.graphics.FlipCharacter();
+                    player.Visuals.FlipCharacter();
                 }
             }
 
@@ -36,9 +34,9 @@ namespace Spelunky {
 
             transform.position = new Vector2(hangPosition.x, hangPosition.y);
 
-            player.graphics.animator.Play("Hang", true);
+            player.Visuals.animator.Play("Hang");
 
-            player.audio.Play(player.audio.grabClip);
+            player.Audio.Play(player.Audio.grabClip);
         }
 
         private void Update() {
@@ -51,8 +49,9 @@ namespace Spelunky {
             if (player.directionalInput.y != 0) {
                 player._lookTimer += Time.deltaTime;
                 if (player.directionalInput.y > 0) {
-                    player.graphics.animator.Play("HangLookUp");
+                    player.Visuals.animator.Play("HangLookUp");
                 }
+
                 if (player._lookTimer > player._timeBeforeLook) {
                     float offset = Mathf.Lerp(0, 64f * Mathf.Sign(player.directionalInput.y), Time.deltaTime * 128);
                     player.cam.SetVerticalOffset(offset);
@@ -61,7 +60,7 @@ namespace Spelunky {
             else {
                 player._lookTimer = 0;
                 player.cam.SetVerticalOffset(0);
-                player.graphics.animator.Play("Hang");
+                player.Visuals.animator.Play("Hang");
             }
         }
 
@@ -73,5 +72,11 @@ namespace Spelunky {
         public override void ChangePlayerVelocity(ref Vector2 velocity) {
             velocity = Vector2.zero;
         }
+
+        public override void OnAttackInputDown() {
+            base.OnAttackInputDown();
+            player.stateMachine.AttemptToChangeState(player.inAirState);
+        }
     }
+
 }

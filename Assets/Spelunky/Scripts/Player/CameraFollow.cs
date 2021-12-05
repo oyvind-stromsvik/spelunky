@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Spelunky {
-    public class CameraFollow : MonoBehaviour {
 
+    public class CameraFollow : MonoBehaviour {
         public float verticalOffset;
         public float verticalSmoothTime;
         public Vector2 focusAreaSize;
@@ -16,7 +16,7 @@ namespace Spelunky {
 
         public void Initialize(Player player) {
             _target = player;
-            _focusArea = new FocusArea(_target.physicsObject.collider.bounds, focusAreaSize);
+            _focusArea = new FocusArea(_target.Physics.Collider.bounds, focusAreaSize);
             _initialVerticalOffset = verticalOffset;
         }
 
@@ -29,7 +29,7 @@ namespace Spelunky {
                 return;
             }
 
-            _focusArea.Update(_target.physicsObject.collider.bounds);
+            _focusArea.Update(_target.Physics.Collider.bounds);
             Vector3 focusPosition = _focusArea.centre + Vector2.up * verticalOffset;
             focusPosition = Vector3.SmoothDamp(transform.position, focusPosition, ref _smoothVelocity, verticalSmoothTime);
             float x = focusPosition.x;
@@ -37,15 +37,19 @@ namespace Spelunky {
             if (x < 112) {
                 x = 112;
             }
+
             if (x > 640 - 112) {
                 x = 640 - 112;
             }
+
             if (y < 52) {
                 y = 52;
             }
+
             if (y > 512 - 52) {
                 y = 512 - 52;
             }
+
             Vector3 position = new Vector3(x, y, -10);
             transform.position = position;
         }
@@ -96,4 +100,5 @@ namespace Spelunky {
             }
         }
     }
+
 }

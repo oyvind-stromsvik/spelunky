@@ -1,20 +1,24 @@
 using UnityEngine;
 
 namespace Spelunky {
-    public abstract class State : MonoBehaviour {
 
+    [RequireComponent(typeof(Player))]
+    public abstract class State : MonoBehaviour {
         [HideInInspector] public Player player;
+
+        public virtual void Awake() {
+            player = GetComponent<Player>();
+            enabled = false;
+        }
 
         public virtual bool CanEnter() {
             return true;
         }
 
         public virtual void Enter() {
-            enabled = true;
         }
 
         public virtual void Exit() {
-            enabled = false;
         }
 
         public virtual void OnDirectionalInput(Vector2 input) {
@@ -27,14 +31,14 @@ namespace Spelunky {
                 player.velocity.y = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.physicsObject.collisions.colliderBelow != null && player.physicsObject.collisions.colliderBelow.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.velocity.y = 0;
-                player.physicsObject.collisions.fallingThroughPlatform = true;
+                player.Physics.collisionInfo.fallingThroughPlatform = true;
             }
 
             Invoke("ResetFallingThroughPlatform", .1f);
 
-            player.audio.Play(player.audio.jumpClip);
+            player.Audio.Play(player.Audio.jumpClip);
             player.recentlyJumped = true;
             // Increase the grace timer so it's impossible to accidentally double jump.
             // TODO: Can the above variable be used for this purpose?
@@ -61,8 +65,12 @@ namespace Spelunky {
             player.Use();
         }
 
+        public virtual void OnAttackInputDown() {
+            player.Attack();
+        }
+
         public void ResetFallingThroughPlatform() {
-            player.physicsObject.collisions.fallingThroughPlatform = false;
+            player.Physics.collisionInfo.fallingThroughPlatform = false;
         }
 
         public virtual void ChangePlayerVelocity(ref Vector2 velocity) {
@@ -72,4 +80,5 @@ namespace Spelunky {
             return false;
         }
     }
+
 }
