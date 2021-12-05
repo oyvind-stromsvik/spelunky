@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.twiik.spriteanimator": "file:C:/Users/admin/Dropbox (Ny Media AS)/STUFFLE/Unity Projects/WIP/PackageProject/Packages/SpriteAnimator",
+    "com.twiik.spriteanimator": "git@github.com:oyvind-stromsvik/upm-sprite-animator.git",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ide.rider": "3.0.7",
     "com.unity.render-pipelines.universal": "11.0.0",

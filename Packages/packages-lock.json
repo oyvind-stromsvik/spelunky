@@ -1,10 +1,11 @@
 {
   "dependencies": {
     "com.twiik.spriteanimator": {
-      "version": "file:C:/Users/admin/Dropbox (Ny Media AS)/STUFFLE/Unity Projects/WIP/PackageProject/Packages/SpriteAnimator",
+      "version": "git@github.com:oyvind-stromsvik/upm-sprite-animator.git",
       "depth": 0,
-      "source": "local",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {},
+      "hash": "ce20be0c2316691dcb1c0f92b13d9ddcddbd3ad8"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
