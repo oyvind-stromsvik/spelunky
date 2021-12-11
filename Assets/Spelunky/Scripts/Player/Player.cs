@@ -86,13 +86,6 @@ namespace Spelunky {
         }
 
         private void Update() {
-            if (directionalInput.x > 0 && !Visuals.isFacingRight) {
-                Visuals.FlipCharacter();
-            }
-            else if (directionalInput.x < 0 && Visuals.isFacingRight) {
-                Visuals.FlipCharacter();
-            }
-
             SetPlayerSpeed();
             CalculateVelocity();
 
