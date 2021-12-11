@@ -43,10 +43,12 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -97,9 +99,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animations:
   - {fileID: 11400000, guid: 77cb5e0a566c3b14bb57de6adb7f0f63, type: 2}
-  fps: 0
+  fps: 8
+  looping: 1
+  pingPong: 0
+  reverse: 0
   currentFrame: 0
-  currentAnimation: {fileID: 0}
+  currentAnimation: {fileID: 11400000, guid: 77cb5e0a566c3b14bb57de6adb7f0f63, type: 2}
 --- !u!1 &1611851042852994
 GameObject:
   m_ObjectHideFlags: 0
