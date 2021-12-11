@@ -23,6 +23,13 @@ namespace Spelunky {
 
         public virtual void OnDirectionalInput(Vector2 input) {
             player.directionalInput = input;
+
+            if (player.directionalInput.x > 0 && !player.Visuals.isFacingRight) {
+                player.Visuals.FlipCharacter();
+            }
+            else if (player.directionalInput.x < 0 && player.Visuals.isFacingRight) {
+                player.Visuals.FlipCharacter();
+            }
         }
 
         public virtual void OnJumpInputDown() {
