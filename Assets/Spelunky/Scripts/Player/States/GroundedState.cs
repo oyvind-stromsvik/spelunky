@@ -3,19 +3,15 @@ using UnityEngine;
 namespace Spelunky {
 
     public class GroundedState : State {
-        public Block blockToPush;
-        private Block _lastBlockPushed;
+
+        public override void Awake() {
+            base.Awake();
+            player.Physics.OnCollisionEvent.AddListener(OnCollision);
+        }
 
         public override void Enter() {
             if (player.stateMachine.PreviousState == player.inAirState) {
                 player.Audio.Play(player.Audio.landClip);
-            }
-        }
-
-        public override void Exit() {
-            if (blockToPush != null) {
-                blockToPush.pushSpeed = 0f;
-                blockToPush = null;
             }
         }
 
@@ -42,30 +38,13 @@ namespace Spelunky {
             else if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
-
-            blockToPush = null;
-            if (player.directionalInput.x < 0 && player.Physics.collisionInfo.left && player.Physics.collisionInfo.collider.CompareTag("Block")) {
-                blockToPush = player.Physics.collisionInfo.collider.GetComponent<Block>();
-            }
-
-            if (player.directionalInput.x > 0 && player.Physics.collisionInfo.right && player.Physics.collisionInfo.collider.CompareTag("Block")) {
-                blockToPush = player.Physics.collisionInfo.collider.GetComponent<Block>();
-            }
-
-            if (blockToPush != null) {
-                blockToPush.pushSpeed = player.pushBlockSpeed * player.directionalInput.x;
-            }
-
-            if (blockToPush == null && _lastBlockPushed != null) {
-                _lastBlockPushed.pushSpeed = 0f;
-            }
-
-            _lastBlockPushed = blockToPush;
         }
+
+        private bool pushing;
 
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
-                if (player.Physics.collisionInfo.left || player.Physics.collisionInfo.right) {
+                if (pushing) {
                     player.Visuals.animator.Play("Push", 1, false);
                 }
                 else if (player.directionalInput.y < 0) {
@@ -78,6 +57,8 @@ namespace Spelunky {
                 if (player.sprinting) {
                     player.Visuals.animator.fps = 18;
                 }
+
+                pushing = false;
             }
             else {
                 if (player.directionalInput.y < 0) {
@@ -125,6 +106,23 @@ namespace Spelunky {
                     player.Visuals.animator.Play("Unsteady", 1, false);
                 }
             }
+        }
+
+        public void OnCollision(CollisionInfo collisionInfo) {
+            // TODO: The block gets stuck to the player. The same happens to the Cavemen. Fix it!
+            // TODO: How do we make the block stop immediately when we stop pushing?
+            if (collisionInfo.collider.CompareTag("Block")) {
+                print("block");
+                collisionInfo.collider.GetComponent<Block>().Push(player.pushBlockSpeed * player.directionalInput.x);
+            }
+
+            if (collisionInfo.left || collisionInfo.right) {
+                pushing = true;
+            }
+        }
+
+        public override void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
+            velocity.y = 0;
         }
     }
 

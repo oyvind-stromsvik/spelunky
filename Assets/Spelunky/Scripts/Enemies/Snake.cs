@@ -13,10 +13,13 @@ namespace Spelunky {
             damage = 1;
         }
 
+        public override void Awake() {
+            base.Awake();
+            EntityPhysics.OnCollisionEvent.AddListener(OnCollision);
+        }
+
         private void Update() {
             HandleUnsteady();
-
-            HandleCollisions();
 
             CalculateVelocity();
 
@@ -27,11 +30,9 @@ namespace Spelunky {
             }
         }
 
-        private void HandleCollisions() {
-            if (EntityPhysics.collisionInfo.collidedThisFrame) {
-                if (EntityPhysics.collisionInfo.right || EntityPhysics.collisionInfo.left) {
-                    EntityVisuals.FlipCharacter();
-                }
+        public void OnCollision(CollisionInfo collisionInfo) {
+            if (collisionInfo.right || collisionInfo.left) {
+                EntityVisuals.FlipCharacter();
             }
         }
 

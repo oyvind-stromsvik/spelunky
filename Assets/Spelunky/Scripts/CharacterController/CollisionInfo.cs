@@ -6,7 +6,6 @@ namespace Spelunky {
         public bool up;
         public bool down;
         public bool left;
-
         public bool right;
 
         // The collider we're colliding with. We can potentially collide with multiple colliders at once
@@ -15,9 +14,6 @@ namespace Spelunky {
         public Collider2D collider;
         public bool becameGroundedThisFrame;
         public bool wasGroundedLastFrame;
-        public bool collidedLastFrame;
-        public bool collidedThisFrame;
-
         public bool fallingThroughPlatform;
 
         public void Reset() {
@@ -28,7 +24,6 @@ namespace Spelunky {
             direction = CollisionDirection.None;
             collider = null;
             becameGroundedThisFrame = false;
-            collidedThisFrame = true;
         }
     }
 
