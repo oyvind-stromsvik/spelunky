@@ -17,20 +17,11 @@ namespace Spelunky {
         private void Awake() {
             _audioSource = GetComponent<AudioSource>();
             entityPhysics = GetComponent<EntityPhysics>();
-        }
-
-        // TODO: This method should be a callback from the physics object.
-        private void HandleCollisions() {
-            if (entityPhysics.collisionInfo.becameGroundedThisFrame) {
-                _audioSource.clip = landClip;
-                _audioSource.Play();
-            }
+            entityPhysics.OnCollisionEvent.AddListener(OnCollision);
         }
 
         private void Update() {
             CalculateVelocity();
-
-            HandleCollisions();
 
             entityPhysics.Move(_velocity * Time.deltaTime);
 
@@ -56,10 +47,20 @@ namespace Spelunky {
         }
 
         public void OnCollision(CollisionInfo collisionInfo) {
-            if (collisionInfo.direction == CollisionDirection.Down && collisionInfo.collider.CompareTag("Player")) {
+            if (collisionInfo.down && collisionInfo.collider.CompareTag("Player")) {
                 Player player = collisionInfo.collider.GetComponent<Player>();
                 player.Splat();
             }
+
+            if (collisionInfo.becameGroundedThisFrame) {
+                _audioSource.clip = landClip;
+                _audioSource.Play();
+            }
+        }
+
+        public void Push(float pushSpeed) {
+            print(pushSpeed);
+            this.pushSpeed = pushSpeed;
         }
     }
 

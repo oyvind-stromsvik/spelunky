@@ -78,7 +78,6 @@ namespace Spelunky {
             Inventory = GetComponent<PlayerInventory>();
 
             Health.HealthChangedEvent.AddListener(OnHealthChanged);
-            Physics.OnCollisionEvent.AddListener(OnCollision);
         }
 
         private void Start() {
@@ -103,9 +102,7 @@ namespace Spelunky {
 
             Physics.Move(velocity * Time.deltaTime);
 
-            if (Physics.collisionInfo.up || Physics.collisionInfo.down) {
-                velocity.y = 0;
-            }
+            stateMachine.CurrentState.ChangePlayerVelocityAfterMove(ref velocity);
 
             _stunDuration -= Time.deltaTime;
         }
@@ -215,12 +212,6 @@ namespace Spelunky {
 
         public void Splat() {
             stateMachine.AttemptToChangeState(splatState);
-        }
-
-        public void OnCollision(CollisionInfo collisionInfo) {
-            if (collisionInfo.collider.CompareTag("Enemy") && collisionInfo.direction == CollisionDirection.Down) {
-                collisionInfo.collider.GetComponent<Enemy>().EntityHealth.TakeDamage(1);
-            }
         }
 
         public void TakeDamage(int damage, CollisionDirection direction) {

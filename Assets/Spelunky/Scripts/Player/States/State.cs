@@ -80,7 +80,23 @@ namespace Spelunky {
             player.Physics.collisionInfo.fallingThroughPlatform = false;
         }
 
+        /// <summary>
+        /// Change the player's velocity before we move (and perform collision detection).
+        /// </summary>
+        /// <param name="velocity"></param>
         public virtual void ChangePlayerVelocity(ref Vector2 velocity) {
+        }
+
+        /// <summary>
+        /// Change the player's velocity after a move has happened.
+        ///
+        /// Currently used to set the y-velocity to 0 when we're grounded so that if we fall off a ledge we don't fall
+        /// at terminal velocity immediately, but rather start falling from 0 y-velocity. This needs to happen after
+        /// the move has happened because we need gravity to pull us down for the collision check to register us as
+        /// being grounded. At least this is how I've chosen to handle this at the moment.
+        /// </summary>
+        /// <param name="velocity"></param>
+        public virtual void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
         }
 
         public virtual bool LockInput() {

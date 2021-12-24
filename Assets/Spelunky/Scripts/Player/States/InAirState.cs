@@ -5,6 +5,11 @@ namespace Spelunky {
     public class InAirState : State {
         [HideInInspector] public RaycastHit2D lastEdgeGrabRayCastHit;
 
+        public override void Awake() {
+            base.Awake();
+            player.Physics.OnCollisionEvent.AddListener(OnCollision);
+        }
+
         public override void OnDirectionalInput(Vector2 input) {
             base.OnDirectionalInput(input);
 
@@ -72,6 +77,32 @@ namespace Spelunky {
 
         private void TryToClimb() {
             player.stateMachine.AttemptToChangeState(player.climbingState);
+        }
+
+        private bool hitHead;
+        private bool bouncedOnEnemy;
+
+        public void OnCollision(CollisionInfo collisionInfo) {
+            if (collisionInfo.collider.CompareTag("Enemy") && collisionInfo.down) {
+                collisionInfo.collider.GetComponent<Enemy>().EntityHealth.TakeDamage(1);
+                bouncedOnEnemy = true;
+            }
+
+            if (collisionInfo.up) {
+                hitHead = true;
+            }
+        }
+
+        public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            if (hitHead) {
+                player.velocity.y = 0;
+                hitHead = false;
+            }
+
+            if (bouncedOnEnemy) {
+                velocity.y = player._maxJumpVelocity;
+                bouncedOnEnemy = false;
+            }
         }
     }
 
