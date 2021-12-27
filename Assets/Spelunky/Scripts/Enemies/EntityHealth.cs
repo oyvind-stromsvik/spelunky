@@ -4,6 +4,9 @@ using UnityEngine.Events;
 namespace Spelunky {
 
     public class EntityHealth : MonoBehaviour {
+
+        public GameObject bloodParticles;
+
         public UnityEvent HealthChangedEvent { get; private set; } = new UnityEvent();
 
         public float invulnerabilityDuration;
@@ -42,11 +45,20 @@ namespace Spelunky {
             HealthChangedEvent?.Invoke();
 
             _invulnerabilityTimer = 0f;
+
+            if (CurrentHealth <= 0) {
+                Die();
+            }
         }
 
         public void SetHealth(int value) {
             CurrentHealth = value;
             HealthChangedEvent?.Invoke();
+        }
+
+        private void Die() {
+            Instantiate(bloodParticles, transform.position, Quaternion.identity);
+            Destroy(gameObject);
         }
     }
 

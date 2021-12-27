@@ -321,6 +321,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ceadb8bded4ef348b851df1884426e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
+    type: 3}
   invulnerabilityDuration: 0
   maxHealth: 1
 --- !u!114 &6396263571779178972
@@ -351,7 +353,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6caef8b88f4b2f74dbae8b80151e4d5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
-    type: 3}
   moveSpeed: 16
   damage: 1
