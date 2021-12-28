@@ -7,7 +7,7 @@ namespace Spelunky {
 
         public override void Awake() {
             base.Awake();
-            player.Physics.OnCollisionEvent.AddListener(OnCollision);
+            player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
         }
 
         public override void OnDirectionalInput(Vector2 input) {
@@ -82,9 +82,9 @@ namespace Spelunky {
         private bool hitHead;
         private bool bouncedOnEnemy;
 
-        public void OnCollision(CollisionInfo collisionInfo) {
-            if (collisionInfo.collider.CompareTag("Enemy") && collisionInfo.down) {
-                collisionInfo.collider.GetComponent<Enemy>().EntityHealth.TakeDamage(1);
+        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
+            if (collisionInfo.down && collisionInfo.colliderVertical.CompareTag("Enemy")) {
+                collisionInfo.colliderVertical.GetComponent<EntityHealth>().TakeDamage(1);
                 bouncedOnEnemy = true;
             }
 
@@ -104,6 +104,7 @@ namespace Spelunky {
                 bouncedOnEnemy = false;
             }
         }
+
     }
 
 }

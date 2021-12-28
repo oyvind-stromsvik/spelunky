@@ -2,7 +2,8 @@
 
 namespace Spelunky {
 
-    public class Bat : Enemy {
+    public class Bat : Entity {
+
         public float moveSpeed;
         public int damage;
 
@@ -20,25 +21,22 @@ namespace Spelunky {
                 return;
             }
 
-            if (_velocity.x > 0 && !EntityVisuals.isFacingRight) {
-                EntityVisuals.FlipCharacter();
+            if (_velocity.x > 0 && !Visuals.isFacingRight) {
+                Visuals.FlipCharacter();
             }
-            else if (_velocity.x < 0 && EntityVisuals.isFacingRight) {
-                EntityVisuals.FlipCharacter();
+            else if (_velocity.x < 0 && Visuals.isFacingRight) {
+                Visuals.FlipCharacter();
             }
 
-            CalculateVelocity();
-            EntityPhysics.Move(_velocity * Time.deltaTime);
-        }
-
-        private void CalculateVelocity() {
             _velocity = (_targetToMoveTowards.position - transform.position).normalized * moveSpeed;
+
+            Physics.Move(_velocity * Time.deltaTime);
         }
 
         private void OnTriggerEnter2D(Collider2D other) {
             if (other.CompareTag("Player")) {
                 _targetToMoveTowards = other.transform;
-                EntityVisuals.animator.Play("Fly");
+                Visuals.animator.Play("Fly");
             }
         }
     }

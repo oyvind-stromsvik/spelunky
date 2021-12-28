@@ -38,7 +38,7 @@ namespace Spelunky {
                 player.velocity.y = 0;
             }
 
-            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
+            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.colliderVertical.CompareTag("OneWayPlatform")) {
                 player.velocity.y = 0;
                 player.Physics.collisionInfo.fallingThroughPlatform = true;
             }

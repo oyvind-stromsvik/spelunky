@@ -2,7 +2,8 @@
 
 namespace Spelunky {
 
-    public class Caveman : Enemy {
+    public class Caveman : Entity {
+
         public float moveSpeed;
         public int damage;
 
@@ -15,40 +16,30 @@ namespace Spelunky {
             damage = 1;
         }
 
-        public override void Awake() {
-            base.Awake();
-            EntityPhysics.OnCollisionEvent.AddListener(OnCollision);
-        }
-
         private void Update() {
             if (!_triggered) {
                 return;
             }
 
-            CalculateVelocity();
+            if (Physics.collisionInfo.right || Physics.collisionInfo.left) {
+                Visuals.FlipCharacter();
+            }
 
-            EntityPhysics.Move(_velocity * Time.deltaTime);
+            _velocity.x = moveSpeed * Visuals.facingDirection;
 
-            if (EntityPhysics.collisionInfo.down) {
+            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+
+            Physics.Move(_velocity * Time.deltaTime);
+
+            if (Physics.collisionInfo.down) {
                 _velocity.y = 0;
             }
-        }
-
-        public void OnCollision(CollisionInfo collisionInfo) {
-            if (collisionInfo.right || collisionInfo.left) {
-                EntityVisuals.FlipCharacter();
-            }
-        }
-
-        private void CalculateVelocity() {
-            _velocity.x = moveSpeed * EntityVisuals.facingDirection;
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
         }
 
         private void OnTriggerEnter2D(Collider2D other) {
             if (other.CompareTag("Player")) {
                 _triggered = true;
-                EntityVisuals.animator.Play("Run");
+                Visuals.animator.Play("Run");
             }
         }
     }

@@ -11,11 +11,12 @@ namespace Spelunky {
         [HideInInspector] public SpriteAnimator animator;
 
         private void Awake() {
+            // We can't use RequireComponent for these because these could be on a different game object than the one
+            // this script is on.
             renderer = GetComponentInChildren<SpriteRenderer>();
             if (renderer == null) {
                 Debug.LogError("No SpriteRenderer found on object or in object children.");
             }
-
             animator = GetComponentInChildren<SpriteAnimator>();
             if (animator == null) {
                 Debug.LogError("No SpriteAnimator found on object or in object children.");

@@ -2,53 +2,44 @@
 
 namespace Spelunky {
 
-    public class Snake : Enemy {
+    public class Snake : Entity {
+
         public float moveSpeed;
         public int damage;
 
-        private Vector2 _velocity;
+        public Vector2 _velocity;
 
         private void Reset() {
             moveSpeed = 16f;
             damage = 1;
         }
 
-        public override void Awake() {
-            base.Awake();
-            EntityPhysics.OnCollisionEvent.AddListener(OnCollision);
-        }
-
         private void Update() {
             HandleUnsteady();
 
-            CalculateVelocity();
+            if (Physics.collisionInfo.right || Physics.collisionInfo.left) {
+                Visuals.FlipCharacter();
+            }
 
-            EntityPhysics.Move(_velocity * Time.deltaTime);
+            _velocity.x = moveSpeed * Visuals.facingDirection;
 
-            if (EntityPhysics.collisionInfo.down) {
+            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+
+            Physics.Move(_velocity * Time.deltaTime);
+
+            if (Physics.collisionInfo.down) {
                 _velocity.y = 0;
             }
         }
 
-        public void OnCollision(CollisionInfo collisionInfo) {
-            if (collisionInfo.right || collisionInfo.left) {
-                EntityVisuals.FlipCharacter();
-            }
-        }
-
-        private void CalculateVelocity() {
-            _velocity.x = moveSpeed * EntityVisuals.facingDirection;
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-        }
-
         private void HandleUnsteady() {
-            Vector3 offsetForward = new Vector3(EntityPhysics.Collider.size.x * EntityVisuals.facingDirection / 2f, 1, 0);
-            RaycastHit2D hitForward = Physics2D.Raycast(transform.position + offsetForward, Vector2.down, 2, EntityPhysics.collisionMask);
+            Vector3 offsetForward = new Vector3(Physics.Collider.size.x * Visuals.facingDirection / 2f, 1, 0);
+            RaycastHit2D hitForward = Physics2D.Raycast(transform.position + offsetForward, Vector2.down, 2, Physics.collisionMask);
             Debug.DrawRay(transform.position + offsetForward, Vector2.down * 2, Color.green);
 
             // Play unsteady animation
-            if (EntityPhysics.collisionInfo.down && hitForward.collider == null) {
-                EntityVisuals.FlipCharacter();
+            if (Physics.collisionInfo.down && hitForward.collider == null) {
+                Visuals.FlipCharacter();
             }
         }
     }
