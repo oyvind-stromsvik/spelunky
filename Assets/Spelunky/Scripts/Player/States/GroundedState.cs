@@ -4,14 +4,24 @@ namespace Spelunky {
 
     public class GroundedState : State {
 
-        public override void Awake() {
-            base.Awake();
-            player.Physics.OnCollisionEvent.AddListener(OnCollision);
-        }
+        public Block pushingBlock;
 
         public override void Enter() {
+            player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
+            player.Physics.OnCollisionExitEvent.AddListener(OnEntityPhysicsCollisionExit);
+
             if (player.stateMachine.PreviousState == player.inAirState) {
                 player.Audio.Play(player.Audio.landClip);
+            }
+        }
+
+        public override void Exit() {
+            player.Physics.OnCollisionEnterEvent.RemoveListener(OnEntityPhysicsCollisionEnter);
+            player.Physics.OnCollisionExitEvent.RemoveListener(OnEntityPhysicsCollisionExit);
+
+            if (pushingBlock) {
+                pushingBlock.Push(0);
+                pushingBlock = null;
             }
         }
 
@@ -35,16 +45,15 @@ namespace Spelunky {
             if (player.directionalInput.y > 0) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
-            else if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.collider.CompareTag("OneWayPlatform")) {
+            else if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.colliderVertical.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
         }
 
-        private bool pushing;
-
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
-                if (pushing) {
+                if (pushingBlock != null) {
+                    pushingBlock.Push(player.pushBlockSpeed * player.directionalInput.x);
                     player.Visuals.animator.Play("Push", 1, false);
                 }
                 else if (player.directionalInput.y < 0) {
@@ -57,10 +66,12 @@ namespace Spelunky {
                 if (player.sprinting) {
                     player.Visuals.animator.fps = 18;
                 }
-
-                pushing = false;
             }
             else {
+                if (pushingBlock != null) {
+                    pushingBlock.Push(0);
+                }
+
                 if (player.directionalInput.y < 0) {
                     player.Visuals.animator.Play("Duck");
                 }
@@ -108,22 +119,33 @@ namespace Spelunky {
             }
         }
 
-        public void OnCollision(CollisionInfo collisionInfo) {
-            // TODO: The block gets stuck to the player. The same happens to the Cavemen. Fix it!
-            // TODO: How do we make the block stop immediately when we stop pushing?
-            if (collisionInfo.collider.CompareTag("Block")) {
-                print("block");
-                collisionInfo.collider.GetComponent<Block>().Push(player.pushBlockSpeed * player.directionalInput.x);
+        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
+            if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Block")) {
+                pushingBlock = collisionInfo.colliderHorizontal.GetComponent<Block>();
             }
+        }
 
-            if (collisionInfo.left || collisionInfo.right) {
-                pushing = true;
+        private void OnEntityPhysicsCollisionExit(CollisionInfo collisionInfo) {
+            if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Block")) {
+                // Just to see if things work as expected.
+                if (pushingBlock != collisionInfo.colliderHorizontal.GetComponent<Block>()) {
+                    Debug.LogError("Trying to exit the collision from a different block that we entered the collision with!");
+                }
+                pushingBlock.Push(0);
+                pushingBlock = null;
+            }
+        }
+
+        public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            if (pushingBlock != null && player.directionalInput.x == 0) {
+                velocity.x = 0;
             }
         }
 
         public override void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
             velocity.y = 0;
         }
+
     }
 
 }

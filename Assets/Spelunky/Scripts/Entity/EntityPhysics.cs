@@ -5,12 +5,14 @@ using UnityEngine.Events;
 namespace Spelunky {
 
     [Serializable]
-    public class UnityCollisionInfoEvent : UnityEvent<CollisionInfo> {
+    public class CollisionInfoEvent : UnityEvent<CollisionInfo> {
     }
 
     [RequireComponent(typeof(BoxCollider2D))]
     public class EntityPhysics : MonoBehaviour {
-        public UnityCollisionInfoEvent OnCollisionEvent { get; private set; } = new UnityCollisionInfoEvent();
+
+        public CollisionInfoEvent OnCollisionEnterEvent { get; private set; } = new CollisionInfoEvent();
+        public CollisionInfoEvent OnCollisionExitEvent { get; private set; } = new CollisionInfoEvent();
 
         private struct RaycastOrigins {
             public Vector2 topLeft, topRight;
@@ -19,10 +21,9 @@ namespace Spelunky {
 
         public BoxCollider2D Collider { get; private set; }
 
-        public bool useFixedUpdate;
-        public bool useGravity;
-
         public CollisionInfo collisionInfo;
+        public CollisionInfo collisionInfoLastFrame;
+
         public LayerMask collisionMask;
         public float skinWidth;
         public int horizontalRayCount;
@@ -54,23 +55,8 @@ namespace Spelunky {
             CalculateRaySpacing();
         }
 
-        public Vector2 velocity;
-
-        private void FixedUpdate() {
-            if (!useFixedUpdate) {
-                return;
-            }
-
-            if (useGravity) {
-                velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-            }
-
-            Move(velocity * Time.deltaTime);
-        }
-
         public void Move(Vector2 moveDelta) {
-            // Save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame.
-            collisionInfo.wasGroundedLastFrame = collisionInfo.down;
+            collisionInfoLastFrame = collisionInfo;
 
             UpdateRaycastOrigins();
 
@@ -85,6 +71,19 @@ namespace Spelunky {
             }
 
             transform.Translate(moveDelta);
+
+            // Set our becameGrounded state based on the previous and current collision state.
+            if (!collisionInfoLastFrame.down && collisionInfo.down) {
+                collisionInfo.becameGroundedThisFrame = true;
+            }
+
+            if ((!collisionInfoLastFrame.left && collisionInfo.left) || (!collisionInfoLastFrame.right && collisionInfo.right) || (!collisionInfoLastFrame.down && collisionInfo.down) || (!collisionInfoLastFrame.up && collisionInfo.up)) {
+                OnCollisionEnterEvent?.Invoke(collisionInfo);
+            }
+
+            if ((collisionInfoLastFrame.left && !collisionInfo.left) || (collisionInfoLastFrame.right && !collisionInfo.right) || (collisionInfoLastFrame.down && !collisionInfo.down) || (collisionInfoLastFrame.up && !collisionInfo.up)) {
+                OnCollisionExitEvent?.Invoke(collisionInfoLastFrame);
+            }
         }
 
         private void HorizontalCollisions(ref Vector2 moveDelta) {
@@ -95,8 +94,6 @@ namespace Spelunky {
             if (Mathf.Abs(moveDelta.x) < skinWidth) {
                 rayLength = 2 * skinWidth;
             }
-
-            bool collided = false;
 
             for (int i = 0; i < horizontalRayCount; i++) {
                 Vector2 rayOrigin = directionX == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
@@ -117,15 +114,9 @@ namespace Spelunky {
                         collisionInfo.left = directionX == -1;
                         collisionInfo.right = directionX == 1;
                         collisionInfo.direction = collisionDirection;
-                        collisionInfo.collider = hit.collider;
-
-                        collided = true;
+                        collisionInfo.colliderHorizontal = hit.collider;
                     }
                 }
-            }
-
-            if (collided) {
-                OnCollisionEvent?.Invoke(collisionInfo);
             }
         }
 
@@ -133,8 +124,6 @@ namespace Spelunky {
             float directionY = Mathf.Sign(moveDelta.y);
             CollisionDirection collisionDirection = moveDelta.y > 0 ? CollisionDirection.Up : CollisionDirection.Down;
             float rayLength = Mathf.Abs(moveDelta.y) + skinWidth;
-
-            bool collided = false;
 
             for (int i = 0; i < verticalRayCount; i++) {
                 Vector2 rayOrigin = directionY == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
@@ -155,20 +144,9 @@ namespace Spelunky {
                         collisionInfo.down = directionY == -1;
                         collisionInfo.up = directionY == 1;
                         collisionInfo.direction = collisionDirection;
-                        collisionInfo.collider = hit.collider;
-
-                        collided = true;
+                        collisionInfo.colliderVertical = hit.collider;
                     }
                 }
-            }
-
-            // Set our becameGrounded state based on the previous and current collision state.
-            if (!collisionInfo.wasGroundedLastFrame && collisionInfo.down) {
-                collisionInfo.becameGroundedThisFrame = true;
-            }
-
-            if (collided) {
-                OnCollisionEvent?.Invoke(collisionInfo);
             }
         }
 
@@ -220,6 +198,7 @@ namespace Spelunky {
             _horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
             _verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
         }
+
     }
 
 }

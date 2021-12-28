@@ -2,7 +2,7 @@
 
 namespace Spelunky {
 
-    public class Spider : Enemy {
+    public class Spider : Entity {
         public float minJumpWaitTime;
         public float maxJumpWaitTime;
         public Vector2 jumpVelocity;
@@ -26,6 +26,11 @@ namespace Spelunky {
             targetDetectionDistance = 128;
         }
 
+        public override void Awake() {
+            base.Awake();
+            Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
+        }
+
         private void Update() {
             DetectTargetWhenHanging();
 
@@ -34,11 +39,11 @@ namespace Spelunky {
             }
 
             _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-            EntityPhysics.Move(_velocity * Time.deltaTime);
+            Physics.Move(_velocity * Time.deltaTime);
 
             _idleDuration -= Time.deltaTime;
 
-            if (_flipping && EntityPhysics.collisionInfo.becameGroundedThisFrame) {
+            if (_flipping && Physics.collisionInfo.becameGroundedThisFrame) {
                 _flipping = false;
                 _landed = true;
             }
@@ -60,35 +65,27 @@ namespace Spelunky {
 
             if (hit.collider != null) {
                 _targetToMoveTowards = hit.transform;
-                EntityVisuals.animator.Play("Flip");
+                Visuals.animator.Play("Flip");
                 _flipping = true;
             }
         }
 
         private void JumpTowardsTarget() {
-            if (EntityPhysics.collisionInfo.becameGroundedThisFrame) {
+            if (Physics.collisionInfo.becameGroundedThisFrame) {
                 _idleDuration = Random.Range(minJumpWaitTime, maxJumpWaitTime);
             }
 
-            if (EntityPhysics.collisionInfo.up) {
-                _velocity.y = 0;
-            }
-
-            if (EntityPhysics.collisionInfo.left || EntityPhysics.collisionInfo.right) {
-                _velocity.x *= -0.25f;
-            }
-
-            if (!EntityPhysics.collisionInfo.down) {
+            if (!Physics.collisionInfo.down) {
                 if (_velocity.y > 0) {
-                    EntityVisuals.animator.Play("Jump");
+                    Visuals.animator.Play("Jump");
                 }
                 else {
-                    EntityVisuals.animator.Play("Fall");
+                    Visuals.animator.Play("Fall");
                 }
             }
             else {
                 _velocity = Vector2.zero;
-                EntityVisuals.animator.Play("Idle");
+                Visuals.animator.Play("Idle");
                 if (_idleDuration <= 0f) {
                     DoSingleJump();
                 }
@@ -99,6 +96,18 @@ namespace Spelunky {
             float sign = Mathf.Sign(_targetToMoveTowards.position.x - transform.position.x);
             _velocity = new Vector2(jumpVelocity.x * sign, jumpVelocity.y);
         }
+
+
+        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
+            if (collisionInfo.up) {
+                _velocity.y = 0;
+            }
+
+            if (collisionInfo.left || collisionInfo.right) {
+                _velocity.x *= -0.25f;
+            }
+        }
+
     }
 
 }

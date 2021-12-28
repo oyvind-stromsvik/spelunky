@@ -3,11 +3,7 @@ using UnityEngine;
 
 namespace Spelunky {
 
-    [RequireComponent(typeof(EntityPhysics), typeof(EntityHealth), typeof(EntityVisuals))]
-    public class Player : MonoBehaviour {
-        public EntityVisuals Visuals { get; private set; }
-        public EntityPhysics Physics { get; private set; }
-        public EntityHealth Health { get; private set; }
+    public class Player : Entity {
 
         public PlayerInput Input { get; private set; }
         public PlayerAudio Audio { get; private set; }
@@ -64,14 +60,12 @@ namespace Spelunky {
 
         private float _stunDuration;
 
-        private void Awake() {
+        public override void Awake() {
+            base.Awake();
+
             _gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
             _maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
             _minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(_gravity) * minJumpHeight);
-
-            Visuals = GetComponent<EntityVisuals>();
-            Physics = GetComponent<EntityPhysics>();
-            Health = GetComponent<EntityHealth>();
 
             Input = GetComponent<PlayerInput>();
             Audio = GetComponent<PlayerAudio>();
@@ -100,11 +94,11 @@ namespace Spelunky {
                 }
             }
 
+            _stunDuration -= Time.deltaTime;
+
             Physics.Move(velocity * Time.deltaTime);
 
             stateMachine.CurrentState.ChangePlayerVelocityAfterMove(ref velocity);
-
-            _stunDuration -= Time.deltaTime;
         }
 
         private void SetPlayerSpeed() {
@@ -153,7 +147,7 @@ namespace Spelunky {
                 }
             }
 
-            bombInstance.Physics.velocity = bombVelocity;
+            bombInstance._velocity = bombVelocity;
         }
 
         public void ThrowRope() {
