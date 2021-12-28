@@ -45,7 +45,7 @@ namespace Spelunky {
 
             // This was just what felt right.
             // TODO: Maybe this isn't the best suited for when we're grabbing with the glove. Investigate this.
-            const float yOffset = 10f;
+            const float yOffset = 12f;
             const float rayLength = 9f;
 
             RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.up * yOffset, direction, rayLength, player.edgeGrabLayerMask);
