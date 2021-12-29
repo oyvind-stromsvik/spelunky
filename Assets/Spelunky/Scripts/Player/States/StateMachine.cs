@@ -10,18 +10,18 @@ namespace Spelunky {
                     return;
                 }
 
-                if (!newState.CanEnter()) {
+                if (!newState.CanEnterState()) {
                     return;
                 }
 
-                CurrentState.Exit();
+                CurrentState.ExitState();
                 CurrentState.enabled = false;
                 PreviousState = CurrentState;
             }
 
             CurrentState = newState;
             CurrentState.enabled = true;
-            CurrentState.Enter();
+            CurrentState.EnterState();
         }
     }
 

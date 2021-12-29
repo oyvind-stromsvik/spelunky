@@ -42,10 +42,12 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -93,6 +95,7 @@ GameObject:
   - component: {fileID: 8060265210379454942}
   - component: {fileID: 3491064854465480449}
   - component: {fileID: 7360653207189137735}
+  - component: {fileID: -6008720937781482049}
   m_Layer: 16
   m_Name: GoldBarStack
   m_TagString: Untagged
@@ -167,8 +170,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useFixedUpdate: 0
-  useGravity: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -176,4 +177,24 @@ MonoBehaviour:
   horizontalRayCount: 4
   verticalRayCount: 3
   raycastsHitTriggers: 0
-  velocity: {x: 0, y: 0}
+--- !u!50 &-6008720937781482049
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8281725173081034806}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

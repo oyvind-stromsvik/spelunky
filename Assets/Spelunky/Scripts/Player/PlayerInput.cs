@@ -2,8 +2,12 @@ using UnityEngine;
 
 namespace Spelunky {
 
+    /// <summary>
+    /// TODO: Replace with new input system. To be honest I thought I had done that ages ago.
+    /// </summary>
     [RequireComponent(typeof(Player))]
     public class PlayerInput : MonoBehaviour {
+
         public float joystickDeadzone;
 
         private Player _player;
@@ -48,6 +52,7 @@ namespace Spelunky {
                 _player.stateMachine.CurrentState.OnAttackInputDown();
             }
         }
+
     }
 
 }

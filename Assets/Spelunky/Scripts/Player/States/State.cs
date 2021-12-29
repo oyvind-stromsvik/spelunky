@@ -6,21 +6,49 @@ namespace Spelunky {
     public abstract class State : MonoBehaviour {
         [HideInInspector] public Player player;
 
-        public virtual void Awake() {
+        /// <summary>
+        /// TODO: Remove this. We need to get the player some other way and we shouldn't really need a reference to the
+        /// player in here at all so that we can use the state logic for NPCs as well.
+        /// </summary>
+        private void Awake() {
             player = GetComponent<Player>();
             enabled = false;
         }
 
-        public virtual bool CanEnter() {
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A boolean indiciating whether we're allowed to enter the state or not.</returns>
+        public virtual bool CanEnterState() {
             return true;
         }
 
-        public virtual void Enter() {
+        /// <summary>
+        /// Called when we enter the state.
+        ///
+        /// Use this to perform any initialization logic for the state.
+        /// </summary>
+        public virtual void EnterState() {
         }
 
-        public virtual void Exit() {
+        /// <summary>
+        /// Called when we exit the state.
+        ///
+        /// Use this to perform any cleanup logic for the state.
+        /// </summary>
+        public virtual void ExitState() {
         }
 
+        /// <summary>
+        /// Called from Update(). The only way the state should do per frame logic to avoid race conditions etc.
+        /// </summary>
+        public virtual void UpdateState() {
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="input"></param>
         public virtual void OnDirectionalInput(Vector2 input) {
             player.directionalInput = input;
 
@@ -32,6 +60,9 @@ namespace Spelunky {
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public virtual void OnJumpInputDown() {
             player.velocity.y = player._maxJumpVelocity;
             if ((player.stateMachine.CurrentState == player.climbingState || player.stateMachine.CurrentState == player.hangingState) && player.directionalInput.y < 0) {
@@ -54,28 +85,46 @@ namespace Spelunky {
             player.stateMachine.AttemptToChangeState(player.inAirState);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public virtual void OnJumpInputUp() {
             if (player.velocity.y > player._minJumpVelocity) {
                 player.velocity.y = player._minJumpVelocity;
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public virtual void OnBombInputDown() {
             player.ThrowBomb();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public virtual void OnRopeInputDown() {
             player.ThrowRope();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public virtual void OnUseInputDown() {
             player.Use();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public virtual void OnAttackInputDown() {
             player.Attack();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public void ResetFallingThroughPlatform() {
             player.Physics.collisionInfo.fallingThroughPlatform = false;
         }
@@ -99,6 +148,10 @@ namespace Spelunky {
         public virtual void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
         public virtual bool LockInput() {
             return false;
         }

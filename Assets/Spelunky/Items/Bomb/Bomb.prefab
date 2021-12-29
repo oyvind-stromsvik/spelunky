@@ -120,6 +120,7 @@ GameObject:
   - component: {fileID: -217999298232589494}
   - component: {fileID: 4144584583855800121}
   - component: {fileID: 6673599234638747701}
+  - component: {fileID: -3693928449106682672}
   m_Layer: 14
   m_Name: Bomb
   m_TagString: Untagged
@@ -185,6 +186,7 @@ MonoBehaviour:
   bounceClip: {fileID: 8300000, guid: 39b30b1d23679b24d8015c8d76a31145, type: 3}
   bombTimerClip: {fileID: 8300000, guid: 264515f24014bee45a552a9b68e94d95, type: 3}
   timeToExplode: 3
+  _velocity: {x: 0, y: 0}
 --- !u!82 &-7030764533147636328
 AudioSource:
   m_ObjectHideFlags: 0
@@ -301,7 +303,6 @@ MonoBehaviour:
   horizontalRayCount: 2
   verticalRayCount: 2
   raycastsHitTriggers: 0
-  velocity: {x: 0, y: 0}
 --- !u!114 &4144584583855800121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -333,3 +334,24 @@ MonoBehaviour:
   facingDirection: -1
   renderer: {fileID: 0}
   animator: {fileID: 0}
+--- !u!50 &-3693928449106682672
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6430094435519817004}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

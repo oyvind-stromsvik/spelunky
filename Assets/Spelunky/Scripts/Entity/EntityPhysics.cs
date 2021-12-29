@@ -1,14 +1,8 @@
-using System;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Spelunky {
 
-    [Serializable]
-    public class CollisionInfoEvent : UnityEvent<CollisionInfo> {
-    }
-
-    [RequireComponent(typeof(BoxCollider2D))]
+    [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
     public class EntityPhysics : MonoBehaviour {
 
         public CollisionInfoEvent OnCollisionEnterEvent { get; private set; } = new CollisionInfoEvent();
@@ -45,9 +39,29 @@ namespace Spelunky {
             horizontalRayCount = 4;
             verticalRayCount = 4;
             raycastsHitTriggers = false;
+
+            ValidateData();
+        }
+
+        private void OnValidate() {
+            ValidateData();
+        }
+
+        private void ValidateData() {
+            // Even though we're doing the full collision detection and handling ourselves a rigidbody is required for
+            // Unity to even allow colliders to detect triggers and we use triggers for various things. So we add a
+            // rigidbody, but we make sure it's impossible to actually interact with it.
+            Rigidbody2D rigidbody2D = GetComponent<Rigidbody2D>();
+            // Ensure the rigidbody doesn't actually affect us.
+            rigidbody2D.isKinematic = true;
+            // Disable and collapse the inspector.
+            rigidbody2D.hideFlags = HideFlags.NotEditable;
+            UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(rigidbody2D, false);
         }
 
         private void Awake() {
+            // TODO: Do the same for the collider as for the rigidbody above? We just need to expose the variables we
+            // need to be able to change like size, offset, bounds etc.
             Collider = GetComponent<BoxCollider2D>();
         }
 
@@ -55,6 +69,15 @@ namespace Spelunky {
             CalculateRaySpacing();
         }
 
+        /// <summary>
+        /// Move the entity by the provided delta and do collision detection and handling for the move.
+        ///
+        /// NOTE: Currently this is called from Update(). I want to make it so that it's called from FixedUpdate(), or
+        /// maybe even so that we remove Move() altogether and take full control over the call order so that the caller
+        /// can't do things in the wrong order. The reason I don't use FixedUpdate() at the moment is because I don't
+        /// understand how to properly interpolate the movement.
+        /// </summary>
+        /// <param name="moveDelta"></param>
         public void Move(Vector2 moveDelta) {
             collisionInfoLastFrame = collisionInfo;
 

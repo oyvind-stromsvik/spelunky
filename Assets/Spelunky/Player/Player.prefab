@@ -178,7 +178,7 @@ Transform:
 --- !u!50 &441570235812081202
 Rigidbody2D:
   serializedVersion: 4
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -343,6 +343,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 41216
   cam: {fileID: 0}
+  _exitDoor: {fileID: 0}
   bomb: {fileID: 6430094435519817005, guid: 5d73f589b7d7d3b489523140e46bf32b, type: 3}
   rope: {fileID: 5904638784943168102, guid: 664121d23d46b3c43a145ba4c636c15f, type: 3}
   maxJumpHeight: 24
@@ -353,6 +354,7 @@ MonoBehaviour:
   crawlSpeed: 24
   runSpeed: 48
   sprintSpeed: 96
+  pushBlockSpeed: 16
   sprinting: 0
   groundedGracePeriod: 0.05
   groundedGraceTimer: 0
@@ -360,12 +362,10 @@ MonoBehaviour:
   _minJumpVelocity: 0
   velocity: {x: 0, y: 0}
   directionalInput: {x: 0, y: 0}
-  pushBlockSpeed: 16
   recentlyJumped: 0
   _lastJumpTimer: 0
   _lookTimer: 0
   _timeBeforeLook: 1
-  _exitDoor: {fileID: 0}
 --- !u!114 &8645646398547493291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -385,7 +385,6 @@ MonoBehaviour:
   horizontalRayCount: 4
   verticalRayCount: 3
   raycastsHitTriggers: 0
-  velocity: {x: 0, y: 0}
 --- !u!114 &8124188979697528624
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -477,6 +476,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
+  pushingBlock: {fileID: 0}
 --- !u!114 &-3839825326305256150
 MonoBehaviour:
   m_ObjectHideFlags: 0

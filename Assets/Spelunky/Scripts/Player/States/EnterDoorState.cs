@@ -8,9 +8,10 @@ namespace Spelunky {
     /// The state we're in when we're entering a door (exiting a level).
     /// </summary>
     public class EnterDoorState : State {
+
         public AudioClip enterDoorClip;
 
-        public override bool CanEnter() {
+        public override bool CanEnterState() {
             if (player._exitDoor == null) {
                 return false;
             }
@@ -18,8 +19,12 @@ namespace Spelunky {
             return true;
         }
 
-        public override void Enter() {
+        public override void EnterState() {
             StartCoroutine(EnterDoor());
+        }
+
+        public override bool LockInput() {
+            return true;
         }
 
         private IEnumerator EnterDoor() {
@@ -38,13 +43,11 @@ namespace Spelunky {
                 yield return null;
             }
 
+            // TODO: This is just temporary. We should load the next level here, while obviously saving character stats.
             Scene scene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(scene.name);
         }
 
-        public override bool LockInput() {
-            return true;
-        }
     }
 
 }

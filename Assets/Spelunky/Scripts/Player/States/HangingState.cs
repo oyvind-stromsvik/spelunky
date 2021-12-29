@@ -2,12 +2,16 @@ using UnityEngine;
 
 namespace Spelunky {
 
+    /// <summary>
+    /// The state we're in when we hang from a tile or block.
+    /// </summary>
     public class HangingState : State {
+
         public bool grabbedWallUsingGlove;
         public Collider2D colliderToHangFrom;
 
-        public override bool CanEnter() {
-            // The tile we were going to hang from was destroyed.
+        public override bool CanEnterState() {
+            // We can't enter this state without something to hang from.
             if (colliderToHangFrom == null) {
                 return false;
             }
@@ -15,7 +19,7 @@ namespace Spelunky {
             return true;
         }
 
-        public override void Enter() {
+        public override void EnterState() {
             Vector2 hangPosition = new Vector2(transform.position.x, colliderToHangFrom.transform.position.y + 6);
             if (player.Visuals.isFacingRight) {
                 if (colliderToHangFrom.transform.position.x < player.transform.position.x) {
@@ -34,12 +38,10 @@ namespace Spelunky {
 
             transform.position = new Vector2(hangPosition.x, hangPosition.y);
 
-            player.Visuals.animator.Play("Hang");
-
             player.Audio.Play(player.Audio.grabClip);
         }
 
-        private void Update() {
+        public override void UpdateState() {
             // The tile we're hanging from was destroyed.
             if (colliderToHangFrom == null) {
                 player.stateMachine.AttemptToChangeState(player.inAirState);
@@ -65,6 +67,9 @@ namespace Spelunky {
         }
 
         public override void OnDirectionalInput(Vector2 input) {
+            // We have to disallow horizontal input even though we zero the velocity in this state, otherwise we whould
+            // be able to change our facing direction which would look completely wrong. We still allow vertical input
+            // because we use that for looking up or down.
             input.x = 0;
             base.OnDirectionalInput(input);
         }
@@ -75,8 +80,10 @@ namespace Spelunky {
 
         public override void OnAttackInputDown() {
             base.OnAttackInputDown();
+            // If we attack while hanging we should fall.
             player.stateMachine.AttemptToChangeState(player.inAirState);
         }
+
     }
 
 }
