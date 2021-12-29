@@ -22,12 +22,12 @@ namespace Spelunky {
         public override void UpdateState() {
             player.groundedGraceTimer += Time.deltaTime;
 
-            HandleEdgeGrabbing();
-
             // TODO: We currently only have a single sprite for anything "air" related. Later on we would probably
             // created animations for jumping, falling etc. It's especially important to have something for when we're
             // ragdolled.
             player.Visuals.animator.Play("Jump");
+
+            HandleEdgeGrabbing();
         }
 
         public override void OnDirectionalInput(Vector2 input) {
