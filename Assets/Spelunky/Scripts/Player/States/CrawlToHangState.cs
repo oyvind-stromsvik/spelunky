@@ -9,6 +9,19 @@ namespace Spelunky {
     /// </summary>
     public class CrawlToHangState : State {
 
+        public override bool CanEnterState() {
+            // Find the collider we're going to grab on to.
+            Vector3 offset = new Vector3(-6 * player.Visuals.facingDirection, 1, 0);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position + offset, Vector2.down, 2, player.edgeGrabLayerMask);
+            if (hit.collider == null) {
+                return false;
+            }
+
+            player.hangingState.colliderToHangFrom = hit.collider;
+
+            return true;
+        }
+
         public override void EnterState() {
             StartCoroutine(CrawlToHang());
         }
@@ -18,16 +31,10 @@ namespace Spelunky {
         }
 
         private IEnumerator CrawlToHang() {
-            // Find the collider we're going to grab on to.
-            Vector3 offset = new Vector3(-6 * player.Visuals.facingDirection, 1, 0);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position + offset, Vector2.down, 2, player.edgeGrabLayerMask);
-            Debug.DrawRay(transform.position + offset, Vector2.down * 4, Color.yellow);
-
             player.Visuals.animator.Play("CrawlToHang");
 
             yield return new WaitForSeconds(player.Visuals.animator.GetAnimationLength("CrawlToHang"));
 
-            player.hangingState.colliderToHangFrom = hit.collider;
             player.stateMachine.AttemptToChangeState(player.hangingState);
         }
 

@@ -37,8 +37,9 @@ namespace Spelunky {
 
             if (!player.Physics.collisionInfo.down) {
                 if (player.directionalInput.y < 0) {
-                    player.stateMachine.AttemptToChangeState(player.crawlToHangState);
-                    return;
+                    if (player.stateMachine.AttemptToChangeState(player.crawlToHangState)) {
+                        return;
+                    }
                 }
 
                 player.stateMachine.AttemptToChangeState(player.inAirState);
