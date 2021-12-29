@@ -38,6 +38,12 @@ namespace Spelunky {
 
             transform.position = new Vector2(hangPosition.x, hangPosition.y);
 
+            // Set our sprite to the hang sprite immediately when we enter this state because the conditionals we
+            // currently have in UpdateState() could lead to us not actually changing to the Hang sprite if we have tiny
+            // amount of vertical directional input.
+            // TODO: This can probably be fixed properly in the UpdateState() instead?
+            player.Visuals.animator.Play("Hang");
+
             player.Audio.Play(player.Audio.grabClip);
         }
 
