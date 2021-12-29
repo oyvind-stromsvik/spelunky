@@ -22,12 +22,12 @@ namespace Spelunky {
         public override void UpdateState() {
             player.groundedGraceTimer += Time.deltaTime;
 
-            HandleEdgeGrabbing();
-
             // TODO: We currently only have a single sprite for anything "air" related. Later on we would probably
             // created animations for jumping, falling etc. It's especially important to have something for when we're
             // ragdolled.
             player.Visuals.animator.Play("Jump");
+
+            HandleEdgeGrabbing();
         }
 
         public override void OnDirectionalInput(Vector2 input) {
@@ -65,7 +65,11 @@ namespace Spelunky {
             // This was just what felt right.
             // TODO: Maybe this isn't the best suited for when we're grabbing with the glove. Investigate this.
             const float yOffset = 12f;
-            const float rayLength = 9f;
+            // This should only stick 1 "pixel" out from our collider so that we can grab the tiniest of ledges.
+            // TODO: This doesn't currently work. We're able to stand on any width of ledge, but we're not able to grab
+            // very tiny ledges. We need a better check here. There's also a bug with CrawlToHang if we're on really
+            // tiny ledges where it will hang on the ledge above us instead of the one below us.
+            const float rayLength = 5f;
 
             RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.up * yOffset, direction, rayLength, player.edgeGrabLayerMask);
             Debug.DrawRay(transform.position + Vector3.up * yOffset, direction * rayLength, Color.cyan);

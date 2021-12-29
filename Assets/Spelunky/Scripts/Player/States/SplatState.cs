@@ -15,7 +15,14 @@ namespace Spelunky {
         public override void EnterState() {
             player.Visuals.animator.Play("Splat");
             player.Audio.Play(splatClip);
+            // TODO: This is temporary. The health class should handle dying and death effects. We're not technically
+            // dead here currently either as nothing has reduced our health.
+            Instantiate(player.Health.bloodParticles, transform.position, Quaternion.identity);
             player.Physics.Collider.enabled = false;
+        }
+
+        public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            velocity = Vector2.zero;
         }
 
         public override bool LockInput() {

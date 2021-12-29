@@ -397,7 +397,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e228eb65e4d64e1684a1d07ecc9bda1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  joystickDeadzone: 0.1
+  joystickDeadzone: 0.15
 --- !u!114 &-5236971530926676888
 MonoBehaviour:
   m_ObjectHideFlags: 0

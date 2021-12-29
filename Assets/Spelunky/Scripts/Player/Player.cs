@@ -214,6 +214,25 @@ namespace Spelunky {
                 stateMachine.AttemptToChangeState(splatState);
             }
         }
+
+        private void OnGUI() {
+            string[] debugInfo = {
+                "--- Player info ---",
+                "State: " + stateMachine.CurrentState.GetType().Name,
+                "Velocity: " + velocity,
+                "--- Collision info --- ",
+                "Down: " + Physics.collisionInfo.down,
+                "Left: " + Physics.collisionInfo.left,
+                "Right: " + Physics.collisionInfo.right,
+                "Up: " + Physics.collisionInfo.up,
+                "Collider horizontal: " + Physics.collisionInfo.colliderHorizontal,
+                "Collider vertical: " + Physics.collisionInfo.colliderVertical,
+                "Falling through platform: " + Physics.collisionInfo.fallingThroughPlatform
+            };
+            for (int i = 0; i < debugInfo.Length; i++) {
+                GUI.Label(new Rect(8, 52 + 16 * i, 300, 22), debugInfo[i]);
+            }
+        }
     }
 
 }

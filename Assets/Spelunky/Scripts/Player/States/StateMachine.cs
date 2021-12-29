@@ -1,17 +1,18 @@
 namespace Spelunky {
 
     public class StateMachine {
+
         public State CurrentState { get; private set; }
         public State PreviousState { get; private set; }
 
-        public void AttemptToChangeState(State newState) {
+        public bool AttemptToChangeState(State newState) {
             if (CurrentState != null) {
                 if (newState == CurrentState) {
-                    return;
+                    return false;
                 }
 
                 if (!newState.CanEnterState()) {
-                    return;
+                    return false;
                 }
 
                 CurrentState.ExitState();
@@ -22,7 +23,10 @@ namespace Spelunky {
             CurrentState = newState;
             CurrentState.enabled = true;
             CurrentState.EnterState();
+
+            return true;
         }
+
     }
 
 }
