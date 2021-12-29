@@ -146,7 +146,7 @@ Transform:
 --- !u!50 &441570235812081202
 Rigidbody2D:
   serializedVersion: 4
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -299,8 +299,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useFixedUpdate: 0
-  useGravity: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 45824
@@ -308,7 +306,6 @@ MonoBehaviour:
   horizontalRayCount: 3
   verticalRayCount: 3
   raycastsHitTriggers: 0
-  velocity: {x: 0, y: 0}
 --- !u!114 &1619121511715360887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,3 +352,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 16
   damage: 1
+  _velocity: {x: 0, y: 0}

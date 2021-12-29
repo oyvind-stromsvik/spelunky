@@ -1,13 +1,20 @@
 using System.Collections;
 using UnityEngine;
 
-// TODO: This is actually a transition between grounded and hanging.
-//   Figure out a way how to solve this more elegantly?
 namespace Spelunky {
 
+    /// <summary>
+    /// This state is essentially just a transition to the HangingState, but you can only enter this state by crawling
+    /// and you can only enter the HangingState by jumping so they behave very differently.
+    /// </summary>
     public class CrawlToHangState : State {
-        public override void Enter() {
+
+        public override void EnterState() {
             StartCoroutine(CrawlToHang());
+        }
+
+        public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            velocity = Vector2.zero;
         }
 
         private IEnumerator CrawlToHang() {
@@ -24,9 +31,6 @@ namespace Spelunky {
             player.stateMachine.AttemptToChangeState(player.hangingState);
         }
 
-        public override void ChangePlayerVelocity(ref Vector2 velocity) {
-            velocity = Vector2.zero;
-        }
     }
 
 }

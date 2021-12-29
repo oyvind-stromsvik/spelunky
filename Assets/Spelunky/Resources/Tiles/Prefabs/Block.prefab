@@ -67,7 +67,7 @@ BoxCollider2D:
 --- !u!50 &5278255645147940697
 Rigidbody2D:
   serializedVersion: 4
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -98,7 +98,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   landClip: {fileID: 8300000, guid: d85a968d14bbfe2469b8441a080f6b5f, type: 3}
-  pushSpeed: 0
 --- !u!82 &372345064638002506
 AudioSource:
   m_ObjectHideFlags: 0
@@ -215,7 +214,6 @@ MonoBehaviour:
   horizontalRayCount: 4
   verticalRayCount: 4
   raycastsHitTriggers: 0
-  velocity: {x: 0, y: 0}
 --- !u!114 &1081932905278690019
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -11,7 +11,8 @@ namespace Spelunky {
 
         public Collider2D whipCollider;
 
-        [Header("States")] public GroundedState groundedState;
+        [Header("States")]
+        public GroundedState groundedState;
         public InAirState inAirState;
         public HangingState hangingState;
         public ClimbingState climbingState;
@@ -19,13 +20,17 @@ namespace Spelunky {
         public EnterDoorState enterDoorState;
         public SplatState splatState;
 
-        [Header("Crap")] public LayerMask edgeGrabLayerMask;
+        [Header("Crap")]
+        public LayerMask edgeGrabLayerMask;
         public CameraFollow cam;
+        public Exit _exitDoor;
 
-        [Header("Abilities")] public Bomb bomb;
+        [Header("Abilities")]
+        public Bomb bomb;
         public Rope rope;
 
-        [Header("Movement")] public float maxJumpHeight;
+        [Header("Movement")]
+        public float maxJumpHeight;
         public float minJumpHeight;
         public float timeToJumpApex;
         public float accelerationTime;
@@ -33,6 +38,7 @@ namespace Spelunky {
         public float crawlSpeed;
         public float runSpeed;
         public float sprintSpeed;
+        public float pushBlockSpeed;
 
         [HideInInspector] public bool sprinting;
 
@@ -44,11 +50,12 @@ namespace Spelunky {
         private float _gravity;
         [HideInInspector] public float _maxJumpVelocity;
         [HideInInspector] public float _minJumpVelocity;
+        // TODO: Make this private. Currently the jump logic in State.cs is the only place we set this, but I'm not
+        // entirely sure how to refactor that so that.
         [HideInInspector] public Vector2 velocity;
         private float _velocityXSmoothing;
         [HideInInspector] public Vector2 directionalInput;
         private float _speed;
-        public float pushBlockSpeed;
 
         [HideInInspector] public bool recentlyJumped;
         [HideInInspector] public float _lastJumpTimer;
@@ -57,8 +64,6 @@ namespace Spelunky {
         [HideInInspector] public float _timeBeforeLook = 1f;
 
         public StateMachine stateMachine = new StateMachine();
-
-        private float _stunDuration;
 
         public override void Awake() {
             base.Awake();
@@ -79,6 +84,8 @@ namespace Spelunky {
         }
 
         private void Update() {
+            stateMachine.CurrentState.UpdateState();
+
             SetPlayerSpeed();
             CalculateVelocity();
 
@@ -93,8 +100,6 @@ namespace Spelunky {
                     recentlyJumped = false;
                 }
             }
-
-            _stunDuration -= Time.deltaTime;
 
             Physics.Move(velocity * Time.deltaTime);
 
@@ -116,10 +121,8 @@ namespace Spelunky {
         }
 
         private void CalculateVelocity() {
-            if (_stunDuration <= 0f) {
-                float targetVelocityX = directionalInput.x * _speed;
-                velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
-            }
+            float targetVelocityX = directionalInput.x * _speed;
+            velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
 
             velocity.y += _gravity * Time.deltaTime;
 
@@ -194,8 +197,6 @@ namespace Spelunky {
             whipCollider.enabled = false;
         }
 
-        public Exit _exitDoor;
-
         public void EnteredDoorway(Exit door) {
             _exitDoor = door;
         }
@@ -206,16 +207,6 @@ namespace Spelunky {
 
         public void Splat() {
             stateMachine.AttemptToChangeState(splatState);
-        }
-
-        public void TakeDamage(int damage, CollisionDirection direction) {
-            if (GetComponent<EntityHealth>().IsInvulernable) {
-                return;
-            }
-
-            GetComponent<EntityHealth>().TakeDamage(damage);
-            velocity = new Vector2(128 * Visuals.facingDirection * -1, 64);
-            _stunDuration = 0.5f;
         }
 
         private void OnHealthChanged() {

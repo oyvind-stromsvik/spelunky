@@ -7,12 +7,13 @@ namespace Spelunky {
     /// The state we're in when we're climbing a ladder or a rope.
     /// </summary>
     public class ClimbingState : State {
+
         public ContactFilter2D ladderFilter;
         public LayerMask ladderLayerMask;
 
         private Collider2D _closestCollider;
 
-        public override bool CanEnter() {
+        public override bool CanEnterState() {
             if (player.directionalInput.y == 0) {
                 return false;
             }
@@ -42,7 +43,7 @@ namespace Spelunky {
             return true;
         }
 
-        public override void Enter() {
+        public override void EnterState() {
             player.Physics.collisionInfo.fallingThroughPlatform = true;
             float xPos = _closestCollider.transform.position.x;
             player.Visuals.animator.Play("ClimbRope");
@@ -55,29 +56,22 @@ namespace Spelunky {
             player.Audio.Play(player.Audio.grabClip);
         }
 
-        private void Update() {
+        public override void UpdateState() {
             if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && !player.Physics.collisionInfo.colliderVertical.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
             // Continously look for a ladder collider so that we can react accordingly.
             _closestCollider = FindClosestOverlappedLadder();
-            if (_closestCollider == null) {
-                // NOTE: Do we want this? It's like this in Spelunky, but isn't it better
-                // for the player to have full control over when he drops from a ladder/rope?
-                // He can just press jump and hold down at the same time and he will do the
-                // same thing.
-                player.stateMachine.AttemptToChangeState(player.inAirState);
-            }
-            else {
+            if (_closestCollider) {
                 player.Visuals.animator.Play("ClimbRope", 1, false);
                 if (_closestCollider.CompareTag("Ladder")) {
                     player.Visuals.animator.Play("ClimbLadder", 1, false);
                 }
             }
 
-            if (player.directionalInput.y != 0) // Set the framerate of the climbing animation dynamically based on our climbing speed.
-            {
+            // Set the framerate of the climbing animation dynamically based on our climbing speed.
+            if (player.directionalInput.y != 0) {
                 player.Visuals.animator.fps = Mathf.RoundToInt(Mathf.Abs(player.directionalInput.y).Remap(0.1f, 1.0f, 4, 18));
             }
             else {
@@ -86,23 +80,22 @@ namespace Spelunky {
         }
 
         public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            // Allow us to move freely up and down, but disallow any horizontal movement.
             velocity.y = player.directionalInput.y * player.climbSpeed;
             velocity.x = 0;
 
-            // Raycast ahead of us and set our velocity to 0 if we are no longer on
-            // a ladder.
+            // Raycast ahead of us and set our velocity to 0 if there is no ladder (or rope) in front of us, effectively
+            // disallowing us from climbing off and falling. We have to manually jump to leave a ladder.
             Vector2 direction = Vector2.down;
-            Vector3 position = transform.position + Vector3.up * 16;
+            Vector3 position = transform.position + Vector3.up * 8;
             if (player.directionalInput.y > 0) {
                 direction = Vector2.up;
             }
-
             RaycastHit2D hit = Physics2D.Raycast(position, direction, 9, ladderLayerMask);
             Debug.DrawRay(position, direction * 9, Color.magenta);
             if (hit.collider == null) {
                 velocity.y = 0;
             }
-
         }
 
         /// <summary>
@@ -132,7 +125,7 @@ namespace Spelunky {
                     closestCollider = ladderCollider;
                 }
 
-                // Prioritize ropes over ladders due to the climbing animation.
+                // Prioritize ropes over ladders due to the sprite sort order.
                 if (currentDistance == closestDistance) {
                     if (ladderCollider.CompareTag("Rope")) {
                         closestCollider = ladderCollider;
@@ -142,6 +135,7 @@ namespace Spelunky {
 
             return closestCollider;
         }
+
     }
 
 }

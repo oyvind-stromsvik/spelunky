@@ -2,12 +2,32 @@ using UnityEngine;
 
 namespace Spelunky {
 
+    /// <summary>
+    /// The state for whenever we're in the air, whether it's from jumping, falling or anything else.
+    /// </summary>
     public class InAirState : State {
-        [HideInInspector] public RaycastHit2D lastEdgeGrabRayCastHit;
 
-        public override void Awake() {
-            base.Awake();
+        private RaycastHit2D _lastEdgeGrabRayCastHit;
+        private bool _hitHead;
+        private bool _bouncedOnEnemy;
+
+        public override void EnterState() {
             player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
+        }
+
+        public override void ExitState() {
+            player.Physics.OnCollisionEnterEvent.RemoveListener(OnEntityPhysicsCollisionEnter);
+        }
+
+        public override void UpdateState() {
+            player.groundedGraceTimer += Time.deltaTime;
+
+            HandleEdgeGrabbing();
+
+            // TODO: We currently only have a single sprite for anything "air" related. Later on we would probably
+            // created animations for jumping, falling etc. It's especially important to have something for when we're
+            // ragdolled.
+            player.Visuals.animator.Play("Jump");
         }
 
         public override void OnDirectionalInput(Vector2 input) {
@@ -26,18 +46,17 @@ namespace Spelunky {
             base.OnJumpInputDown();
         }
 
-        private void Update() {
-            if (player.Physics.collisionInfo.becameGroundedThisFrame) {
-                player.stateMachine.AttemptToChangeState(player.groundedState);
+        public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            if (_hitHead) {
+                velocity.y = 0;
+                _hitHead = false;
             }
 
-            player.groundedGraceTimer += Time.deltaTime;
-
-            HandleEdgeGrabbing();
-
-            player.Visuals.animator.Play("Jump");
-
-            TryToClimb();
+            if (_bouncedOnEnemy) {
+                // TODO: This should not be a full jump. Maybe half height or something.
+                velocity.y = player._maxJumpVelocity;
+                _bouncedOnEnemy = false;
+            }
         }
 
         private void HandleEdgeGrabbing() {
@@ -66,42 +85,35 @@ namespace Spelunky {
                 // Otherwise we can only grab ledges (tile corners).
                 // lastEdgeGrabRayCastHit.collider == null ensures we'll only grab
                 // an actual ledge with air above it and only when we're falling downwards.
-                else if (lastEdgeGrabRayCastHit.collider == null) {
+                else if (_lastEdgeGrabRayCastHit.collider == null) {
                     player.hangingState.colliderToHangFrom = hit.collider;
                     player.stateMachine.AttemptToChangeState(player.hangingState);
                 }
             }
 
-            lastEdgeGrabRayCastHit = hit;
+            _lastEdgeGrabRayCastHit = hit;
         }
-
-        private void TryToClimb() {
-            player.stateMachine.AttemptToChangeState(player.climbingState);
-        }
-
-        private bool hitHead;
-        private bool bouncedOnEnemy;
 
         private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            if (collisionInfo.down && collisionInfo.colliderVertical.CompareTag("Enemy")) {
-                collisionInfo.colliderVertical.GetComponent<EntityHealth>().TakeDamage(1);
-                bouncedOnEnemy = true;
+            if (collisionInfo.down) {
+                if (collisionInfo.colliderVertical.CompareTag("Enemy")) {
+                    // TODO: Show some blood particles, play a sound etc. when this happened. Can maybe be generic in
+                    // the EntityHealth class for all damage? At least for now.
+                    collisionInfo.colliderVertical.GetComponent<EntityHealth>().TakeDamage(1);
+                    // Set a temporary flag so that we can apply the bounce velocity next frame. It's too late to do
+                    // it here. Update() calls Move() which checks for collisions which invokes this event. We won't
+                    // move again until the next frame so if we change the velocity here it will be changed/overridden
+                    // before it's applied.
+                    _bouncedOnEnemy = true;
+                }
+                else {
+                    player.stateMachine.AttemptToChangeState(player.groundedState);
+                }
             }
 
             if (collisionInfo.up) {
-                hitHead = true;
-            }
-        }
-
-        public override void ChangePlayerVelocity(ref Vector2 velocity) {
-            if (hitHead) {
-                player.velocity.y = 0;
-                hitHead = false;
-            }
-
-            if (bouncedOnEnemy) {
-                velocity.y = player._maxJumpVelocity;
-                bouncedOnEnemy = false;
+                // Same as _bouncedOnEnemy.
+                _hitHead = true;
             }
         }
 

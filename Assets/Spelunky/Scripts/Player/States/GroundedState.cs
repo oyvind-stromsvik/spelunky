@@ -2,11 +2,14 @@ using UnityEngine;
 
 namespace Spelunky {
 
+    /// <summary>
+    /// The state for whenever we're on the ground.
+    /// </summary>
     public class GroundedState : State {
 
         public Block pushingBlock;
 
-        public override void Enter() {
+        public override void EnterState() {
             player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.AddListener(OnEntityPhysicsCollisionExit);
 
@@ -15,7 +18,7 @@ namespace Spelunky {
             }
         }
 
-        public override void Exit() {
+        public override void ExitState() {
             player.Physics.OnCollisionEnterEvent.RemoveListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.RemoveListener(OnEntityPhysicsCollisionExit);
 
@@ -25,7 +28,7 @@ namespace Spelunky {
             }
         }
 
-        public void Update() {
+        public override void UpdateState() {
             player.groundedGraceTimer = 0;
 
             HandleHorizontalInput();
@@ -48,6 +51,16 @@ namespace Spelunky {
             else if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.colliderVertical.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.climbingState);
             }
+        }
+
+        public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            if (pushingBlock != null && player.directionalInput.x == 0) {
+                velocity.x = 0;
+            }
+        }
+
+        public override void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
+            velocity.y = 0;
         }
 
         private void HandleHorizontalInput() {
@@ -129,21 +142,11 @@ namespace Spelunky {
             if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Block")) {
                 // Just to see if things work as expected.
                 if (pushingBlock != collisionInfo.colliderHorizontal.GetComponent<Block>()) {
-                    Debug.LogError("Trying to exit the collision from a different block that we entered the collision with!");
+                    Debug.LogError("Trying to exit the collision from a different block than the one we entered the collision with!");
                 }
                 pushingBlock.Push(0);
                 pushingBlock = null;
             }
-        }
-
-        public override void ChangePlayerVelocity(ref Vector2 velocity) {
-            if (pushingBlock != null && player.directionalInput.x == 0) {
-                velocity.x = 0;
-            }
-        }
-
-        public override void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
-            velocity.y = 0;
         }
 
     }
