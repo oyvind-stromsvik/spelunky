@@ -37,8 +37,9 @@ namespace Spelunky {
 
             if (!player.Physics.collisionInfo.down) {
                 if (player.directionalInput.y < 0) {
-                    player.stateMachine.AttemptToChangeState(player.crawlToHangState);
-                    return;
+                    if (player.stateMachine.AttemptToChangeState(player.crawlToHangState)) {
+                        return;
+                    }
                 }
 
                 player.stateMachine.AttemptToChangeState(player.inAirState);
@@ -65,12 +66,12 @@ namespace Spelunky {
 
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
-                if (pushingBlock != null) {
+                if (player.directionalInput.y < 0) {
+                    player.Visuals.animator.Play("Crawl", 1, false);
+                }
+                else if (pushingBlock != null) {
                     pushingBlock.Push(player.pushBlockSpeed * player.directionalInput.x);
                     player.Visuals.animator.Play("Push", 1, false);
-                }
-                else if (player.directionalInput.y < 0) {
-                    player.Visuals.animator.Play("Crawl", 1, false);
                 }
                 else {
                     player.Visuals.animator.Play("Run", 1, false);

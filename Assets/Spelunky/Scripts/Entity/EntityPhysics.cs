@@ -111,7 +111,6 @@ namespace Spelunky {
 
         private void HorizontalCollisions(ref Vector2 moveDelta) {
             float directionX = Mathf.Sign(moveDelta.x);
-            CollisionDirection collisionDirection = moveDelta.x > 0 ? CollisionDirection.Right : CollisionDirection.Left;
             float rayLength = Mathf.Abs(moveDelta.x) + skinWidth;
 
             if (Mathf.Abs(moveDelta.x) < skinWidth) {
@@ -127,17 +126,17 @@ namespace Spelunky {
                 for (int j = 0; j < hits; j++) {
                     RaycastHit2D hit = _raycastHits[j];
                     if (hit) {
-                        if (IgnoreCollider(hit.collider, collisionDirection)) {
+
+                        if (IgnoreCollider(hit.collider, directionX, "horizontal")) {
                             continue;
                         }
 
-                        moveDelta.x = (hit.distance - skinWidth) * directionX;
-                        rayLength = hit.distance;
-
                         collisionInfo.left = directionX == -1;
                         collisionInfo.right = directionX == 1;
-                        collisionInfo.direction = collisionDirection;
                         collisionInfo.colliderHorizontal = hit.collider;
+
+                        moveDelta.x = (hit.distance - skinWidth) * directionX;
+                        rayLength = hit.distance;
                     }
                 }
             }
@@ -145,7 +144,6 @@ namespace Spelunky {
 
         private void VerticalCollisions(ref Vector2 moveDelta) {
             float directionY = Mathf.Sign(moveDelta.y);
-            CollisionDirection collisionDirection = moveDelta.y > 0 ? CollisionDirection.Up : CollisionDirection.Down;
             float rayLength = Mathf.Abs(moveDelta.y) + skinWidth;
 
             for (int i = 0; i < verticalRayCount; i++) {
@@ -157,23 +155,29 @@ namespace Spelunky {
                 for (int j = 0; j < hits; j++) {
                     RaycastHit2D hit = _raycastHits[j];
                     if (hit) {
-                        if (IgnoreCollider(hit.collider, collisionDirection)) {
+                        if (IgnoreCollider(hit.collider, directionY, "vertical")) {
                             continue;
                         }
 
-                        moveDelta.y = (hit.distance - skinWidth) * directionY;
-                        rayLength = hit.distance;
-
                         collisionInfo.down = directionY == -1;
                         collisionInfo.up = directionY == 1;
-                        collisionInfo.direction = collisionDirection;
                         collisionInfo.colliderVertical = hit.collider;
+
+                        moveDelta.y = (hit.distance - skinWidth) * directionY;
+                        rayLength = hit.distance;
                     }
                 }
             }
         }
 
-        private bool IgnoreCollider(Collider2D collider, CollisionDirection direction) {
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="collider">The collider to check if we want to ignore a collision with or not.</param>
+        /// <param name="direction">A signed value indicating the direction.</param>
+        /// <param name="type">Whether we were called from the horizontal or the vertical collision check.</param>
+        /// <returns>TRUE if we should ignore the collider, FALSE otherwise.</returns>
+        private bool IgnoreCollider(Collider2D collider, float direction, string type) {
             if (raycastsHitTriggers == false && collider.isTrigger) {
                 return true;
             }
@@ -186,17 +190,19 @@ namespace Spelunky {
             // One way platform handling.
             if (collider.CompareTag("OneWayPlatform")) {
                 // Always ignore them if we're colliding horizontally.
-                if (direction == CollisionDirection.Left || direction == CollisionDirection.Right) {
+                if (type == "horizontal") {
                     return true;
                 }
 
-                // If we're colliding vertically ignore them if we're going up or if we're passing through them.
-                if (direction == CollisionDirection.Up || direction == CollisionDirection.Down) {
-                    if (direction == CollisionDirection.Up) {
+                // If we're colliding vertically...
+                if (type == "vertical") {
+                    /// ignore them if we're going up...
+                    if (direction == 1) {
                         return true;
                     }
 
-                    if (collisionInfo.fallingThroughPlatform) {
+                    /// or if we're going down and flagged to pass through them.
+                    if (direction == -1 && collisionInfo.fallingThroughPlatform) {
                         return true;
                     }
                 }
