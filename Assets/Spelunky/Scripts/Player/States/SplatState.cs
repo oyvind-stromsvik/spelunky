@@ -18,6 +18,10 @@ namespace Spelunky {
             player.Physics.Collider.enabled = false;
         }
 
+        public override void ChangePlayerVelocity(ref Vector2 velocity) {
+            velocity = Vector2.zero;
+        }
+
         public override bool LockInput() {
             return true;
         }
