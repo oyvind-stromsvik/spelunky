@@ -55,8 +55,10 @@ namespace Spelunky {
             // Ensure the rigidbody doesn't actually affect us.
             rigidbody2D.isKinematic = true;
             // Disable and collapse the inspector.
+#if UNITY_EDITOR
             rigidbody2D.hideFlags = HideFlags.NotEditable;
             UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(rigidbody2D, false);
+#endif
         }
 
         private void Awake() {
