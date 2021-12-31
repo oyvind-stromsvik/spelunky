@@ -320,8 +320,8 @@ namespace Spelunky {
             boundsRight.transform.localRotation = Quaternion.Euler(0, 0, 90);
             SpriteRenderer boundsBottom = Instantiate(boundsStraight, new Vector3(0, -48, 0), Quaternion.identity, _boundsParent);
             boundsBottom.size = new Vector2(LevelWidth, 64);
-            boundsBottom.GetComponent<BoxCollider2D>().size = new Vector2(LevelHeight, 48);
-            boundsBottom.GetComponent<BoxCollider2D>().offset = new Vector2(LevelHeight / 2f, 24);
+            boundsBottom.GetComponent<BoxCollider2D>().size = new Vector2(LevelWidth, 48);
+            boundsBottom.GetComponent<BoxCollider2D>().offset = new Vector2(LevelWidth / 2f, 24);
             SpriteRenderer boundsLeft = Instantiate(boundsStraight, new Vector3(-48, LevelHeight, 0), Quaternion.identity, _boundsParent);
             boundsLeft.size = new Vector2(LevelHeight, 64);
             boundsLeft.GetComponent<BoxCollider2D>().size = new Vector2(LevelHeight, 48);
