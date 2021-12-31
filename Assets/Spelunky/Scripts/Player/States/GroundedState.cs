@@ -10,7 +10,6 @@ namespace Spelunky {
         public Block pushingBlock;
 
         public override void EnterState() {
-            player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.AddListener(OnEntityPhysicsCollisionExit);
 
             if (player.stateMachine.PreviousState == player.inAirState) {
@@ -19,7 +18,6 @@ namespace Spelunky {
         }
 
         public override void ExitState() {
-            player.Physics.OnCollisionEnterEvent.RemoveListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.RemoveListener(OnEntityPhysicsCollisionExit);
 
             if (pushingBlock) {
@@ -69,7 +67,8 @@ namespace Spelunky {
                 if (player.directionalInput.y < 0) {
                     player.Visuals.animator.Play("Crawl", 1, false);
                 }
-                else if (pushingBlock != null) {
+                else if (player.Physics.collisionInfo.colliderHorizontal != null && player.Physics.collisionInfo.colliderHorizontal.CompareTag("Block")) {
+                    pushingBlock = player.Physics.collisionInfo.colliderHorizontal.GetComponent<Block>();
                     pushingBlock.Push(player.pushBlockSpeed * player.directionalInput.x);
                     player.Visuals.animator.Play("Push", 1, false);
                 }
@@ -130,12 +129,6 @@ namespace Spelunky {
                 if (player.directionalInput.y >= 0) {
                     player.Visuals.animator.Play("Unsteady", 1, false);
                 }
-            }
-        }
-
-        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Block")) {
-                pushingBlock = collisionInfo.colliderHorizontal.GetComponent<Block>();
             }
         }
 
