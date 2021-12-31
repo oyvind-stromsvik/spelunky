@@ -462,7 +462,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBeforeAddingCurrentGoldToTotal: 2
   goldToAddPerInterval: 100
-  goldIntervalTime: 0.02
+  goldIntervalTime: 0.01
 --- !u!114 &-138630158166356528
 MonoBehaviour:
   m_ObjectHideFlags: 0
