@@ -22,6 +22,8 @@ namespace Spelunky {
         public float goldIntervalTime;
         private float _intervalTimer;
 
+        private GameObject _canvasObject;
+
         private void Awake() {
             _player = GetComponent<Player>();
             _lifeAmountText = GameObject.Find("LifeAmountText").GetComponent<Text>();
@@ -34,6 +36,12 @@ namespace Spelunky {
             _player.Inventory.BombsChangedEvent.AddListener(OnBombsChanged);
             _player.Inventory.RopesChangedEvent.AddListener(OnRopesChanged);
             _player.Inventory.GoldAmountChangedEvent.AddListener(OnGoldChanged);
+
+            // TODO: The hackiest of hacks to ensure the black background on the HUD actually cover all the elements.
+            // Otherwise it doesn't until you pickup the first piece of gold.
+            _canvasObject = GameObject.Find("PlayerUICanvas");
+            _canvasObject.SetActive(false);
+            _canvasObject.SetActive(true);
         }
 
         private void Update() {
