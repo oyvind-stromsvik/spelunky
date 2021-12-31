@@ -30,6 +30,14 @@ namespace Spelunky {
         public int RoomWidth { get; } = 10;
         public int RoomHeight { get; } = 8;
 
+        // The total pixel width and height of the level.
+        public float LevelWidth {
+            get { return RoomWidth * roomsHorizontal * Tile.Width; }
+        }
+        public float LevelHeight {
+            get { return RoomHeight * roomsVertical * Tile.Height; }
+        }
+
         private Dictionary<string, Tile> _tilePrefabs;
         private Dictionary<string, GameObject> _backgroundPrefabs;
 
@@ -183,26 +191,27 @@ namespace Spelunky {
         ///
         /// </summary>
         private void CreateRemainingRooms() {
-            for (int x = 0; x < Rooms.GetLength(0); x++)
-            for (int y = 0; y < Rooms.GetLength(1); y++) {
-                Vector2 currentIndex = new Vector2(x, y);
-                if (Rooms[(int) currentIndex.x, (int) currentIndex.y] == null) {
-                    Room roomToSpawn = null;
-                    if (!_hasSpawnedTrapRoom && Random.value < 0.1f) {
-                        _hasSpawnedTrapRoom = true;
-                        roomToSpawn = specialRooms[0];
-                    }
-                    else if (!_hasSpawnedSacrificalAltar && Random.value < 0.1f) {
-                        _hasSpawnedSacrificalAltar = true;
-                        roomToSpawn = specialRooms[1];
-                    }
-                    else {
-                        roomToSpawn = FindSuitableRoom(currentIndex);
-                    }
+            for (int x = 0; x < Rooms.GetLength(0); x++) {
+                for (int y = 0; y < Rooms.GetLength(1); y++) {
+                    Vector2 currentIndex = new Vector2(x, y);
+                    if (Rooms[(int)currentIndex.x, (int)currentIndex.y] == null) {
+                        Room roomToSpawn = null;
+                        if (!_hasSpawnedTrapRoom && Random.value < 0.1f) {
+                            _hasSpawnedTrapRoom = true;
+                            roomToSpawn = specialRooms[0];
+                        }
+                        else if (!_hasSpawnedSacrificalAltar && Random.value < 0.1f) {
+                            _hasSpawnedSacrificalAltar = true;
+                            roomToSpawn = specialRooms[1];
+                        }
+                        else {
+                            roomToSpawn = FindSuitableRoom(currentIndex);
+                        }
 
-                    SpawnRoom(roomToSpawn, currentIndex);
-                    if (debug) {
-                        Instantiate(circle, CurrentPosition(currentIndex, true), Quaternion.identity, _debugParent);
+                        SpawnRoom(roomToSpawn, currentIndex);
+                        if (debug) {
+                            Instantiate(circle, CurrentPosition(currentIndex, true), Quaternion.identity, _debugParent);
+                        }
                     }
                 }
             }
@@ -298,37 +307,33 @@ namespace Spelunky {
         /// Create an indestructable boundary around the level.
         /// </summary>
         private void CreateLevelBounds() {
-            // Level width/height.
-            float width = RoomWidth * roomsHorizontal * Tile.Width;
-            float height = RoomHeight * roomsVertical * Tile.Height;
-
             // Straights.
-            SpriteRenderer boundsTop = Instantiate(boundsStraight, new Vector3(0, height + 48, 0), Quaternion.identity, _boundsParent);
-            boundsTop.size = new Vector2(width, 64);
-            boundsTop.GetComponent<BoxCollider2D>().size = new Vector2(width, 48);
-            boundsTop.GetComponent<BoxCollider2D>().offset = new Vector2(width / 2f, 24);
+            SpriteRenderer boundsTop = Instantiate(boundsStraight, new Vector3(0, LevelHeight + 48, 0), Quaternion.identity, _boundsParent);
+            boundsTop.size = new Vector2(LevelWidth, 64);
+            boundsTop.GetComponent<BoxCollider2D>().size = new Vector2(LevelWidth, 48);
+            boundsTop.GetComponent<BoxCollider2D>().offset = new Vector2(LevelWidth / 2f, 24);
             boundsTop.transform.localScale = new Vector3(1, -1, 1);
-            SpriteRenderer boundsRight = Instantiate(boundsStraight, new Vector3(width + 48, 0, 0), Quaternion.identity, _boundsParent);
-            boundsRight.size = new Vector2(height, 64);
-            boundsRight.GetComponent<BoxCollider2D>().size = new Vector2(height, 48);
-            boundsRight.GetComponent<BoxCollider2D>().offset = new Vector2(height / 2f, 24);
+            SpriteRenderer boundsRight = Instantiate(boundsStraight, new Vector3(LevelWidth + 48, 0, 0), Quaternion.identity, _boundsParent);
+            boundsRight.size = new Vector2(LevelHeight, 64);
+            boundsRight.GetComponent<BoxCollider2D>().size = new Vector2(LevelHeight, 48);
+            boundsRight.GetComponent<BoxCollider2D>().offset = new Vector2(LevelHeight / 2f, 24);
             boundsRight.transform.localRotation = Quaternion.Euler(0, 0, 90);
             SpriteRenderer boundsBottom = Instantiate(boundsStraight, new Vector3(0, -48, 0), Quaternion.identity, _boundsParent);
-            boundsBottom.size = new Vector2(width, 64);
-            boundsBottom.GetComponent<BoxCollider2D>().size = new Vector2(width, 48);
-            boundsBottom.GetComponent<BoxCollider2D>().offset = new Vector2(width / 2f, 24);
-            SpriteRenderer boundsLeft = Instantiate(boundsStraight, new Vector3(-48, height, 0), Quaternion.identity, _boundsParent);
-            boundsLeft.size = new Vector2(height, 64);
-            boundsLeft.GetComponent<BoxCollider2D>().size = new Vector2(height, 48);
-            boundsLeft.GetComponent<BoxCollider2D>().offset = new Vector2(height / 2f, 24);
+            boundsBottom.size = new Vector2(LevelWidth, 64);
+            boundsBottom.GetComponent<BoxCollider2D>().size = new Vector2(LevelHeight, 48);
+            boundsBottom.GetComponent<BoxCollider2D>().offset = new Vector2(LevelHeight / 2f, 24);
+            SpriteRenderer boundsLeft = Instantiate(boundsStraight, new Vector3(-48, LevelHeight, 0), Quaternion.identity, _boundsParent);
+            boundsLeft.size = new Vector2(LevelHeight, 64);
+            boundsLeft.GetComponent<BoxCollider2D>().size = new Vector2(LevelHeight, 48);
+            boundsLeft.GetComponent<BoxCollider2D>().offset = new Vector2(LevelHeight / 2f, 24);
             boundsLeft.transform.localRotation = Quaternion.Euler(0, 0, -90);
 
             // Corners.
-            SpriteRenderer boundsCornerTopLeft = Instantiate(boundsCorner, new Vector3(0, height + 48, 0), Quaternion.identity, _boundsParent);
+            SpriteRenderer boundsCornerTopLeft = Instantiate(boundsCorner, new Vector3(0, LevelHeight + 48, 0), Quaternion.identity, _boundsParent);
             boundsCornerTopLeft.transform.localRotation = Quaternion.Euler(0, 0, 180);
-            SpriteRenderer boundsCornerTopRight = Instantiate(boundsCorner, new Vector3(width + 48, height, 0), Quaternion.identity, _boundsParent);
+            SpriteRenderer boundsCornerTopRight = Instantiate(boundsCorner, new Vector3(LevelWidth + 48, LevelHeight, 0), Quaternion.identity, _boundsParent);
             boundsCornerTopRight.transform.localRotation = Quaternion.Euler(0, 0, 90);
-            SpriteRenderer boundsCornerBottomRight = Instantiate(boundsCorner, new Vector3(width, -48, 0), Quaternion.identity, _boundsParent);
+            SpriteRenderer boundsCornerBottomRight = Instantiate(boundsCorner, new Vector3(LevelWidth, -48, 0), Quaternion.identity, _boundsParent);
             boundsCornerBottomRight.transform.localRotation = Quaternion.Euler(0, 0, 0);
             SpriteRenderer boundsCornerBottomLeft = Instantiate(boundsCorner, new Vector3(-48, 0, 0), Quaternion.identity, _boundsParent);
             boundsCornerBottomLeft.transform.localRotation = Quaternion.Euler(0, 0, -90);
@@ -340,37 +345,41 @@ namespace Spelunky {
         /// Just fill the background of the level.
         /// </summary>
         private void CreateBackground() {
-            for (int y = 0; y < RoomHeight * roomsVertical * Tile.Height; y += 64)
-            for (int x = 0; x < RoomWidth * roomsHorizontal * Tile.Width; x += 64) {
-                Instantiate(
-                    _backgroundPrefabs["Background"],
-                    new Vector3(x, y, 0),
-                    Quaternion.identity,
-                    _backgroundParent
-                );
+            for (int y = 0; y < RoomHeight * roomsVertical * Tile.Height; y += 64) {
+                for (int x = 0; x < RoomWidth * roomsHorizontal * Tile.Width; x += 64) {
+                    Instantiate(
+                        _backgroundPrefabs["Background"],
+                        new Vector3(x, y, 0),
+                        Quaternion.identity,
+                        _backgroundParent
+                    );
 
-                if (Random.value < 0.1f) {
-                    if (Random.value < 0.5f) {
-                        Instantiate(
-                            _backgroundPrefabs["BackgroundDecal"],
-                            new Vector3(x + Random.Range(-16, 16), y + Random.Range(-16, 16), 0),
-                            Quaternion.identity,
-                            _backgroundParent
-                        );
-                    }
-                    else {
-                        Instantiate(
-                            _backgroundPrefabs["BackgroundDecal_2"],
-                            new Vector3(x + Random.Range(-16, 16), y + Random.Range(-16, 16), 0),
-                            Quaternion.identity,
-                            _backgroundParent
-                        );
+                    if (Random.value < 0.1f) {
+                        if (Random.value < 0.5f) {
+                            Instantiate(
+                                _backgroundPrefabs["BackgroundDecal"],
+                                new Vector3(x + Random.Range(-16, 16), y + Random.Range(-16, 16), 0),
+                                Quaternion.identity,
+                                _backgroundParent
+                            );
+                        }
+                        else {
+                            Instantiate(
+                                _backgroundPrefabs["BackgroundDecal_2"],
+                                new Vector3(x + Random.Range(-16, 16), y + Random.Range(-16, 16), 0),
+                                Quaternion.identity,
+                                _backgroundParent
+                            );
+                        }
                     }
                 }
             }
         }
 
-        private void InitializeTiles() {
+        /// <summary>
+        /// Initialize all the tiles in the level.
+        /// </summary>
+        private static void InitializeTiles() {
             // Find all tiles in the level.
             Tile[] tempTiles = FindObjectsOfType<Tile>();
             foreach (Tile tile in tempTiles) {
@@ -380,32 +389,37 @@ namespace Spelunky {
                     continue;
                 }
 
-                // Otherwise initialize the tile and add it to our tiles array for
-                // easier manipulation. For example to check if there is a tile
-                // above any given tile you can just do y + 1 to find out if there
-                // is an entry in the array.
+                // Otherwise initialize the tile.
                 int x = (int) tile.transform.position.x / Tile.Width;
                 int y = (int) tile.transform.position.y / Tile.Height;
                 tile.InitializeTile(x, y);
             }
         }
 
+        /// <summary>
+        /// Loop through and setup all the tiles in the level.
+        ///
+        /// This gives the correct sprite and decorations etc.
+        /// </summary>
         private void SetupTiles() {
-            // We have to wait until we have all the tiles before we can in the
-            // tiles array before we set them up because this depends on each tile
-            // knowing where neighboring tiles are etc.
-            for (int x = 0; x < Tiles.GetLength(0); x++)
-            for (int y = 0; y < Tiles.GetLength(1); y++) {
-                // No tile.
-                if (Tiles[x, y] == null) {
-                    continue;
-                }
+            for (int x = 0; x < Tiles.GetLength(0); x++) {
+                for (int y = 0; y < Tiles.GetLength(1); y++) {
+                    // No tile.
+                    if (Tiles[x, y] == null) {
+                        continue;
+                    }
 
-                Tiles[x, y].SetupTile();
+                    Tiles[x, y].SetupTile();
+                }
             }
         }
 
+        /// <summary>
+        /// Remove tiles from the level.
+        /// </summary>
+        /// <param name="tilesToRemove"></param>
         public void RemoveTiles(Tile[] tilesToRemove) {
+            // Find the bounds of the tiles to remove while we remove the specified tiles.
             int minX = int.MaxValue;
             int maxX = -1;
             int minY = int.MaxValue;
@@ -427,39 +441,41 @@ namespace Spelunky {
                     maxY = tile.y;
                 }
 
-                Tiles[tile.x, tile.y] = null;
+                // Remove the specified tile.
                 tile.Remove();
             }
 
+            // Expand the bounds by 1...
             minX--;
             maxX++;
             minY--;
             maxY++;
 
+            // But ensure we stay within the level bounds.
             if (minX < 0) {
                 minX = 0;
             }
-
             if (maxX >= Tiles.GetLength(0)) {
                 maxX = Tiles.GetLength(0) - 1;
             }
-
             if (minY < 0) {
                 minY = 0;
             }
-
             if (maxY >= Tiles.GetLength(1)) {
                 maxY = Tiles.GetLength(1) - 1;
             }
 
-            for (int x = minX; x <= maxX; x++)
-            for (int y = minY; y <= maxY; y++) {
-                // No tile.
-                if (Tiles[x, y] == null) {
-                    continue;
-                }
+            // Setup the tiles surrounding the tiles we just removed using the bounds we've just founds, so that the
+            // affected tiles get the correct sprites and decorations now that their neighbor tiles are gone.
+            for (int x = minX; x <= maxX; x++) {
+                for (int y = minY; y <= maxY; y++) {
+                    // No tile.
+                    if (Tiles[x, y] == null) {
+                        continue;
+                    }
 
-                Tiles[x, y].SetupTile();
+                    Tiles[x, y].SetupTile();
+                }
             }
         }
     }
