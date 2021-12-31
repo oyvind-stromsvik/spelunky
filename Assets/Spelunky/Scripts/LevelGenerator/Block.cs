@@ -2,13 +2,19 @@
 
 namespace Spelunky {
 
+    /// <summary>
+    /// A pushable block.
+    /// TODO: These are currently indestructable, but shouldn't be.
+    /// </summary>
     public class Block : Entity {
+
         public AudioClip landClip;
 
         private Vector3 _velocity;
 
         // References.
         private AudioSource _audioSource;
+        private bool _initialized;
 
         public override void Awake() {
             base.Awake();
@@ -17,9 +23,10 @@ namespace Spelunky {
         }
 
         private void Update() {
-            // If we're not grounded we snap our x position to the tile grid to avoid
-            // floating point inaccuraies in our alignment and we zero out our
-            // x velocity to avoid any further movement on the horizontal axis.
+            // If we're not grounded we snap our x position to the tile grid to avoid floating point inaccuraies in our
+            // alignment and we zero out our x velocity to avoid any further movement on the horizontal axis.
+            // NOTE: Is it possible for the game to just handle this automatically? Why would I ever want decimal
+            // positions for anything in the game when it's pixel based?
             if (!Physics.collisionInfo.down) {
                 Vector3 centerOfBlock = transform.position + (Vector3) Physics.Collider.offset;
                 Vector3 lowerLeftCornerOfTileWeAreIn = Tile.GetPositionOfLowerLeftOfNearestTile(centerOfBlock);
@@ -37,24 +44,29 @@ namespace Spelunky {
         }
 
         private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            if (collisionInfo.down && collisionInfo.colliderVertical.CompareTag("Player")) {
-                Player player = collisionInfo.colliderVertical.GetComponent<Player>();
-                player.Splat();
-            }
-
-            if (collisionInfo.becameGroundedThisFrame) {
-                _audioSource.clip = landClip;
-                _audioSource.Play();
+            // Not sure if hacky or not, but I added this to avoid the landClip from playing on level start for all
+            // blocks in the level.
+            if (!_initialized) {
+                _initialized = true;
+                return;
             }
 
             if (collisionInfo.down) {
-                _velocity.y = 0;
+                if (collisionInfo.colliderVertical.CompareTag("Player")) {
+                    Player player = collisionInfo.colliderVertical.GetComponent<Player>();
+                    player.Splat();
+                }
+                else {
+                    _audioSource.clip = landClip;
+                    _audioSource.Play();
+                }
             }
         }
 
         public void Push(float pushSpeed) {
             _velocity.x = pushSpeed;
         }
+
     }
 
 }
