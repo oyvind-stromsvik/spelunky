@@ -361,3 +361,7 @@ MonoBehaviour:
   targetDetectionMask:
     serializedVersion: 2
     m_Bits: 512
+  colliderToHangFromLayerMask:
+    serializedVersion: 2
+    m_Bits: 41216
+  colliderToHangFrom: {fileID: 0}
