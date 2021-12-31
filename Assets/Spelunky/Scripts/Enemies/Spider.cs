@@ -2,7 +2,16 @@
 
 namespace Spelunky {
 
+    /// <summary>
+    /// The basic spider enemy.
+    ///
+    /// Always starts hanging from the ceiling and is activated when the player walks beneath it.
+    ///
+    /// TODO: This entire class should be refactored. We need to generalize the state machine so that we cna use states
+    /// for enemies.
+    /// </summary>
     public class Spider : Entity {
+
         public float minJumpWaitTime;
         public float maxJumpWaitTime;
         public Vector2 jumpVelocity;
@@ -10,6 +19,9 @@ namespace Spelunky {
 
         public float targetDetectionDistance;
         public LayerMask targetDetectionMask;
+
+        public LayerMask colliderToHangFromLayerMask;
+        public Collider2D colliderToHangFrom;
 
         private Vector2 _velocity;
 
@@ -31,10 +43,24 @@ namespace Spelunky {
             Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
         }
 
+        private void Start() {
+            // TODO: Should get this based on the tile we're in. Also this can probably be assigned by the level
+            // generator when it generates the level as it will procedurally place the spiders and only in suitable
+            // locations so it will know the tile to place the spider under when it spawns the spider.
+            Vector2 direction = Vector2.up;
+            float rayLength = 24f;
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, rayLength, colliderToHangFromLayerMask);
+            Debug.DrawRay(transform.position, direction * rayLength, Color.cyan);
+            colliderToHangFrom = hit.collider;
+        }
+
         private void Update() {
-            DetectTargetWhenHanging();
+            if (colliderToHangFrom == null && !_landed) {
+                DetectTargetGlobal();
+            }
 
             if (_targetToMoveTowards == null) {
+                DetectTargetWhenHanging();
                 return;
             }
 
@@ -43,11 +69,6 @@ namespace Spelunky {
 
             _idleDuration -= Time.deltaTime;
 
-            if (_flipping && Physics.collisionInfo.becameGroundedThisFrame) {
-                _flipping = false;
-                _landed = true;
-            }
-
             if (!_landed) {
                 return;
             }
@@ -55,11 +76,26 @@ namespace Spelunky {
             JumpTowardsTarget();
         }
 
-        private void DetectTargetWhenHanging() {
-            if (_targetToMoveTowards) {
-                return;
+        /// <summary>
+        /// TODO: Lots of stupid code here. If the block we're hanging from is destroyed we fall and in Spelunky the
+        /// spiders then seemingly autotarget the player no matter the distance or line of sight. This is just a
+        /// ridiculous way to reproduce that same behavior. I'm pretty sure I don't want that behavior though. If the
+        /// spider falls from a block it should just jump around randomly until it spots the player in some way. Which
+        /// means we need another "roaming" state for the spiders as well in addition to states we already have in here.
+        /// </summary>
+        private void DetectTargetGlobal() {
+            float radius = LevelGenerator.instance.LevelWidth > LevelGenerator.instance.LevelHeight ? LevelGenerator.instance.LevelWidth : LevelGenerator.instance.LevelHeight;
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius, targetDetectionMask);
+            foreach (Collider2D collider in colliders) {
+                _targetToMoveTowards = collider.transform;
+                break;
             }
 
+            Visuals.animator.Play("Flip");
+            _flipping = true;
+        }
+
+        private void DetectTargetWhenHanging() {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, targetDetectionDistance, targetDetectionMask);
             Debug.DrawRay(transform.position, Vector2.down * targetDetectionDistance, Color.green);
 
@@ -71,16 +107,12 @@ namespace Spelunky {
         }
 
         private void JumpTowardsTarget() {
-            if (Physics.collisionInfo.becameGroundedThisFrame) {
-                _idleDuration = Random.Range(minJumpWaitTime, maxJumpWaitTime);
-            }
-
             if (!Physics.collisionInfo.down) {
                 if (_velocity.y > 0) {
-                    Visuals.animator.Play("Jump");
+                    Visuals.animator.Play("Jump", 1, false);
                 }
                 else {
-                    Visuals.animator.Play("Fall");
+                    Visuals.animator.Play("Fall", 1, false);
                 }
             }
             else {
@@ -105,6 +137,15 @@ namespace Spelunky {
 
             if (collisionInfo.left || collisionInfo.right) {
                 _velocity.x *= -0.25f;
+            }
+
+            if (collisionInfo.down) {
+                _idleDuration = Random.Range(minJumpWaitTime, maxJumpWaitTime);
+
+                if (_flipping) {
+                    _flipping = false;
+                    _landed = true;
+                }
             }
         }
 

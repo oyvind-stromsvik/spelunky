@@ -46,10 +46,12 @@ namespace Spelunky {
         public override void EnterState() {
             player.Physics.collisionInfo.fallingThroughPlatform = true;
             float xPos = _closestCollider.transform.position.x;
-            player.Visuals.animator.Play("ClimbRope");
             if (_closestCollider.CompareTag("Ladder")) {
                 xPos += Tile.Width / 2f;
                 player.Visuals.animator.Play("ClimbLadder");
+            }
+            else {
+                player.Visuals.animator.Play("ClimbRope");
             }
 
             transform.position = new Vector3(xPos, transform.position.y, 0);
@@ -64,9 +66,12 @@ namespace Spelunky {
             // Continously look for a ladder collider so that we can react accordingly.
             _closestCollider = FindClosestOverlappedLadder();
             if (_closestCollider) {
-                player.Visuals.animator.Play("ClimbRope", 1, false);
+
                 if (_closestCollider.CompareTag("Ladder")) {
-                    player.Visuals.animator.Play("ClimbLadder", 1, false);
+                    player.Visuals.animator.Play("ClimbLadder");
+                }
+                else {
+                    player.Visuals.animator.Play("ClimbRope");
                 }
             }
 
