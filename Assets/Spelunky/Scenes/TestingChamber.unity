@@ -272,10 +272,9 @@ MonoBehaviour:
     type: 3}
   arrowLeft: {fileID: 1327977706111001672, guid: 2f70c13379260714ebe17bda19d247a7,
     type: 3}
-  roomsHorizontal: 2
+  roomsHorizontal: 1
   roomsVertical: 1
   normalRooms:
-  - {fileID: 6398162121198865019, guid: 67b88abbc2e08eb47842b00bdfc3551d, type: 3}
   - {fileID: 6398162121198865019, guid: 7f19fdf2b587e5a419ff5a473dc1fc7d, type: 3}
   specialRooms: []
 --- !u!1 &91530674

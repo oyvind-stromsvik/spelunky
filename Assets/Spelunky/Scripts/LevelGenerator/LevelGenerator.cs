@@ -3,7 +3,13 @@ using UnityEngine;
 
 namespace Spelunky {
 
+    /// <summary>
+    /// Generates our levels.
+    ///
+    /// TODO: Currently extremely wip. Only generates a single level and very badly.
+    /// </summary>
     public class LevelGenerator : MonoBehaviour {
+
         public bool debug;
 
         public SpriteRenderer boundsStraight;
@@ -17,18 +23,20 @@ namespace Spelunky {
         public int roomsHorizontal = 4;
         public int roomsVertical = 4;
 
-        [Header("Normal rooms")] public Room[] normalRooms;
+        [Header("Normal rooms")]
+        public Room[] normalRooms;
 
-        [Header("Special rooms")] public Room[] specialRooms;
+        [Header("Special rooms")]
+        public Room[] specialRooms;
 
         public Room[,] Rooms { get; private set; }
         public Tile[,] Tiles { get; private set; }
 
-        // NOTE: Changing these involves recreating all room prefabs.
-        // I left these at the default Spelunky values so that
-        // it's easy to recreate the same rooms here if desirable.
-        public int RoomWidth { get; } = 10;
-        public int RoomHeight { get; } = 8;
+        // The width and height of the rooms in number of tiles.
+        // I left these at the default Spelunky values so that it's easy to recreate the same rooms here if desirable.
+        // NB: Changing these involves recreating all room prefabs.
+        public const int RoomWidth = 10;
+        public const int RoomHeight = 8;
 
         // The total pixel width and height of the level.
         public float LevelWidth {
@@ -41,7 +49,6 @@ namespace Spelunky {
         private Dictionary<string, Tile> _tilePrefabs;
         private Dictionary<string, GameObject> _backgroundPrefabs;
 
-        private Transform _tileParent;
         private Transform _boundsParent;
         private Transform _backgroundParent;
         private Transform _roomParent;
@@ -77,7 +84,6 @@ namespace Spelunky {
                 _backgroundPrefabs.Add(background.name, background);
             }
 
-            _tileParent = GameObject.Find("_TILES").GetComponent<Transform>();
             _boundsParent = GameObject.Find("_BOUNDS").GetComponent<Transform>();
             _backgroundParent = GameObject.Find("_BACKGROUND").GetComponent<Transform>();
             _roomParent = GameObject.Find("_ROOMS").GetComponent<Transform>();
@@ -96,10 +102,6 @@ namespace Spelunky {
         /// </summary>
         /// <exception cref="Exception"></exception>
         private void CreateLevel() {
-            if (roomsHorizontal <= 1 && roomsVertical <= 1) {
-                throw new System.Exception("A level need at least 2 rooms.");
-            }
-
             // 1. First create the main path from entrance to exit.
             CreateMainPathRooms();
 
@@ -153,12 +155,32 @@ namespace Spelunky {
                 }
                 // Reached the bottom row.
                 else if (indexToCheck.y < 0) {
+                    if (firstRoom == null) {
+                        _lastDirection = Vector2.zero;
+                    }
+
                     _direction = Vector2.zero;
+
                     Room roomToSpawn = FindSuitableRoom(currentIndex);
+                    if (roomToSpawn == null) {
+                        Debug.LogError("No suitable main path room found. Trying to find any room instead.");
+                        roomToSpawn = FindAnyRoom();
+                    }
+
+                    if (roomToSpawn == null) {
+                        Debug.LogError("No room found at all!");
+                    }
+
                     Room spawnedRoom = SpawnRoom(roomToSpawn, currentIndex);
+                    if (firstRoom == null) {
+                        firstRoom = spawnedRoom;
+                    }
+
                     InstantiateDirectionArrow(currentIndex);
                     currentIndex = indexToCheck;
+
                     stopGeneration = true;
+
                     lastRoom = spawnedRoom;
                 }
                 // Found an empty slot.
@@ -168,15 +190,22 @@ namespace Spelunky {
                     }
 
                     Room roomToSpawn = FindSuitableRoom(currentIndex);
-                    if (roomToSpawn != null) {
-                        Room spawnedRoom = SpawnRoom(roomToSpawn, currentIndex);
-                        if (firstRoom == null) {
-                            firstRoom = spawnedRoom;
-                        }
-
-                        InstantiateDirectionArrow(currentIndex);
-                        currentIndex = indexToCheck;
+                    if (roomToSpawn == null) {
+                        Debug.LogError("No suitable main path room found. Trying to find any room instead.");
+                        roomToSpawn = FindAnyRoom();
                     }
+
+                    if (roomToSpawn == null) {
+                        Debug.LogError("No room found at all!");
+                    }
+
+                    Room spawnedRoom = SpawnRoom(roomToSpawn, currentIndex);
+                    if (firstRoom == null) {
+                        firstRoom = spawnedRoom;
+                    }
+
+                    InstantiateDirectionArrow(currentIndex);
+                    currentIndex = indexToCheck;
 
                     PickRandomDirection();
                 }
@@ -205,7 +234,7 @@ namespace Spelunky {
                             roomToSpawn = specialRooms[1];
                         }
                         else {
-                            roomToSpawn = FindSuitableRoom(currentIndex);
+                            roomToSpawn = FindAnyRoom();
                         }
 
                         SpawnRoom(roomToSpawn, currentIndex);
@@ -217,6 +246,12 @@ namespace Spelunky {
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="roomToSpawn"></param>
+        /// <param name="currentIndex"></param>
+        /// <returns></returns>
         private Room SpawnRoom(Room roomToSpawn, Vector2 currentIndex) {
             Rooms[(int) currentIndex.x, (int) currentIndex.y] = Instantiate(roomToSpawn, CurrentPosition(currentIndex), Quaternion.identity, _roomParent);
             Rooms[(int) currentIndex.x, (int) currentIndex.y].name = "Room [" + currentIndex.x + "," + currentIndex.y + "]";
@@ -247,7 +282,7 @@ namespace Spelunky {
         /// </summary>
         /// <param name="arrow"></param>
         /// <returns></returns>
-        private Vector3 CurrentPosition(Vector2 currentIndex, bool arrow = false) {
+        private static Vector3 CurrentPosition(Vector2 currentIndex, bool arrow = false) {
             if (arrow) {
                 return new Vector3(currentIndex.x * RoomWidth * Tile.Width + RoomWidth * Tile.Width / 2f, currentIndex.y * RoomHeight * Tile.Height + RoomHeight * Tile.Height / 2f, 0);
             }
@@ -301,6 +336,14 @@ namespace Spelunky {
             }
 
             return suitableRooms.Count > 0 ? suitableRooms[Random.Range(0, suitableRooms.Count)] : null;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        private Room FindAnyRoom() {
+            return normalRooms[Random.Range(0, normalRooms.Length)];
         }
 
         /// <summary>
@@ -478,6 +521,7 @@ namespace Spelunky {
                 }
             }
         }
+
     }
 
 }
