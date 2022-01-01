@@ -260,7 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a0aaecb2b7ea7549bd8e9c24eefaf1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debug: 0
+  debug: 1
   boundsStraight: {fileID: 7019423646051681708, guid: bc7c3ac4de0ddf54984836dbc57ea86d,
     type: 3}
   boundsCorner: {fileID: 2386631125324619133, guid: 6ada5bb10c3d77247a011bd6bf566116,
@@ -275,7 +275,7 @@ MonoBehaviour:
   roomsHorizontal: 1
   roomsVertical: 1
   normalRooms:
-  - {fileID: 6398162121198865019, guid: 7f19fdf2b587e5a419ff5a473dc1fc7d, type: 3}
+  - {fileID: 6398162121198865019, guid: dd0bb16d406e63048b02017f884f9a72, type: 3}
   specialRooms: []
 --- !u!1 &91530674
 GameObject:

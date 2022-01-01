@@ -278,7 +278,7 @@ PrefabInstance:
     - target: {fileID: 7733887751573418895, guid: 535620be7e5fb134bbfd353c4fadd3df,
         type: 3}
       propertyPath: m_Name
-      value: RoomTopBottomLeft
+      value: Room
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 535620be7e5fb134bbfd353c4fadd3df, type: 3}
@@ -352,7 +352,7 @@ PrefabInstance:
     - target: {fileID: 7733887751573418895, guid: d24d47c2b97c54e498c5e3f806336e25,
         type: 3}
       propertyPath: m_Name
-      value: RoomTopRightLeft
+      value: Room_3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d24d47c2b97c54e498c5e3f806336e25, type: 3}
@@ -426,7 +426,7 @@ PrefabInstance:
     - target: {fileID: 7733887751573418895, guid: 51d6ecb5aa8aa80439b846b7392cf129,
         type: 3}
       propertyPath: m_Name
-      value: RoomTopRightLeft
+      value: Room_5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51d6ecb5aa8aa80439b846b7392cf129, type: 3}
@@ -500,7 +500,7 @@ PrefabInstance:
     - target: {fileID: 7733887751573418895, guid: dd0bb16d406e63048b02017f884f9a72,
         type: 3}
       propertyPath: m_Name
-      value: RoomTopRightLeft
+      value: Room_4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dd0bb16d406e63048b02017f884f9a72, type: 3}
@@ -569,7 +569,7 @@ PrefabInstance:
     - target: {fileID: 7733887751573418895, guid: 7f19fdf2b587e5a419ff5a473dc1fc7d,
         type: 3}
       propertyPath: m_Name
-      value: RoomTopLeft
+      value: Room_2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f19fdf2b587e5a419ff5a473dc1fc7d, type: 3}
