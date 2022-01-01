@@ -25,7 +25,7 @@ namespace Spelunky {
         public Sprite[] spriteUpDown;
 
         // Tile width and height. I left these at the default Spelunky values.
-        // NOTE: Changing these involves redoing all sprite assets.
+        // NB: Changing these involves redoing all sprite assets.
         public const int Width = 16;
         public const int Height = 16;
 
