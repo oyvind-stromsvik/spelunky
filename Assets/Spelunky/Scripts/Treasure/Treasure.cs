@@ -29,7 +29,12 @@ namespace Spelunky {
         }
 
         private void Update() {
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+            if (Physics.collisionInfo.down) {
+                _velocity.y = 0;
+            }
+            else {
+                _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+            }
 
             if (Physics.collisionInfo.down) {
                 _velocity *= 0.9f;

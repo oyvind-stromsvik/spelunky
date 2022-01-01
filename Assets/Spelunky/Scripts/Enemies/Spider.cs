@@ -139,7 +139,7 @@ namespace Spelunky {
                 _velocity.x *= -0.25f;
             }
 
-            if (collisionInfo.down) {
+            if (collisionInfo.becameGroundedThisFrame) {
                 _idleDuration = Random.Range(minJumpWaitTime, maxJumpWaitTime);
 
                 if (_flipping) {

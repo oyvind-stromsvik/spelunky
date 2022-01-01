@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Spelunky {
 
+    /// <summary>
+    ///
+    /// </summary>
     public class Bomb : Entity {
 
         public Explosion explosion;
@@ -64,30 +67,21 @@ namespace Spelunky {
         }
 
         private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            bool playSound = false;
-
             if (collisionInfo.left || collisionInfo.right) {
-                if (Mathf.Abs(_velocity.x) > BounceSoundVelocityThreshold) {
-                    playSound = true;
-                }
-
                 _velocity.x *= -1f;
             }
 
             if (collisionInfo.up || collisionInfo.down) {
-                if (Mathf.Abs(_velocity.y) > BounceSoundVelocityThreshold) {
-                    playSound = true;
-                }
-
                 _velocity.y *= -1f;
             }
 
             _velocity *= 0.5f;
 
-            if (playSound) {
+            if (Physics.Velocity.magnitude > BounceSoundVelocityThreshold) {
                 _audioSource.PlayOneShot(bounceClip);
             }
         }
+
     }
 
 }

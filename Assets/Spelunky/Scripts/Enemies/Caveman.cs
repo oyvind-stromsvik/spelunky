@@ -27,13 +27,14 @@ namespace Spelunky {
 
             _velocity.x = moveSpeed * Visuals.facingDirection;
 
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-
-            Physics.Move(_velocity * Time.deltaTime);
-
             if (Physics.collisionInfo.down) {
                 _velocity.y = 0;
             }
+            else {
+                _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+            }
+
+            Physics.Move(_velocity * Time.deltaTime);
         }
 
         private void OnTriggerEnter2D(Collider2D other) {
