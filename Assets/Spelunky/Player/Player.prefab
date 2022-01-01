@@ -382,7 +382,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 176384
   skinWidth: 0.4
-  horizontalRayCount: 4
+  horizontalRayCount: 3
   verticalRayCount: 3
   raycastsHitTriggers: 0
 --- !u!114 &8124188979697528624
