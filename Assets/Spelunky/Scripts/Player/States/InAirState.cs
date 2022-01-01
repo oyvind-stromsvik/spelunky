@@ -99,7 +99,7 @@ namespace Spelunky {
         }
 
         private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            if (collisionInfo.down) {
+            if (collisionInfo.becameGroundedThisFrame) {
                 if (collisionInfo.colliderVertical.CompareTag("Enemy")) {
                     // TODO: Show some blood particles, play a sound etc. when this happened. Can maybe be generic in
                     // the EntityHealth class for all damage? At least for now.

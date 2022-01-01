@@ -34,13 +34,14 @@ namespace Spelunky {
                 _velocity.x = 0;
             }
 
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-
-            Physics.Move(_velocity * Time.deltaTime);
-
             if (Physics.collisionInfo.down) {
                 _velocity.y = 0;
             }
+            else {
+                _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
+            }
+
+            Physics.Move(_velocity * Time.deltaTime);
         }
 
         private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
@@ -51,7 +52,7 @@ namespace Spelunky {
                 return;
             }
 
-            if (collisionInfo.down) {
+            if (collisionInfo.becameGroundedThisFrame) {
                 if (collisionInfo.colliderVertical.CompareTag("Player")) {
                     Player player = collisionInfo.colliderVertical.GetComponent<Player>();
                     player.Splat();

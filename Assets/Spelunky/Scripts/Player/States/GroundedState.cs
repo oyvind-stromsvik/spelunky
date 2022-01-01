@@ -10,6 +10,7 @@ namespace Spelunky {
         public Block pushingBlock;
 
         public override void EnterState() {
+            player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.AddListener(OnEntityPhysicsCollisionExit);
 
             if (player.stateMachine.PreviousState == player.inAirState) {
@@ -18,6 +19,7 @@ namespace Spelunky {
         }
 
         public override void ExitState() {
+            player.Physics.OnCollisionEnterEvent.RemoveListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.RemoveListener(OnEntityPhysicsCollisionExit);
 
             if (pushingBlock) {
@@ -56,9 +58,6 @@ namespace Spelunky {
             if (pushingBlock != null && player.directionalInput.x == 0) {
                 velocity.x = 0;
             }
-        }
-
-        public override void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
             velocity.y = 0;
         }
 
@@ -132,7 +131,19 @@ namespace Spelunky {
             }
         }
 
+        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
+            // TODO: This is a hack to avoid us getting dragged after enemies due to some weird interaction with the
+            // collision detection. See the TODO in Player.CalculateVelocity() for more information.
+            if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Enemy")) {
+                player.velocity.x = 0;
+            }
+        }
+
         private void OnEntityPhysicsCollisionExit(CollisionInfo collisionInfo) {
+            if (pushingBlock == null) {
+                return;
+            }
+
             if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Block")) {
                 // Just to see if things work as expected.
                 if (pushingBlock != collisionInfo.colliderHorizontal.GetComponent<Block>()) {

@@ -122,6 +122,13 @@ namespace Spelunky {
 
         private void CalculateVelocity() {
             float targetVelocityX = directionalInput.x * _speed;
+            // TODO: This means we have a horizontal velocity for many seconds after letting go of the input. This tiny
+            // velocity apparently can cause us to get dragged after enemies. It's of course the collision detection
+            // that needs to be fixed and not the fact that we have deceleration on our movement, but I don't think I
+            // understand what's going on here so I should try to understand it. Currently it doesn't really do what I
+            // want. I don't want us to have a lingering velocity for many seconds after we stop moving. I want this to
+            // just simulate some slight acceleration and deceleration, maybe over a second or something? And then we
+            // also need to be able to affect this when we introduce ice which should be slippery.
             velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
 
             velocity.y += _gravity * Time.deltaTime;
@@ -215,12 +222,15 @@ namespace Spelunky {
             }
         }
 
+        // TODO: Make it so that we can show debug info for whatever entity we select.
         private void OnGUI() {
             string[] debugInfo = {
                 "--- Player info ---",
                 "State: " + stateMachine.CurrentState.GetType().Name,
-                "Velocity: " + velocity,
-                "--- Collision info --- ",
+                "--- Physics info --- ",
+                "Velocity X: " + Physics.Velocity.x,
+                "Velocity Y: " + Physics.Velocity.y,
+                "--- Physics Collision info --- ",
                 "Down: " + Physics.collisionInfo.down,
                 "Left: " + Physics.collisionInfo.left,
                 "Right: " + Physics.collisionInfo.right,

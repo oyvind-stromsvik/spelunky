@@ -2,18 +2,30 @@ using UnityEngine;
 
 namespace Spelunky {
 
+    /// <summary>
+    /// Our custom "Rigidbody2D" class.
+    ///
+    /// TODO: Should there be a character controller wrapper class for this? So that rocks, bombs, blocks and other
+    /// actual rigidbodies can have this class and then our player can have the character controller class? Also is it
+    /// just ridiculous not to use the built-in Rigidbody2D for anything?
+    /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
     public class EntityPhysics : MonoBehaviour {
 
         public CollisionInfoEvent OnCollisionEnterEvent { get; private set; } = new CollisionInfoEvent();
         public CollisionInfoEvent OnCollisionExitEvent { get; private set; } = new CollisionInfoEvent();
 
+        // TODO: I really want to get rid of all this raycast nonsense and just use Collider.Cast or Physics2D.Boxcast
+        // instead, but they don't return precise collisions so I would have to find a workaround for that.
+        // Ref. https://forum.unity.com/threads/spelunky-clone-open-source-2d-platformer.935966/#post-6172939
         private struct RaycastOrigins {
-            public Vector2 topLeft, topRight;
-            public Vector2 bottomLeft, bottomRight;
+            public Vector2 topLeft;
+            public Vector2 bottomLeft;
+            public Vector2 bottomRight;
         }
 
         public BoxCollider2D Collider { get; private set; }
+        public Vector2 Velocity { get; private set; }
 
         public CollisionInfo collisionInfo;
         public CollisionInfo collisionInfoLastFrame;
@@ -34,10 +46,14 @@ namespace Spelunky {
         private static RaycastHit2D[] _raycastHits = new RaycastHit2D[MaxCollisions];
 
         private void Reset() {
-            collisionMask = -1;
+            // First time I've tried setting up layermasks in code.
+            // TODO: This will break if the layers change, but maybe the layers assigned in the inspector also break
+            // then? Either way I will want more control over layers at some point. Like some layer manager which knows
+            // all obstacle layers, all entity layers etc. etc.
+            collisionMask = 1<<8 | 1<<12 | 1<<13 | 1<<15;
             skinWidth = 0.4f;
-            horizontalRayCount = 4;
-            verticalRayCount = 4;
+            horizontalRayCount = 2;
+            verticalRayCount = 2;
             raycastsHitTriggers = false;
 
             ValidateData();
@@ -87,15 +103,18 @@ namespace Spelunky {
 
             collisionInfo.Reset();
 
+            // We don't need to check horizontal collisions if there are no horizontal movement.
             if (moveDelta.x != 0) {
-                HorizontalCollisions(ref moveDelta);
+                HorizontalCollisions(ref moveDelta.x);
             }
 
-            if (moveDelta.y != 0) {
-                VerticalCollisions(ref moveDelta);
-            }
+            // Even if there is no vertical movement we still want to check for ground.
+            VerticalCollisions(ref moveDelta.y);
 
+            // Actually move our entity, with the movement delta adjusted based on the resolved collisions above.
             transform.Translate(moveDelta);
+
+            Velocity = moveDelta / Time.deltaTime;
 
             // Set our becameGrounded state based on the previous and current collision state.
             if (!collisionInfoLastFrame.down && collisionInfo.down) {
@@ -106,20 +125,31 @@ namespace Spelunky {
                 OnCollisionEnterEvent?.Invoke(collisionInfo);
             }
 
+            // TODO: If the collider is destroyed last frame this will cause an exception if someone tries to access it
+            // in this event. Figure out how to handle that.
             if ((collisionInfoLastFrame.left && !collisionInfo.left) || (collisionInfoLastFrame.right && !collisionInfo.right) || (collisionInfoLastFrame.down && !collisionInfo.down) || (collisionInfoLastFrame.up && !collisionInfo.up)) {
                 OnCollisionExitEvent?.Invoke(collisionInfoLastFrame);
             }
         }
 
-        private void HorizontalCollisions(ref Vector2 moveDelta) {
-            float directionX = Mathf.Sign(moveDelta.x);
-            float rayLength = Mathf.Abs(moveDelta.x) + skinWidth;
+        /// <summary>
+        /// Check for and resolve any horizontal collisions for this move.
+        /// </summary>
+        /// <param name="moveDeltaX">The horizontal translation to check for collisions.</param>
+        private void HorizontalCollisions(ref float moveDeltaX) {
+            float directionX = Mathf.Sign(moveDeltaX);
+            float rayLength = Mathf.Abs(moveDeltaX) + skinWidth;
 
-            if (Mathf.Abs(moveDelta.x) < skinWidth) {
+            if (Mathf.Abs(moveDeltaX) < skinWidth) {
                 rayLength = 2 * skinWidth;
             }
 
+            bool resolvedCollision = false;
             for (int i = 0; i < horizontalRayCount; i++) {
+                if (resolvedCollision) {
+                    break;
+                }
+
                 Vector2 rayOrigin = directionX == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
                 rayOrigin += Vector2.up * (_horizontalRaySpacing * i);
                 int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.right * directionX, _raycastHits, rayLength, collisionMask);
@@ -128,7 +158,6 @@ namespace Spelunky {
                 for (int j = 0; j < hits; j++) {
                     RaycastHit2D hit = _raycastHits[j];
                     if (hit) {
-
                         if (IgnoreCollider(hit.collider, directionX, "horizontal")) {
                             continue;
                         }
@@ -137,20 +166,43 @@ namespace Spelunky {
                         collisionInfo.right = directionX == 1;
                         collisionInfo.colliderHorizontal = hit.collider;
 
-                        moveDelta.x = (hit.distance - skinWidth) * directionX;
-                        rayLength = hit.distance;
+                        moveDeltaX = (hit.distance - skinWidth) * directionX;
+
+                        // In Sebastian Lague's original tutorial I think he supports slopes so he has to go through all
+                        // the hits because they could be different lengths due to us being on a slope. We don't support
+                        // that so there's no reason to check more than one hit. We only use multiple raycasts to ensure
+                        // nothing smaller than our bounds passes through us.
+                        resolvedCollision = true;
+                        break;
                     }
                 }
             }
         }
 
-        private void VerticalCollisions(ref Vector2 moveDelta) {
-            float directionY = Mathf.Sign(moveDelta.y);
-            float rayLength = Mathf.Abs(moveDelta.y) + skinWidth;
+        /// <summary>
+        /// Check for and resolve vertical collisions for this move.
+        ///
+        /// If we're not actually moving we still check to see if we're grounded without resolving any collisions.
+        /// </summary>
+        /// <param name="moveDeltaY">The vertical translation to check for collisions.</param>
+        private void VerticalCollisions(ref float moveDeltaY) {
+            bool justCheckForGround =moveDeltaY == 0;
 
+            float directionY = justCheckForGround ? -1 : Mathf.Sign(moveDeltaY);
+            float rayLength = Mathf.Abs(moveDeltaY) + skinWidth;
+
+            if (Mathf.Abs(moveDeltaY) < skinWidth) {
+                rayLength = 2 * skinWidth;
+            }
+
+            bool resolvedCollision = false;
             for (int i = 0; i < verticalRayCount; i++) {
+                if (resolvedCollision) {
+                    break;
+                }
+
                 Vector2 rayOrigin = directionY == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
-                rayOrigin += Vector2.right * (_verticalRaySpacing * i + moveDelta.x);
+                rayOrigin += Vector2.right * (_verticalRaySpacing * i);
                 int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up * directionY, _raycastHits, rayLength, collisionMask);
                 Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
 
@@ -165,15 +217,23 @@ namespace Spelunky {
                         collisionInfo.up = directionY == 1;
                         collisionInfo.colliderVertical = hit.collider;
 
-                        moveDelta.y = (hit.distance - skinWidth) * directionY;
-                        rayLength = hit.distance;
+                        if (!justCheckForGround) {
+                            moveDeltaY = (hit.distance - skinWidth) * directionY;
+                        }
+
+                        // In Sebastian Lague's original tutorial I think he supports slopes so he has to go through all
+                        // the hits because they could be different lengths due to us being on a slope. We don't support
+                        // that so there's no reason to check more than one hit. We only use multiple raycasts to ensure
+                        // nothing smaller than our bounds passes through us.
+                        resolvedCollision = true;
+                        break;
                     }
                 }
             }
         }
 
         /// <summary>
-        ///
+        /// Check if we should ignore collisions with the given collider.
         /// </summary>
         /// <param name="collider">The collider to check if we want to ignore a collision with or not.</param>
         /// <param name="direction">A signed value indicating the direction.</param>
@@ -213,21 +273,44 @@ namespace Spelunky {
             return false;
         }
 
+        /// <summary>
+        /// Update the raycast origins.
+        ///
+        /// Because the bounds are in world space this needs to happen before every collision check.
+        /// </summary>
         private void UpdateRaycastOrigins() {
-            Bounds bounds = Collider.bounds;
-            bounds.Expand(skinWidth * -2);
-
+            Bounds bounds = CalculateBounds();
             _raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
             _raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
             _raycastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-            _raycastOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
         }
 
+        /// <summary>
+        /// Calculate the spacing for our raycasts based on our adjusted bounds.
+        /// </summary>
         private void CalculateRaySpacing() {
-            Bounds bounds = Collider.bounds;
-            bounds.Expand(skinWidth * -2);
+            Bounds bounds = CalculateBounds();
             _horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
             _verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
+        }
+
+        /// <summary>
+        /// Create bounds that are slightly smaller than our collider.
+        ///
+        /// Bounds need to be created before every collision check because they are in world space.
+        ///
+        /// TODO: I can't exactly remember why we have a value of -2 in here. Need to double check Sebastian Lague's
+        /// tutorial again, I guess. Without shrinking the bounds we'll catch on edges and trigger vertical collisions
+        /// when sliding along walls etc. at least which is very undesirable.
+        /// TODO: But this also means we're not getting pixel perfect collisions. For example when standing on an edge
+        /// we'll now fall off while our collider is still on the edge due to the bounds being shrunk. This is also not
+        /// desirable.
+        /// </summary>
+        /// <returns></returns>
+        private Bounds CalculateBounds() {
+            Bounds bounds = Collider.bounds;
+            bounds.Expand(skinWidth * -2);
+            return bounds;
         }
 
     }
