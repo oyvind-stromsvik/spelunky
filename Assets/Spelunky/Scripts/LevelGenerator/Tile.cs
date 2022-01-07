@@ -1,9 +1,13 @@
 using UnityEngine;
+using Gizmos = Popcron.Gizmos;
 
 namespace Spelunky {
 
     [RequireComponent(typeof(SpriteRenderer))]
     public class Tile : MonoBehaviour {
+
+        [HideInInspector]
+        public bool debug;
 
         [Tooltip("The probably for this tile to spawn. Setting this to 25 means the tile is 75% likely to be removed when the level is generated.")]
         [Range(0, 100)] public int spawnProbability = 100;
@@ -144,6 +148,18 @@ namespace Spelunky {
             int x = Mathf.FloorToInt(Mathf.Abs(position.x) / Width) * Width;
             int y = Mathf.FloorToInt(Mathf.Abs(position.y) / Height) * Height;
             return new Vector3(x, y, 0);
+        }
+
+        private void Update() {
+            if (!debug) {
+                return;
+            }
+
+            Gizmos.Square(
+                (Vector2) transform.position + new Vector2(Width / 2, Height / 2),
+                new Vector2(Width, Height),
+                new Color(0, 1, 0, 0.5f)
+            );
         }
 
     }

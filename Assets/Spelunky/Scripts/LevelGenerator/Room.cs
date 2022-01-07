@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Gizmos = Popcron.Gizmos;
 
 namespace Spelunky {
 
@@ -10,24 +11,33 @@ namespace Spelunky {
 
         public Vector2 index;
 
-        public bool drawGrid;
+        [HideInInspector]
+        public bool debug;
 
         public bool top, right, down, left;
 
         /// <summary>
         ///
         /// </summary>
-        private void OnDrawGizmos() {
-            if (!drawGrid) {
+        private void Update() {
+            if (!debug) {
                 return;
             }
 
             for (int x = 0; x <= LevelGenerator.RoomWidth; x++) {
-                Gizmos.DrawRay(new Vector3(transform.position.x + x * Tile.Width, transform.position.y, 0), Vector3.up * LevelGenerator.RoomHeight * Tile.Height);
+                Gizmos.Line(
+                    new Vector3(transform.position.x + x * Tile.Width, transform.position.y, 0),
+                    new Vector3(transform.position.x + x * Tile.Width, transform.position.y, 0) + Vector3.up * LevelGenerator.RoomHeight * Tile.Height,
+                    new Color(1, 1, 1, 0.3f)
+                );
             }
 
             for (int y = 0; y <= LevelGenerator.RoomHeight; y++) {
-                Gizmos.DrawRay(new Vector3(transform.position.x, transform.position.y + y * Tile.Height, 0), Vector3.right * LevelGenerator.RoomWidth * Tile.Width);
+                Gizmos.Line(
+                    new Vector3(transform.position.x, transform.position.y + y * Tile.Height, 0),
+                    new Vector3(transform.position.x, transform.position.y + y * Tile.Height, 0) + Vector3.right * LevelGenerator.RoomWidth * Tile.Width,
+                    new Color(1, 1, 1, 0.3f)
+                );
             }
         }
 
