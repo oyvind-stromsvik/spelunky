@@ -78,7 +78,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   index: {x: 0, y: 0}
-  drawGrid: 0
+  debug: 0
   top: 1
   right: 1
   down: 0

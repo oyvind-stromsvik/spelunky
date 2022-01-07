@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Gizmos = Popcron.Gizmos;
 
 namespace Spelunky {
 
@@ -253,10 +254,12 @@ namespace Spelunky {
         /// <param name="currentIndex"></param>
         /// <returns></returns>
         private Room SpawnRoom(Room roomToSpawn, Vector2 currentIndex) {
-            Rooms[(int) currentIndex.x, (int) currentIndex.y] = Instantiate(roomToSpawn, CurrentPosition(currentIndex), Quaternion.identity, _roomParent);
-            Rooms[(int) currentIndex.x, (int) currentIndex.y].name = "Room [" + currentIndex.x + "," + currentIndex.y + "]";
-            Rooms[(int) currentIndex.x, (int) currentIndex.y].index = currentIndex;
-            return Rooms[(int) currentIndex.x, (int) currentIndex.y];
+            Room roomInstance = Instantiate(roomToSpawn, CurrentPosition(currentIndex), Quaternion.identity, _roomParent);
+            roomInstance.name = "Room [" + currentIndex.x + "," + currentIndex.y + "]";
+            roomInstance.index = currentIndex;
+            roomInstance.debug = debug;
+            Rooms[(int)currentIndex.x, (int)currentIndex.y] = roomInstance;
+            return roomInstance;
         }
 
         /// <summary>
@@ -422,7 +425,7 @@ namespace Spelunky {
         /// <summary>
         /// Initialize all the tiles in the level.
         /// </summary>
-        private static void InitializeTiles() {
+        private void InitializeTiles() {
             // Find all tiles in the level.
             Tile[] tempTiles = FindObjectsOfType<Tile>();
             foreach (Tile tile in tempTiles) {
@@ -436,6 +439,7 @@ namespace Spelunky {
                 int x = (int) tile.transform.position.x / Tile.Width;
                 int y = (int) tile.transform.position.y / Tile.Height;
                 tile.InitializeTile(x, y);
+                tile.debug = debug;
             }
         }
 

@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   index: {x: 0, y: 0}
-  drawGrid: 0
+  debug: 0
   top: 1
   right: 1
   down: 0
@@ -112,7 +112,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 2a8896989ba91704bad36d51ff1cc5ec, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 2a8896989ba91704bad36d51ff1cc5ec, type: 3}
       propertyPath: m_RootOrder
@@ -305,7 +305,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 2a8896989ba91704bad36d51ff1cc5ec, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 2a8896989ba91704bad36d51ff1cc5ec, type: 3}
       propertyPath: m_RootOrder
