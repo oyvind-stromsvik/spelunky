@@ -59,6 +59,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -69,7 +71,7 @@ TextureImporter:
     serializedVersion: 2
     filterMode: 0
     aniso: 1
-    mipBias: -100
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -90,9 +92,12 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
   applyGammaDecoding: 1
   platformSettings:
   - serializedVersion: 3
@@ -396,6 +401,19 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      ClimbRope_7: 7312086530205575723
+      ClimbRope_1: -2767678533854472289
+      ClimbRope_5: -6724169947708705205
+      ClimbRope_10: -47973445153958253
+      ClimbRope_6: -163781857840118362
+      ClimbRope_4: -6667748142202891476
+      ClimbRope_9: -109614691734541974
+      ClimbRope_3: -426453325218714403
+      ClimbRope_0: 5479190009309733976
+      ClimbRope_8: -8100706962710192379
+      ClimbRope_11: -1437927864501013533
+      ClimbRope_2: -6118858052228800528
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
