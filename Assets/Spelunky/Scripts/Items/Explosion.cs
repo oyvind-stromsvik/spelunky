@@ -24,9 +24,12 @@ namespace Spelunky {
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, explosionRadius, layerMask);
             List<Tile> tilesToRemove = new List<Tile>();
             foreach (Collider2D collider in colliders) {
-                Tile tile = collider.GetComponent<Tile>();
-                if (tile != null) {
+                if (collider.TryGetComponent(out Tile tile)) {
                     tilesToRemove.Add(tile);
+                }
+
+                if (collider.TryGetComponent(out Block block)) {
+                    Destroy(block.gameObject);
                 }
 
                 // Explode any bombs in our explosions radius immediately causing

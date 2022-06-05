@@ -110,6 +110,9 @@ namespace Spelunky {
                     // before it's applied.
                     _bouncedOnEnemy = true;
                 }
+                else if (collisionInfo.colliderVertical.CompareTag("Spikes")) {
+                    player.Splat();
+                }
                 else {
                     player.stateMachine.AttemptToChangeState(player.groundedState);
                 }

@@ -16,6 +16,9 @@ namespace Spelunky {
 
         /// <summary>
         /// Remaps a value from a current minimum a1 and maximum a2 to a new minimum b1 and maximum b2.
+        ///
+        /// Let's say you have a value going from 5 to 20 and you want it to go from 0 to 1 so you can use the value in
+        /// a slider or whatnot, or the reverse of that. This method handles such use cases for you.
         /// </summary>
         /// <param name="value">The value to remap.</param>
         /// <param name="a1">The current minimum</param>
