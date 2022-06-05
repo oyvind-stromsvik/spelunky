@@ -592,8 +592,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
     type: 3}
-  invulnerabilityDuration: 1
   maxHealth: 4
+  spriteRenderer: {fileID: 782368879}
+  invulnerabilityDuration: 1
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 1, g: 1, b: 1, a: 0.5019608}
+  isInvulnerable: 0
 --- !u!1 &390950007307755326
 GameObject:
   m_ObjectHideFlags: 0

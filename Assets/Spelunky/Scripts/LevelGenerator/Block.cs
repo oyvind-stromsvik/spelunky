@@ -4,7 +4,6 @@ namespace Spelunky {
 
     /// <summary>
     /// A pushable block.
-    /// TODO: These are currently indestructable, but shouldn't be.
     /// </summary>
     public class Block : Entity {
 
@@ -25,8 +24,6 @@ namespace Spelunky {
         private void Update() {
             // If we're not grounded we snap our x position to the tile grid to avoid floating point inaccuraies in our
             // alignment and we zero out our x velocity to avoid any further movement on the horizontal axis.
-            // NOTE: Is it possible for the game to just handle this automatically? Why would I ever want decimal
-            // positions for anything in the game when it's pixel based?
             if (!Physics.collisionInfo.down) {
                 Vector3 centerOfBlock = transform.position + (Vector3) Physics.Collider.offset;
                 Vector3 lowerLeftCornerOfTileWeAreIn = Tile.GetPositionOfLowerLeftOfNearestTile(centerOfBlock);

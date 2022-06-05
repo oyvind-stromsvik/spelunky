@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animations:
   - {fileID: 11400000, guid: 77cb5e0a566c3b14bb57de6adb7f0f63, type: 2}
+  - {fileID: 11400000, guid: 6c39fbb30a1dc7d48ab877621e921ff4, type: 2}
   fps: 8
   looping: 1
   pingPong: 0
