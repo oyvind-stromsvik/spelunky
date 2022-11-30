@@ -1,4 +1,5 @@
 using UnityEngine;
+using Gizmos = Popcron.Gizmos;
 
 namespace Spelunky {
 
@@ -31,7 +32,6 @@ namespace Spelunky {
         public CollisionInfo collisionInfoLastFrame;
 
         public LayerMask collisionMask;
-        public float skinWidth;
         public int horizontalRayCount;
         public int verticalRayCount;
 
@@ -44,6 +44,7 @@ namespace Spelunky {
         // The max number of colliders that our raycasts will register hits with at once.
         private const int MaxCollisions = 32;
         private static RaycastHit2D[] _raycastHits = new RaycastHit2D[MaxCollisions];
+        private const float skinWidth = 0.1f;
 
         private void Reset() {
             // First time I've tried setting up layermasks in code.
@@ -51,7 +52,6 @@ namespace Spelunky {
             // then? Either way I will want more control over layers at some point. Like some layer manager which knows
             // all obstacle layers, all entity layers etc. etc.
             collisionMask = 1<<8 | 1<<12 | 1<<13 | 1<<15;
-            skinWidth = 0.4f;
             horizontalRayCount = 2;
             verticalRayCount = 2;
             raycastsHitTriggers = false;
@@ -140,41 +140,28 @@ namespace Spelunky {
             float directionX = Mathf.Sign(moveDeltaX);
             float rayLength = Mathf.Abs(moveDeltaX) + skinWidth;
 
-            if (Mathf.Abs(moveDeltaX) < skinWidth) {
-                rayLength = 2 * skinWidth;
-            }
+            Vector2 rayOrigin = directionX == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
+            int hits = Physics2D.BoxCastNonAlloc((Vector2) transform.position + Vector2.up * 6, CalculateBoxCastSize(), 0, Vector2.right * directionX, _raycastHits, rayLength, collisionMask);
+            Gizmos.Square(
+                (Vector2) transform.position + Vector2.up * 6 + Vector2.right * directionX * rayLength,
+                CalculateBoxCastSize(),
+                Color.blue
+            );
 
-            bool resolvedCollision = false;
-            for (int i = 0; i < horizontalRayCount; i++) {
-                if (resolvedCollision) {
-                    break;
-                }
-
-                Vector2 rayOrigin = directionX == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
-                rayOrigin += Vector2.up * (_horizontalRaySpacing * i);
-                int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.right * directionX, _raycastHits, rayLength, collisionMask);
-                Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
-
-                for (int j = 0; j < hits; j++) {
-                    RaycastHit2D hit = _raycastHits[j];
-                    if (hit) {
-                        if (IgnoreCollider(hit.collider, directionX, "horizontal")) {
-                            continue;
-                        }
-
-                        collisionInfo.left = directionX == -1;
-                        collisionInfo.right = directionX == 1;
-                        collisionInfo.colliderHorizontal = hit.collider;
-
-                        moveDeltaX = (hit.distance - skinWidth) * directionX;
-
-                        // In Sebastian Lague's original tutorial I think he supports slopes so he has to go through all
-                        // the hits because they could be different lengths due to us being on a slope. We don't support
-                        // that so there's no reason to check more than one hit. We only use multiple raycasts to ensure
-                        // nothing smaller than our bounds passes through us.
-                        resolvedCollision = true;
-                        break;
+            for (int j = 0; j < hits; j++) {
+                RaycastHit2D hit = _raycastHits[j];
+                if (hit) {
+                    if (ShouldIgnoreCollisionHit(hit, directionX, "horizontal")) {
+                        continue;
                     }
+
+                    collisionInfo.left = directionX == -1;
+                    collisionInfo.right = directionX == 1;
+                    collisionInfo.colliderHorizontal = hit.collider;
+
+                    float distance = hit.distance > 0 ? hit.distance + Physics2D.defaultContactOffset - skinWidth : 0;
+                    moveDeltaX = distance * directionX;
+                    break;
                 }
             }
         }
@@ -186,71 +173,62 @@ namespace Spelunky {
         /// </summary>
         /// <param name="moveDeltaY">The vertical translation to check for collisions.</param>
         private void VerticalCollisions(ref float moveDeltaY) {
-            bool justCheckForGround =moveDeltaY == 0;
+            bool justCheckForGround = moveDeltaY == 0;
 
             float directionY = justCheckForGround ? -1 : Mathf.Sign(moveDeltaY);
             float rayLength = Mathf.Abs(moveDeltaY) + skinWidth;
-
             if (Mathf.Abs(moveDeltaY) < skinWidth) {
                 rayLength = 2 * skinWidth;
             }
 
-            bool resolvedCollision = false;
-            for (int i = 0; i < verticalRayCount; i++) {
-                if (resolvedCollision) {
-                    break;
-                }
+            Vector2 rayOrigin = directionY == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
+            int hits = Physics2D.BoxCastNonAlloc((Vector2) transform.position + Vector2.up * 6, CalculateBoxCastSize(), 0, Vector2.up * directionY, _raycastHits, rayLength, collisionMask);
+            print(rayLength);
+            Gizmos.Square(
+                (Vector2) transform.position + Vector2.up * 6 + Vector2.up * directionY * rayLength,
+                CalculateBoxCastSize(),
+                Color.red
+            );
 
-                Vector2 rayOrigin = directionY == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
-                rayOrigin += Vector2.right * (_verticalRaySpacing * i);
-                int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up * directionY, _raycastHits, rayLength, collisionMask);
-                Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
-
-                for (int j = 0; j < hits; j++) {
-                    RaycastHit2D hit = _raycastHits[j];
-                    if (hit) {
-                        if (IgnoreCollider(hit.collider, directionY, "vertical")) {
-                            continue;
-                        }
-
-                        collisionInfo.down = directionY == -1;
-                        collisionInfo.up = directionY == 1;
-                        collisionInfo.colliderVertical = hit.collider;
-
-                        if (!justCheckForGround) {
-                            moveDeltaY = (hit.distance - skinWidth) * directionY;
-                        }
-
-                        // In Sebastian Lague's original tutorial I think he supports slopes so he has to go through all
-                        // the hits because they could be different lengths due to us being on a slope. We don't support
-                        // that so there's no reason to check more than one hit. We only use multiple raycasts to ensure
-                        // nothing smaller than our bounds passes through us.
-                        resolvedCollision = true;
-                        break;
+            for (int j = 0; j < hits; j++) {
+                RaycastHit2D hit = _raycastHits[j];
+                if (hit) {
+                    if (ShouldIgnoreCollisionHit(hit, directionY, "vertical")) {
+                        continue;
                     }
+
+                    collisionInfo.down = directionY == -1;
+                    collisionInfo.up = directionY == 1;
+                    collisionInfo.colliderVertical = hit.collider;
+
+                    if (!justCheckForGround) {
+                        float distance = hit.distance > 0 ? hit.distance + Physics2D.defaultContactOffset - skinWidth : 0;
+                        moveDeltaY = distance * directionY;
+                    }
+                    break;
                 }
             }
         }
 
         /// <summary>
-        /// Check if we should ignore collisions with the given collider.
+        /// Check if we should ignore the given collision hit.
         /// </summary>
-        /// <param name="collider">The collider to check if we want to ignore a collision with or not.</param>
+        /// <param name="hit">The RaycastHit2D hit to check if we want to ignore a collision with or not.</param>
         /// <param name="direction">A signed value indicating the direction.</param>
         /// <param name="type">Whether we were called from the horizontal or the vertical collision check.</param>
         /// <returns>TRUE if we should ignore the collider, FALSE otherwise.</returns>
-        private bool IgnoreCollider(Collider2D collider, float direction, string type) {
-            if (raycastsHitTriggers == false && collider.isTrigger) {
+        private bool ShouldIgnoreCollisionHit(RaycastHit2D hit, float direction, string type) {
+            if (raycastsHitTriggers == false && hit.collider.isTrigger) {
                 return true;
             }
 
             // If the collider we hit is ourself, ignore it.
-            if (collider == Collider) {
+            if (hit.collider == Collider) {
                 return true;
             }
 
             // One way platform handling.
-            if (collider.CompareTag("OneWayPlatform")) {
+            if (hit.collider.CompareTag("OneWayPlatform")) {
                 // Always ignore them if we're colliding horizontally.
                 if (type == "horizontal") {
                     return true;
@@ -309,10 +287,12 @@ namespace Spelunky {
         /// <returns></returns>
         private Bounds CalculateBounds() {
             Bounds bounds = Collider.bounds;
-            bounds.Expand(skinWidth * -2);
             return bounds;
         }
 
+        private Vector2 CalculateBoxCastSize() {
+            return new Vector2(Collider.size.x - skinWidth * 2, Collider.size.y - skinWidth * 2);
+        }
     }
 
 }
