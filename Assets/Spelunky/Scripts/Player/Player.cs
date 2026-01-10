@@ -157,7 +157,7 @@ namespace Spelunky {
                 }
             }
 
-            bombInstance._velocity = bombVelocity;
+            bombInstance.Velocity = bombVelocity;
         }
 
         public void ThrowRope() {

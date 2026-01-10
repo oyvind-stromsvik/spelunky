@@ -4,43 +4,25 @@ using UnityEngine;
 namespace Spelunky {
 
     /// <summary>
-    ///
+    /// A throwable bomb that explodes after a delay.
     /// </summary>
-    public class Bomb : Entity {
+    public class Bomb : PhysicsBody {
 
         public Explosion explosion;
-
-        public AudioClip bounceClip;
         public AudioClip bombTimerClip;
-
         public float timeToExplode;
-
-        private AudioSource _audioSource;
-
-        public Vector2 _velocity;
-
-        private const float BounceSoundVelocityThreshold = 100f;
 
         public override void Awake() {
             base.Awake();
 
-            _audioSource = GetComponent<AudioSource>();
-
-            Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
+            // Bomb always falls (doesn't stop on ground), but does have friction.
+            stopOnGround = false;
+            applyFriction = true;
+            bounces = true;
         }
 
         private void Start() {
             StartCoroutine(DelayedExplosion());
-        }
-
-        private void Update() {
-            _velocity.y += PhysicsManager.gravity.y * Time.deltaTime;
-
-            if (Physics.collisionInfo.down) {
-                _velocity *= 0.9f;
-            }
-
-            Physics.Move(_velocity * Time.deltaTime);
         }
 
         private IEnumerator DelayedExplosion() {
@@ -48,8 +30,8 @@ namespace Spelunky {
 
             Visuals.animator.Play("BombArmed");
 
-            _audioSource.clip = bombTimerClip;
-            _audioSource.Play();
+            audioSource.clip = bombTimerClip;
+            audioSource.Play();
 
             yield return new WaitForSeconds(bombTimerClip.length);
 
@@ -66,19 +48,10 @@ namespace Spelunky {
             Destroy(gameObject);
         }
 
-        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            if (collisionInfo.left || collisionInfo.right) {
-                _velocity.x *= -1f;
-            }
-
-            if (collisionInfo.up || collisionInfo.down) {
-                _velocity.y *= -1f;
-            }
-
-            _velocity *= 0.5f;
-
-            if (Physics.Velocity.magnitude > BounceSoundVelocityThreshold) {
-                _audioSource.PlayOneShot(bounceClip);
+        protected override void PlayBounceSound() {
+            // Bomb uses overall velocity magnitude for sound check.
+            if (audioSource != null && bounceClip != null && Physics.Velocity.magnitude > bounceSoundThreshold) {
+                audioSource.PlayOneShot(bounceClip);
             }
         }
 
