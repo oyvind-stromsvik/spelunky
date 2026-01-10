@@ -37,7 +37,7 @@ namespace Spelunky {
             _player.Inventory.RopesChangedEvent.AddListener(OnRopesChanged);
             _player.Inventory.GoldAmountChangedEvent.AddListener(OnGoldChanged);
 
-            // TODO: The hackiest of hacks to ensure the black background on the HUD actually cover all the elements.
+            // The hackiest of hacks to ensure the black background on the HUD actually cover all the elements.
             // Otherwise it doesn't until you pickup the first piece of gold.
             _canvasObject = GameObject.Find("PlayerUICanvas");
             _canvasObject.SetActive(false);

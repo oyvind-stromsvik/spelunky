@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using TwiiK.Utility;
+using UnityEngine;
 
 namespace Spelunky {
 
     public class GameManager : Singleton<GameManager> {
+
         public Player player;
         public CameraFollow playerCamera;
 

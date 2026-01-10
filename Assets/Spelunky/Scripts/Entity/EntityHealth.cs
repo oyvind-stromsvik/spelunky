@@ -18,6 +18,8 @@ namespace Spelunky {
         public float invulnerabilityDuration;
         public int numberOfInvulnerabilityFlashes = 10;
         public Color invulnerabilityFlashColor;
+        // TODO: We probably want to differentiate between being invulnerable and recently being damage and
+        // "not touchable".
         public bool isInvulnerable;
 
         private void Awake() {
@@ -56,7 +58,7 @@ namespace Spelunky {
         }
 
         /// <summary>
-        /// TODO: How do we ignore collisions between the player and enemies when this happens?
+        /// The time we're invulnerable after being hit.
         /// </summary>
         /// <returns></returns>
         private IEnumerator InvulnerabilityTime() {
