@@ -5,7 +5,7 @@ namespace Spelunky {
     /// <summary>
     /// The state for whenever we're on the ground.
     /// </summary>
-    public class GroundedState : State {
+    public class PlayerGroundedState : PlayerState {
 
         public Block pushingBlock;
 
@@ -13,7 +13,7 @@ namespace Spelunky {
             player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.AddListener(OnEntityPhysicsCollisionExit);
 
-            if (player.stateMachine.PreviousState == player.inAirState) {
+            if (ReferenceEquals(player.stateMachine.PreviousState, player.inAirState)) {
                 player.Audio.Play(player.Audio.landClip);
             }
         }
@@ -58,6 +58,7 @@ namespace Spelunky {
             if (pushingBlock != null && player.directionalInput.x == 0) {
                 velocity.x = 0;
             }
+
             velocity.y = 0;
         }
 
@@ -149,6 +150,7 @@ namespace Spelunky {
                 if (pushingBlock != collisionInfo.colliderHorizontal.GetComponent<Block>()) {
                     Debug.LogError("Trying to exit the collision from a different block than the one we entered the collision with!");
                 }
+
                 pushingBlock.Push(0);
                 pushingBlock = null;
             }

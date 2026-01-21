@@ -123,6 +123,7 @@ GameObject:
   - component: {fileID: 1619121511715360887}
   - component: {fileID: 6396263571779178972}
   - component: {fileID: 3545503031625001217}
+  - component: {fileID: 8206166909450700608}
   m_Layer: 17
   m_Name: Snake
   m_TagString: Enemy
@@ -323,8 +324,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
     type: 3}
-  invulnerabilityDuration: 0
   maxHealth: 1
+  spriteRenderer: {fileID: 0}
+  invulnerabilityDuration: 0
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 0, g: 0, b: 0, a: 0}
+  isInvulnerable: 0
 --- !u!114 &6396263571779178972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,4 +360,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 16
   damage: 1
-  _velocity: {x: 0, y: 0}
+  targetDetectionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  detectionRange: 128
+  initialState: {fileID: 8206166909450700608}
+  velocity: {x: 0, y: 0}
+--- !u!114 &8206166909450700608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3582c432bdc4a44d8f3812b51471171, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turnAtLedges: 1
+  turnAtWalls: 1
+  walkAnimation: Walk
+  attackAnimation: Attack
+  knockback: {x: 256, y: 512}

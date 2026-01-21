@@ -3,7 +3,8 @@ using UnityEngine;
 namespace Spelunky {
 
     [RequireComponent(typeof(Player))]
-    public abstract class State : MonoBehaviour {
+    public abstract class PlayerState : MonoBehaviour, IState {
+
         [HideInInspector] public Player player;
 
         /// <summary>
@@ -16,7 +17,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <returns>A boolean indiciating whether we're allowed to enter the state or not.</returns>
         public virtual bool CanEnterState() {
@@ -25,7 +25,6 @@ namespace Spelunky {
 
         /// <summary>
         /// Called when we enter the state.
-        ///
         /// Use this to perform any initialization logic for the state.
         /// </summary>
         public virtual void EnterState() {
@@ -33,7 +32,6 @@ namespace Spelunky {
 
         /// <summary>
         /// Called when we exit the state.
-        ///
         /// Use this to perform any cleanup logic for the state.
         /// </summary>
         public virtual void ExitState() {
@@ -46,7 +44,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <param name="input"></param>
         public virtual void OnDirectionalInput(Vector2 input) {
@@ -61,11 +58,10 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         public virtual void OnJumpInputDown() {
             player.velocity.y = player._maxJumpVelocity;
-            if ((player.stateMachine.CurrentState == player.climbingState || player.stateMachine.CurrentState == player.hangingState) && player.directionalInput.y < 0) {
+            if ((ReferenceEquals(player.stateMachine.CurrentState, player.climbingState) || ReferenceEquals(player.stateMachine.CurrentState, player.hangingState)) && player.directionalInput.y < 0) {
                 player.velocity.y = 0;
             }
 
@@ -86,7 +82,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         public virtual void OnJumpInputUp() {
             if (player.velocity.y > player._minJumpVelocity) {
@@ -95,35 +90,30 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         public virtual void OnBombInputDown() {
             player.ThrowBomb();
         }
 
         /// <summary>
-        ///
         /// </summary>
         public virtual void OnRopeInputDown() {
             player.ThrowRope();
         }
 
         /// <summary>
-        ///
         /// </summary>
         public virtual void OnUseInputDown() {
             player.Use();
         }
 
         /// <summary>
-        ///
         /// </summary>
         public virtual void OnAttackInputDown() {
             player.Attack();
         }
 
         /// <summary>
-        ///
         /// </summary>
         public void ResetFallingThroughPlatform() {
             player.Physics.collisionInfo.fallingThroughPlatform = false;
@@ -138,7 +128,6 @@ namespace Spelunky {
 
         /// <summary>
         /// Change the player's velocity after a move has happened.
-        ///
         /// Currently used to set the y-velocity to 0 when we're grounded so that if we fall off a ledge we don't fall
         /// at terminal velocity immediately, but rather start falling from 0 y-velocity. This needs to happen after
         /// the move has happened because we need gravity to pull us down for the collision check to register us as
@@ -149,12 +138,12 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <returns></returns>
         public virtual bool LockInput() {
             return false;
         }
+
     }
 
 }

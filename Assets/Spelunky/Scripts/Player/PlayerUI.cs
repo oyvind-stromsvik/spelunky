@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,6 +5,7 @@ namespace Spelunky {
 
     [RequireComponent(typeof(Player))]
     public class PlayerUI : MonoBehaviour {
+
         private Player _player;
         private Text _lifeAmountText;
         private Text _bombAmountText;
@@ -95,6 +95,7 @@ namespace Spelunky {
             _currentGoldAmountText.text = " +" + _currentGoldAmount;
             _totalGoldAmountText.text = _totalGoldAmount.ToString();
         }
+
     }
 
 }

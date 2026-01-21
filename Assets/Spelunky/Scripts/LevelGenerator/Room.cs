@@ -5,19 +5,16 @@ using Gizmos = Popcron.Gizmos;
 namespace Spelunky {
 
     /// <summary>
-    ///
     /// </summary>
     public class Room : MonoBehaviour {
 
         public Vector2 index;
 
-        [HideInInspector]
-        public bool debug;
+        [HideInInspector] public bool debug;
 
         public bool top, right, down, left;
 
         /// <summary>
-        ///
         /// </summary>
         private void Update() {
             if (!debug) {
@@ -42,7 +39,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <returns></returns>
         private Tile[] GetRoomTiles() {
@@ -63,7 +59,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <returns></returns>
         public Tile GetSuitableEntranceOrExitTile() {
@@ -72,14 +67,14 @@ namespace Spelunky {
 
             foreach (Tile tile in roomTiles) {
                 // TODO: We only want to spawn the exit on a "normal" tile. Find a better and more generic solution for determining this.
-                if (tile.name.Contains("Dirt") == false) {
+                if (!tile.name.Contains("Dirt")) {
                     continue;
                 }
 
                 // If there is an empty space above the tile we can spawn a door here, but make sure we don't try to
                 // spawn a door out of bounds or so far up it's on the bottom of the room above us.
                 int yPositionToCheck = tile.y + 1;
-                int roomMaxYPosition = (int) (index.y + 1) * LevelGenerator.RoomHeight - 1;
+                int roomMaxYPosition = (int)(index.y + 1) * LevelGenerator.RoomHeight - 1;
                 if (yPositionToCheck < roomMaxYPosition && yPositionToCheck < LevelGenerator.instance.Tiles.GetLength(1) - 1 && LevelGenerator.instance.Tiles[tile.x, yPositionToCheck] == null) {
                     suitableTiles.Add(tile);
                 }
@@ -87,6 +82,7 @@ namespace Spelunky {
 
             return suitableTiles.Count > 0 ? suitableTiles[Random.Range(0, suitableTiles.Count)] : null;
         }
+
     }
 
 }

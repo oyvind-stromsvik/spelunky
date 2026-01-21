@@ -12,13 +12,13 @@ namespace Spelunky {
         public Collider2D whipCollider;
 
         [Header("States")]
-        public GroundedState groundedState;
-        public InAirState inAirState;
-        public HangingState hangingState;
-        public ClimbingState climbingState;
-        public CrawlToHangState crawlToHangState;
-        public EnterDoorState enterDoorState;
-        public SplatState splatState;
+        public PlayerGroundedState groundedState;
+        public PlayerInAirState inAirState;
+        public PlayerHangingState hangingState;
+        public PlayerClimbingState climbingState;
+        public PlayerCrawlToHangState crawlToHangState;
+        public PlayerEnterDoorState enterDoorState;
+        public PlayerSplatState splatState;
 
         [Header("Crap")]
         public LayerMask edgeGrabLayerMask;
@@ -49,7 +49,9 @@ namespace Spelunky {
 
         private float _gravity;
         [HideInInspector] public float _maxJumpVelocity;
+
         [HideInInspector] public float _minJumpVelocity;
+
         // TODO: Make this private. Currently the jump logic in State.cs is the only place we set this, but I'm not
         // entirely sure how to refactor that so that.
         [HideInInspector] public Vector2 velocity;
@@ -64,6 +66,14 @@ namespace Spelunky {
         [HideInInspector] public float _timeBeforeLook = 1f;
 
         public StateMachine stateMachine = new StateMachine();
+
+        /// <summary>
+        /// Helper property to access the current state as a player-specific State.
+        /// Use this when calling player-specific methods like UpdateState(), ChangePlayerVelocity(), etc.
+        /// </summary>
+        public PlayerState CurrentPlayerState {
+            get { return (PlayerState)stateMachine.CurrentState; }
+        }
 
         public override void Awake() {
             base.Awake();
@@ -84,7 +94,7 @@ namespace Spelunky {
         }
 
         private void Update() {
-            stateMachine.CurrentState.UpdateState();
+            CurrentPlayerState.UpdateState();
 
             SetPlayerSpeed();
             CalculateVelocity();
@@ -103,7 +113,7 @@ namespace Spelunky {
 
             Physics.Move(velocity * Time.deltaTime);
 
-            stateMachine.CurrentState.ChangePlayerVelocityAfterMove(ref velocity);
+            CurrentPlayerState.ChangePlayerVelocityAfterMove(ref velocity);
         }
 
         private void SetPlayerSpeed() {
@@ -133,7 +143,7 @@ namespace Spelunky {
 
             velocity.y += _gravity * Time.deltaTime;
 
-            stateMachine.CurrentState.ChangePlayerVelocity(ref velocity);
+            CurrentPlayerState.ChangePlayerVelocity(ref velocity);
         }
 
         public void ThrowBomb() {
@@ -168,7 +178,7 @@ namespace Spelunky {
             Inventory.UseRope();
 
             Rope ropeInstance = Instantiate(rope, transform.position, Quaternion.identity);
-            if (stateMachine.CurrentState == groundedState && directionalInput.y < 0) {
+            if (ReferenceEquals(stateMachine.CurrentState, groundedState) && directionalInput.y < 0) {
                 ropeInstance.placePosition = transform.position + Visuals.facingDirection * Vector3.right * Tile.Width;
             }
         }
@@ -243,6 +253,7 @@ namespace Spelunky {
                 GUI.Label(new Rect(8, 52 + 16 * i, 300, 22), debugInfo[i]);
             }
         }
+
     }
 
 }

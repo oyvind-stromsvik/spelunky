@@ -123,6 +123,8 @@ GameObject:
   - component: {fileID: 6396263571779178972}
   - component: {fileID: 5329803368010108068}
   - component: {fileID: 6672550340453556833}
+  - component: {fileID: 7783447880178257433}
+  - component: {fileID: 1065666531198532826}
   m_Layer: 17
   m_Name: Bat
   m_TagString: Enemy
@@ -323,8 +325,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
     type: 3}
-  invulnerabilityDuration: 0
   maxHealth: 1
+  spriteRenderer: {fileID: 0}
+  invulnerabilityDuration: 0
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 0, g: 0, b: 0, a: 0}
+  isInvulnerable: 0
 --- !u!114 &6396263571779178972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,6 +361,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 24
   damage: 1
+  targetDetectionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  detectionRange: 128
+  initialState: {fileID: 7783447880178257433}
+  velocity: {x: 0, y: 0}
 --- !u!61 &6672550340453556833
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -381,3 +393,31 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 128, y: 64}
   m_EdgeRadius: 0
+--- !u!114 &7783447880178257433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4565656f01f254b89ddc080b2fb726, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activatedState: {fileID: 1065666531198532826}
+  idleAnimation: Hang
+  activationAnimation: Fly
+--- !u!114 &1065666531198532826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365d772927c0bff4182967796dd91e89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flyAnimation: Fly

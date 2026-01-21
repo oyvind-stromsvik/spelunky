@@ -5,7 +5,7 @@ namespace Spelunky {
     /// <summary>
     /// The state we're in when we hang from a tile or block.
     /// </summary>
-    public class HangingState : State {
+    public class PlayerHangingState : PlayerState {
 
         public bool grabbedWallUsingGlove;
         public Collider2D colliderToHangFrom;

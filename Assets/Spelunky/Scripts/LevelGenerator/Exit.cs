@@ -3,6 +3,7 @@ using UnityEngine;
 namespace Spelunky {
 
     public class Exit : MonoBehaviour {
+
         public GameObject buttonPromptObject;
 
         private void Awake() {
@@ -24,6 +25,7 @@ namespace Spelunky {
                 player.ExitedDoorway(this);
             }
         }
+
     }
 
 }

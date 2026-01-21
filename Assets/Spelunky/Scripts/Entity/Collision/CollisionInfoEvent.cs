@@ -5,6 +5,7 @@ namespace Spelunky {
 
     [Serializable]
     public class CollisionInfoEvent : UnityEvent<CollisionInfo> {
+
     }
 
 }

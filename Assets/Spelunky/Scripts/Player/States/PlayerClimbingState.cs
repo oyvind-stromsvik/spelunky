@@ -7,7 +7,7 @@ namespace Spelunky {
     /// <summary>
     /// The state we're in when we're climbing a ladder or a rope.
     /// </summary>
-    public class ClimbingState : State {
+    public class PlayerClimbingState : PlayerState {
 
         public ContactFilter2D ladderFilter;
         public LayerMask ladderLayerMask;
@@ -97,6 +97,7 @@ namespace Spelunky {
             if (player.directionalInput.y > 0) {
                 direction = Vector2.up;
             }
+
             RaycastHit2D hit = Physics2D.Raycast(position, direction, 9, ladderLayerMask);
             Debug.DrawRay(position, direction * 9, Color.magenta);
             if (hit.collider == null) {
@@ -106,7 +107,6 @@ namespace Spelunky {
 
         /// <summary>
         /// Find the closest ladder, in the horizontal direction, that we're currently overlapping.
-        ///
         /// If we're standing between two ladders we want to grab the closet one, not the first one
         /// in the list as that one could be the furthest one away.
         /// </summary>

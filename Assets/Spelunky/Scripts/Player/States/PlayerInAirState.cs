@@ -5,7 +5,7 @@ namespace Spelunky {
     /// <summary>
     /// The state for whenever we're in the air, whether it's from jumping, falling or anything else.
     /// </summary>
-    public class InAirState : State {
+    public class PlayerInAirState : PlayerState {
 
         private RaycastHit2D _lastEdgeGrabRayCastHit;
         private bool _hitHead;

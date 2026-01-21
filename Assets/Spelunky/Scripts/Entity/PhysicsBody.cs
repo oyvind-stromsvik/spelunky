@@ -5,7 +5,6 @@ namespace Spelunky {
     /// <summary>
     /// Base class for entities that have physics-based movement (gravity, velocity, bouncing).
     /// Extends Entity and provides common physics behavior used by Bomb, Treasure, Block, etc.
-    ///
     /// Subclasses can override behavior by:
     /// - Setting configuration fields (bounciness, friction, etc.)
     /// - Overriding virtual methods for custom physics behavior
@@ -42,8 +41,8 @@ namespace Spelunky {
         /// Public access to current velocity.
         /// </summary>
         public Vector2 Velocity {
-            get => velocity;
-            set => velocity = value;
+            get { return velocity; }
+            set { velocity = value; }
         }
 
         public override void Awake() {
@@ -101,6 +100,7 @@ namespace Spelunky {
                 if (Mathf.Abs(velocity.x) > bounceSoundThreshold) {
                     shouldPlaySound = true;
                 }
+
                 velocity.x *= -1f;
             }
 
@@ -108,6 +108,7 @@ namespace Spelunky {
                 if (Mathf.Abs(velocity.y) > bounceSoundThreshold) {
                     shouldPlaySound = true;
                 }
+
                 velocity.y *= -1f;
             }
 

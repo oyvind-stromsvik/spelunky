@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Spelunky {
 
     public class Explosion : MonoBehaviour {
+
         public float explosionRadius;
         public LayerMask layerMask;
 
@@ -55,6 +56,7 @@ namespace Spelunky {
         private void OnDrawGizmos() {
             Gizmos.DrawWireSphere(transform.position, explosionRadius);
         }
+
     }
 
 }

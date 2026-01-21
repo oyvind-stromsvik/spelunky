@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Spelunky {
 
     public class Rope : MonoBehaviour {
+
         public AudioClip ropeTossClip;
         public AudioClip ropeHitClip;
 
@@ -67,7 +68,7 @@ namespace Spelunky {
                 }
                 else {
                     RaycastHit2D hit = Physics2D.Raycast(_oldPos, direction, distanceThisFrame, layerMask);
-                    if (hit.collider != null && hit.transform.CompareTag("OneWayPlatform") == false) {
+                    if (hit.collider != null && !hit.transform.CompareTag("OneWayPlatform")) {
                         PlaceRope(transform.position);
                     }
                 }
@@ -108,7 +109,7 @@ namespace Spelunky {
 
             float ropeLength = maxRopeLength;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, maxRopeLength, layerMask);
-            if (hit.collider != null && hit.transform.CompareTag("OneWayPlatform") == false) {
+            if (hit.collider != null && !hit.transform.CompareTag("OneWayPlatform")) {
                 ropeLength = hit.distance;
             }
 
@@ -123,6 +124,7 @@ namespace Spelunky {
             ropeMiddle.GetComponent<BoxCollider2D>().offset = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().offset.x, -1 * ropeMiddle.size.y / 2f);
             ropeEnd.gameObject.SetActive(false);
         }
+
     }
 
 }

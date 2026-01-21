@@ -125,6 +125,8 @@ GameObject:
   - component: {fileID: 1619121511715360887}
   - component: {fileID: 6396263571779178972}
   - component: {fileID: 6131912778525804599}
+  - component: {fileID: 567770363022045472}
+  - component: {fileID: 4076317311270918087}
   m_Layer: 17
   m_Name: Spider
   m_TagString: Enemy
@@ -325,8 +327,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
     type: 3}
-  invulnerabilityDuration: 0
   maxHealth: 1
+  spriteRenderer: {fileID: 0}
+  invulnerabilityDuration: 0
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 0, g: 0, b: 0, a: 0}
+  isInvulnerable: 0
 --- !u!114 &6396263571779178972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,15 +361,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6e1a029362be5f43a6d4700ffe4adf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minJumpWaitTime: 1
-  maxJumpWaitTime: 3
-  jumpVelocity: {x: 96, y: 196}
+  moveSpeed: 32
   damage: 1
-  targetDetectionDistance: 128
   targetDetectionMask:
     serializedVersion: 2
     m_Bits: 512
-  colliderToHangFromLayerMask:
+  detectionRange: 128
+  initialState: {fileID: 567770363022045472}
+  velocity: {x: 0, y: 0}
+--- !u!114 &567770363022045472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c997e1e3c1397c341b090cc4b14dc4e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ceilingMask:
     serializedVersion: 2
     m_Bits: 41216
-  colliderToHangFrom: {fileID: 0}
+  landedState: {fileID: 4076317311270918087}
+  hangingAnimation: Hang
+  fallingAnimation: Flip
+--- !u!114 &4076317311270918087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 927d8d5ef99fd1541968be9a952a00c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jumpVelocity: {x: 96, y: 196}
+  minJumpWaitTime: 1
+  maxJumpWaitTime: 3
+  idleAnimation: Idle
+  jumpAnimation: Jump
+  fallAnimation: Fall

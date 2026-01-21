@@ -8,7 +8,7 @@ namespace Spelunky {
     /// <summary>
     /// The state we're in when we're entering a door (exiting a level).
     /// </summary>
-    public class EnterDoorState : State {
+    public class PlayerEnterDoorState : PlayerState {
 
         public AudioClip enterDoorClip;
 

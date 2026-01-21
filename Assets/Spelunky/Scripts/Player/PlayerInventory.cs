@@ -1,17 +1,20 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Spelunky {
 
-    [System.Serializable]
+    [Serializable]
     public class UnityIntEvent : UnityEvent<int> {
+
     }
 
     [RequireComponent(typeof(Player))]
     public class PlayerInventory : MonoBehaviour {
-        public UnityEvent BombsChangedEvent { get; private set; } = new UnityEvent();
-        public UnityEvent RopesChangedEvent { get; private set; } = new UnityEvent();
-        public UnityIntEvent GoldAmountChangedEvent { get; private set; } = new UnityIntEvent();
+
+        public UnityEvent BombsChangedEvent { get; } = new UnityEvent();
+        public UnityEvent RopesChangedEvent { get; } = new UnityEvent();
+        public UnityIntEvent GoldAmountChangedEvent { get; } = new UnityIntEvent();
 
         public int numberOfBombs;
         public int numberOfRopes;
@@ -61,6 +64,7 @@ namespace Spelunky {
             goldAmount += amount;
             GoldAmountChangedEvent?.Invoke(amount);
         }
+
     }
 
 }

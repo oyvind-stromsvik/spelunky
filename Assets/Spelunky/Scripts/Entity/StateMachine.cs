@@ -1,11 +1,15 @@
 namespace Spelunky {
 
+    /// <summary>
+    /// Generic state machine that works with any IState implementation.
+    /// Used by both Player and Enemy systems.
+    /// </summary>
     public class StateMachine {
 
-        public State CurrentState { get; private set; }
-        public State PreviousState { get; private set; }
+        public IState CurrentState { get; private set; }
+        public IState PreviousState { get; private set; }
 
-        public bool AttemptToChangeState(State newState) {
+        public bool AttemptToChangeState(IState newState) {
             if (CurrentState != null) {
                 if (newState == CurrentState) {
                     return false;

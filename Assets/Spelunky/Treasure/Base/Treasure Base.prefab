@@ -155,10 +155,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95a18b829aaefdc44ae4a8e891221d83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bounceClip: {fileID: 0}
+  bounceDampening: 0.5
+  groundFriction: 0.9
+  bounces: 1
+  stopOnGround: 1
+  applyFriction: 1
+  bounceClip: {fileID: 8300000, guid: 39b30b1d23679b24d8015c8d76a31145, type: 3}
+  bounceSoundThreshold: 100
   pickUpSound: {fileID: 0}
   value: 0
-  _velocity: {x: 0, y: 0}
 --- !u!61 &4153403453399211046
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -199,7 +204,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 41216
   skinWidth: 0.4
   horizontalRayCount: 2
   verticalRayCount: 2
@@ -238,8 +243,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bloodParticles: {fileID: 0}
-  invulnerabilityDuration: 0
   maxHealth: 1
+  spriteRenderer: {fileID: 0}
+  invulnerabilityDuration: 0
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 0, g: 0, b: 0, a: 0}
+  isInvulnerable: 0
 --- !u!114 &4578531970553639080
 MonoBehaviour:
   m_ObjectHideFlags: 0

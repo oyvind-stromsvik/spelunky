@@ -183,12 +183,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94de364589954e31b4a8dd7383e7e570, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bounceDampening: 0.5
+  groundFriction: 0.9
+  bounces: 1
+  stopOnGround: 1
+  applyFriction: 1
+  bounceClip: {fileID: 8300000, guid: 39b30b1d23679b24d8015c8d76a31145, type: 3}
+  bounceSoundThreshold: 100
   explosion: {fileID: 987747026005618997, guid: 5fde648c9a1f42b4f90fb2bba6094d65,
     type: 3}
-  bounceClip: {fileID: 8300000, guid: 39b30b1d23679b24d8015c8d76a31145, type: 3}
   bombTimerClip: {fileID: 8300000, guid: 264515f24014bee45a552a9b68e94d95, type: 3}
   timeToExplode: 3
-  _velocity: {x: 0, y: 0}
 --- !u!82 &-7030764533147636328
 AudioSource:
   m_ObjectHideFlags: 0
@@ -318,8 +323,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bloodParticles: {fileID: 0}
-  invulnerabilityDuration: 0
   maxHealth: 1
+  spriteRenderer: {fileID: 0}
+  invulnerabilityDuration: 0
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 0, g: 0, b: 0, a: 0}
+  isInvulnerable: 0
 --- !u!114 &6673599234638747701
 MonoBehaviour:
   m_ObjectHideFlags: 0

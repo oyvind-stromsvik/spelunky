@@ -5,7 +5,6 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2352296857248424388, guid: 9ba129196ec6aed458841b87f74f3f8c,
@@ -100,5 +99,4 @@ PrefabInstance:
       value: Diamond Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 9ba129196ec6aed458841b87f74f3f8c, type: 3}

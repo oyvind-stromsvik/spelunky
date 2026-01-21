@@ -3,6 +3,7 @@
 namespace Spelunky {
 
     public class CameraFollow : MonoBehaviour {
+
         public float verticalOffset;
         public float verticalSmoothTime;
         public Vector2 focusAreaSize;
@@ -60,6 +61,7 @@ namespace Spelunky {
         }
 
         private struct FocusArea {
+
             public Vector2 centre;
             private float _left;
             private float _right;
@@ -98,7 +100,9 @@ namespace Spelunky {
                 _bottom += shiftY;
                 centre = new Vector2((_left + _right) / 2, (_top + _bottom) / 2);
             }
+
         }
+
     }
 
 }

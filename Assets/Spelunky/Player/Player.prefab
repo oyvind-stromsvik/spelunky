@@ -139,9 +139,10 @@ GameObject:
   - component: {fileID: 61633986752685120}
   - component: {fileID: 966319219}
   - component: {fileID: 8245114911552847639}
-  - component: {fileID: 8645646398547493291}
   - component: {fileID: 8124188979697528624}
+  - component: {fileID: 8645646398547493291}
   - component: {fileID: -5236971530926676888}
+  - component: {fileID: -3525105093392211172}
   - component: {fileID: -1833860461211926048}
   - component: {fileID: -8564109920999896957}
   - component: {fileID: -5101200405057694549}
@@ -152,7 +153,6 @@ GameObject:
   - component: {fileID: -3941064224825093986}
   - component: {fileID: -6787339454029924957}
   - component: {fileID: 3574339902112029639}
-  - component: {fileID: -3525105093392211172}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -368,6 +368,19 @@ MonoBehaviour:
   _lastJumpTimer: 0
   _lookTimer: 0
   _timeBeforeLook: 1
+--- !u!114 &8124188979697528624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e228eb65e4d64e1684a1d07ecc9bda1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  joystickDeadzone: 0.15
 --- !u!114 &8645646398547493291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,19 +400,6 @@ MonoBehaviour:
   horizontalRayCount: 3
   verticalRayCount: 3
   raycastsHitTriggers: 0
---- !u!114 &8124188979697528624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611851042852994}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e228eb65e4d64e1684a1d07ecc9bda1e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  joystickDeadzone: 0.15
 --- !u!114 &-5236971530926676888
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -416,6 +416,26 @@ MonoBehaviour:
   facingDirection: -1
   renderer: {fileID: 782368879}
   animator: {fileID: 782368878}
+--- !u!114 &-3525105093392211172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ceadb8bded4ef348b851df1884426e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
+    type: 3}
+  maxHealth: 4
+  spriteRenderer: {fileID: 782368879}
+  invulnerabilityDuration: 1
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 1, g: 1, b: 1, a: 0.5019608}
+  isInvulnerable: 0
 --- !u!114 &-1833860461211926048
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -474,7 +494,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611851042852994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 150deaa93c1540108a275b7dacc51c62, type: 3}
+  m_Script: {fileID: 11500000, guid: ba15197d0192bcb43b9830d7664b405d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
@@ -488,7 +508,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611851042852994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba806e3aad444e1197dd5eeb17613dcb, type: 3}
+  m_Script: {fileID: 11500000, guid: d64a88e61acd23443a4c7c6887a53369, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
@@ -501,7 +521,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611851042852994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f0dae39c4124172b7c7faea7f1a4734, type: 3}
+  m_Script: {fileID: 11500000, guid: bd84cb0cb7f49d24eaa3e82d1fc75542, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
@@ -516,7 +536,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611851042852994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b10701f84e04e09997bc0e69a00f79e, type: 3}
+  m_Script: {fileID: 11500000, guid: 4a877772af15a23408e47a48c1c7d067, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
@@ -546,7 +566,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611851042852994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 28eefacb7fe5411fb0de661a5e9990c1, type: 3}
+  m_Script: {fileID: 11500000, guid: c4775ab4deb46cc4faf3181b497eea13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
@@ -559,7 +579,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611851042852994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1254fc56854745bf96f7132884c38a5b, type: 3}
+  m_Script: {fileID: 11500000, guid: 518d9bea831e9f346b387720c17c6a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
@@ -573,31 +593,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611851042852994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c44629606ed74c05a43ffa0d216cc8d4, type: 3}
+  m_Script: {fileID: 11500000, guid: ed31793e3d33f504e914b9853599ae6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   splatClip: {fileID: 8300000, guid: ce97d43f667bf854ca80975db390f396, type: 3}
---- !u!114 &-3525105093392211172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611851042852994}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ceadb8bded4ef348b851df1884426e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
-    type: 3}
-  maxHealth: 4
-  spriteRenderer: {fileID: 782368879}
-  invulnerabilityDuration: 1
-  numberOfInvulnerabilityFlashes: 10
-  invulnerabilityFlashColor: {r: 1, g: 1, b: 1, a: 0.5019608}
-  isInvulnerable: 0
 --- !u!1 &390950007307755326
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,6 +3,7 @@ using UnityEngine;
 namespace Spelunky {
 
     public class EntityVisuals : MonoBehaviour {
+
         public bool isFacingRight = false;
         public float facingDirection = -1;
 
@@ -17,6 +18,7 @@ namespace Spelunky {
             if (renderer == null) {
                 Debug.LogError("No SpriteRenderer found on object or in object children.");
             }
+
             animator = GetComponentInChildren<SpriteAnimator>();
             if (animator == null) {
                 Debug.LogError("No SpriteAnimator found on object or in object children.");
@@ -28,6 +30,7 @@ namespace Spelunky {
             facingDirection *= -1;
             isFacingRight = !isFacingRight;
         }
+
     }
 
 }

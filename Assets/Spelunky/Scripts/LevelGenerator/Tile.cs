@@ -6,8 +6,7 @@ namespace Spelunky {
     [RequireComponent(typeof(SpriteRenderer))]
     public class Tile : MonoBehaviour {
 
-        [HideInInspector]
-        public bool debug;
+        [HideInInspector] public bool debug;
 
         [Tooltip("The probably for this tile to spawn. Setting this to 25 means the tile is 75% likely to be removed when the level is generated.")]
         [Range(0, 100)] public int spawnProbability = 100;
@@ -39,7 +38,7 @@ namespace Spelunky {
 
         /// <summary>
         /// Initializes a tile in the level.
-        ///
+        /// 
         /// This gives it coordinates, names it according to it's coordinates for easier debugging and most importantly
         /// adds it to our tiles array for easier manipulation. For example to check if there is a tile above any given
         /// tile we can just do y + 1 to find out if there is an entry in the array.
@@ -55,7 +54,7 @@ namespace Spelunky {
 
         /// <summary>
         /// Setup a tile in the level.
-        ///
+        /// 
         /// This changes its sprite depending on the surrounding tiles as well as creates the decorations overhangs for
         /// the tile.
         /// </summary>
@@ -156,7 +155,7 @@ namespace Spelunky {
             }
 
             Gizmos.Square(
-                (Vector2) transform.position + new Vector2(Width / 2, Height / 2),
+                (Vector2)transform.position + new Vector2(Width / 2, Height / 2),
                 new Vector2(Width, Height),
                 new Color(0, 1, 0, 0.5f)
             );

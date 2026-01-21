@@ -1,10 +1,10 @@
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Spelunky {
 
     /// <summary>
     /// Our custom "Rigidbody2D" class.
-    ///
     /// TODO: Should there be a character controller wrapper class for this? So that rocks, bombs, blocks and other
     /// actual rigidbodies can have this class and then our player can have the character controller class? Also is it
     /// just ridiculous not to use the built-in Rigidbody2D for anything?
@@ -12,16 +12,18 @@ namespace Spelunky {
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
     public class EntityPhysics : MonoBehaviour {
 
-        public CollisionInfoEvent OnCollisionEnterEvent { get; private set; } = new CollisionInfoEvent();
-        public CollisionInfoEvent OnCollisionExitEvent { get; private set; } = new CollisionInfoEvent();
+        public CollisionInfoEvent OnCollisionEnterEvent { get; } = new CollisionInfoEvent();
+        public CollisionInfoEvent OnCollisionExitEvent { get; } = new CollisionInfoEvent();
 
         // TODO: I really want to get rid of all this raycast nonsense and just use Collider.Cast or Physics2D.Boxcast
         // instead, but they don't return precise collisions so I would have to find a workaround for that.
         // Ref. https://forum.unity.com/threads/spelunky-clone-open-source-2d-platformer.935966/#post-6172939
         private struct RaycastOrigins {
+
             public Vector2 topLeft;
             public Vector2 bottomLeft;
             public Vector2 bottomRight;
+
         }
 
         public BoxCollider2D Collider { get; private set; }
@@ -50,7 +52,7 @@ namespace Spelunky {
             // TODO: This will break if the layers change, but maybe the layers assigned in the inspector also break
             // then? Either way I will want more control over layers at some point. Like some layer manager which knows
             // all obstacle layers, all entity layers etc. etc.
-            collisionMask = 1<<8 | 1<<12 | 1<<13 | 1<<15;
+            collisionMask = (1 << 8) | (1 << 12) | (1 << 13) | (1 << 15);
             skinWidth = 0.4f;
             horizontalRayCount = 2;
             verticalRayCount = 2;
@@ -73,7 +75,7 @@ namespace Spelunky {
             // Disable and collapse the inspector.
 #if UNITY_EDITOR
             rigidbody2D.hideFlags = HideFlags.NotEditable;
-            UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(rigidbody2D, false);
+            InternalEditorUtility.SetIsInspectorExpanded(rigidbody2D, false);
 #endif
         }
 
@@ -89,7 +91,6 @@ namespace Spelunky {
 
         /// <summary>
         /// Move the entity by the provided delta and do collision detection and handling for the move.
-        ///
         /// NOTE: Currently this is called from Update(). I want to make it so that it's called from FixedUpdate(), or
         /// maybe even so that we remove Move() altogether and take full control over the call order so that the caller
         /// can't do things in the wrong order. The reason I don't use FixedUpdate() at the moment is because I don't
@@ -181,12 +182,11 @@ namespace Spelunky {
 
         /// <summary>
         /// Check for and resolve vertical collisions for this move.
-        ///
         /// If we're not actually moving we still check to see if we're grounded without resolving any collisions.
         /// </summary>
         /// <param name="moveDeltaY">The vertical translation to check for collisions.</param>
         private void VerticalCollisions(ref float moveDeltaY) {
-            bool justCheckForGround =moveDeltaY == 0;
+            bool justCheckForGround = moveDeltaY == 0;
 
             float directionY = justCheckForGround ? -1 : Mathf.Sign(moveDeltaY);
             float rayLength = Mathf.Abs(moveDeltaY) + skinWidth;
@@ -240,7 +240,7 @@ namespace Spelunky {
         /// <param name="type">Whether we were called from the horizontal or the vertical collision check.</param>
         /// <returns>TRUE if we should ignore the collider, FALSE otherwise.</returns>
         private bool IgnoreCollider(Collider2D collider, float direction, string type) {
-            if (raycastsHitTriggers == false && collider.isTrigger) {
+            if (!raycastsHitTriggers && collider.isTrigger) {
                 return true;
             }
 
@@ -275,7 +275,6 @@ namespace Spelunky {
 
         /// <summary>
         /// Update the raycast origins.
-        ///
         /// Because the bounds are in world space this needs to happen before every collision check.
         /// </summary>
         private void UpdateRaycastOrigins() {
@@ -296,9 +295,7 @@ namespace Spelunky {
 
         /// <summary>
         /// Create bounds that are slightly smaller than our collider.
-        ///
         /// Bounds need to be created before every collision check because they are in world space.
-        ///
         /// TODO: I can't exactly remember why we have a value of -2 in here. Need to double check Sebastian Lague's
         /// tutorial again, I guess. Without shrinking the bounds we'll catch on edges and trigger vertical collisions
         /// when sliding along walls etc. at least which is very undesirable.

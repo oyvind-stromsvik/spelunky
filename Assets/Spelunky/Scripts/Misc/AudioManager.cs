@@ -3,15 +3,18 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 public class AudioManager : Singleton<AudioManager> {
+
     public AudioMixerGroup sfxGroup;
     public AudioMixerGroup ambientGroup;
     public AudioMixerGroup musicGroup;
 
     public enum AudioGroup {
+
         SFX,
         Ambient,
         Music
-    };
+
+    }
 
     private const float defaultMinDistance = 5f;
     private const float defaultMaxDistance = 50f;
@@ -80,4 +83,5 @@ public class AudioManager : Singleton<AudioManager> {
                 break;
         }
     }
+
 }

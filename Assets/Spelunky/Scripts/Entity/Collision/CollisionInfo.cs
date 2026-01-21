@@ -4,7 +4,6 @@ namespace Spelunky {
 
     /// <summary>
     /// Info about a collision event.
-    ///
     /// Similar to Collision2D for the built-in physics system.
     /// </summary>
     public struct CollisionInfo {

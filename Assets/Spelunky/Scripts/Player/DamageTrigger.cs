@@ -4,6 +4,7 @@ namespace Spelunky {
 
     [RequireComponent(typeof(Collider2D))]
     public class DamageTrigger : MonoBehaviour {
+
         public int damage;
 
         private Collider2D _collider;
@@ -19,6 +20,7 @@ namespace Spelunky {
                 health.TakeDamage(damage);
             }
         }
+
     }
 
 }

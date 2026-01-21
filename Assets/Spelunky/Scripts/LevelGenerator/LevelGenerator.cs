@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Gizmos = Popcron.Gizmos;
 
 namespace Spelunky {
 
     /// <summary>
     /// Generates our levels.
-    ///
     /// TODO: Currently extremely wip. Only generates a single level and very badly.
     /// </summary>
     public class LevelGenerator : MonoBehaviour {
@@ -43,6 +41,7 @@ namespace Spelunky {
         public float LevelWidth {
             get { return RoomWidth * roomsHorizontal * Tile.Width; }
         }
+
         public float LevelHeight {
             get { return RoomHeight * roomsVertical * Tile.Height; }
         }
@@ -74,14 +73,14 @@ namespace Spelunky {
             Object[] resourcesTiles = Resources.LoadAll("Tiles/Prefabs", typeof(Tile));
             _tilePrefabs = new Dictionary<string, Tile>();
             foreach (Object resource in resourcesTiles) {
-                Tile tile = (Tile) resource;
+                Tile tile = (Tile)resource;
                 _tilePrefabs.Add(tile.name, tile);
             }
 
             Object[] resourcesBackgrounds = Resources.LoadAll("Backgrounds/Prefabs", typeof(GameObject));
             _backgroundPrefabs = new Dictionary<string, GameObject>();
             foreach (Object resource in resourcesBackgrounds) {
-                GameObject background = (GameObject) resource;
+                GameObject background = (GameObject)resource;
                 _backgroundPrefabs.Add(background.name, background);
             }
 
@@ -99,7 +98,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <exception cref="Exception"></exception>
         private void CreateLevel() {
@@ -127,7 +125,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         private void PlaceEntranceAndExit() {
             Tile tileToSpawnEntranceOn = firstRoom.GetSuitableEntranceOrExitTile();
@@ -138,7 +135,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         private void CreateMainPathRooms() {
             Vector2 currentIndex = new Vector2(Random.Range(0, Rooms.GetLength(0)), Rooms.GetLength(1) - 1);
@@ -147,8 +143,8 @@ namespace Spelunky {
             firstRoom = null;
             lastRoom = null;
             bool stopGeneration = false;
-            while (stopGeneration == false) {
-                Vector2 indexToCheck = new Vector2((int) currentIndex.x + (int) _direction.x, (int) currentIndex.y + (int) _direction.y);
+            while (!stopGeneration) {
+                Vector2 indexToCheck = new Vector2((int)currentIndex.x + (int)_direction.x, (int)currentIndex.y + (int)_direction.y);
                 // Out of bounds.
                 if (indexToCheck.x < 0 || indexToCheck.x >= Rooms.GetLength(0)) {
                     _lastDirection = _direction;
@@ -185,7 +181,7 @@ namespace Spelunky {
                     lastRoom = spawnedRoom;
                 }
                 // Found an empty slot.
-                else if (Rooms[(int) indexToCheck.x, (int) indexToCheck.y] == null) {
+                else if (Rooms[(int)indexToCheck.x, (int)indexToCheck.y] == null) {
                     if (firstRoom == null) {
                         _lastDirection = Vector2.zero;
                     }
@@ -218,7 +214,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         private void CreateRemainingRooms() {
             for (int x = 0; x < Rooms.GetLength(0); x++) {
@@ -248,7 +243,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <param name="roomToSpawn"></param>
         /// <param name="currentIndex"></param>
@@ -263,7 +257,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         private void PickRandomDirection() {
             _lastDirection = _direction;
@@ -281,7 +274,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <param name="arrow"></param>
         /// <returns></returns>
@@ -294,7 +286,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         private void InstantiateDirectionArrow(Vector2 currentIndex) {
             if (!debug) {
@@ -313,7 +304,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <returns></returns>
         private Room FindSuitableRoom(Vector2 currentIndex) {
@@ -328,10 +318,10 @@ namespace Spelunky {
             bool left = _lastDirection == Vector2.right || _direction == Vector2.left;
             List<Room> suitableRooms = new List<Room>();
             foreach (Room room in normalRooms) {
-                if (top && !room.top ||
-                    right && !room.right ||
-                    down && !room.down ||
-                    left && !room.left) {
+                if ((top && !room.top) ||
+                    (right && !room.right) ||
+                    (down && !room.down) ||
+                    (left && !room.left)) {
                     continue;
                 }
 
@@ -342,7 +332,6 @@ namespace Spelunky {
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <returns></returns>
         private Room FindAnyRoom() {
@@ -436,8 +425,8 @@ namespace Spelunky {
                 }
 
                 // Otherwise initialize the tile.
-                int x = (int) tile.transform.position.x / Tile.Width;
-                int y = (int) tile.transform.position.y / Tile.Height;
+                int x = (int)tile.transform.position.x / Tile.Width;
+                int y = (int)tile.transform.position.y / Tile.Height;
                 tile.InitializeTile(x, y);
                 tile.debug = debug;
             }
@@ -445,7 +434,6 @@ namespace Spelunky {
 
         /// <summary>
         /// Loop through and setup all the tiles in the level.
-        ///
         /// This gives the correct sprite and decorations etc.
         /// </summary>
         private void SetupTiles() {
@@ -502,12 +490,15 @@ namespace Spelunky {
             if (minX < 0) {
                 minX = 0;
             }
+
             if (maxX >= Tiles.GetLength(0)) {
                 maxX = Tiles.GetLength(0) - 1;
             }
+
             if (minY < 0) {
                 minY = 0;
             }
+
             if (maxY >= Tiles.GetLength(1)) {
                 maxY = Tiles.GetLength(1) - 1;
             }

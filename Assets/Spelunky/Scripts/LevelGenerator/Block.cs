@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Spelunky {
 
@@ -24,7 +24,7 @@ namespace Spelunky {
             // If we're not grounded we snap our x position to the tile grid to avoid floating point
             // inaccuracies in our alignment and we zero out our x velocity.
             if (!Physics.collisionInfo.down) {
-                Vector3 centerOfBlock = transform.position + (Vector3) Physics.Collider.offset;
+                Vector3 centerOfBlock = transform.position + (Vector3)Physics.Collider.offset;
                 Vector3 lowerLeftCornerOfTileWeAreIn = Tile.GetPositionOfLowerLeftOfNearestTile(centerOfBlock);
                 transform.position = new Vector3(lowerLeftCornerOfTileWeAreIn.x, transform.position.y, transform.position.z);
                 velocity.x = 0;

@@ -123,6 +123,8 @@ GameObject:
   - component: {fileID: 6396263571779178972}
   - component: {fileID: 4675926317218313548}
   - component: {fileID: 6672550340453556833}
+  - component: {fileID: 3471473987661277627}
+  - component: {fileID: 8774568592001113569}
   m_Layer: 17
   m_Name: Caveman
   m_TagString: Enemy
@@ -323,8 +325,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
     type: 3}
-  invulnerabilityDuration: 0
   maxHealth: 3
+  spriteRenderer: {fileID: 0}
+  invulnerabilityDuration: 0
+  numberOfInvulnerabilityFlashes: 10
+  invulnerabilityFlashColor: {r: 0, g: 0, b: 0, a: 0}
+  isInvulnerable: 0
 --- !u!114 &6396263571779178972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,6 +361,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 64
   damage: 1
+  targetDetectionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  detectionRange: 128
+  initialState: {fileID: 3471473987661277627}
+  velocity: {x: 0, y: 0}
 --- !u!61 &6672550340453556833
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -381,3 +393,31 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 128, y: 16}
   m_EdgeRadius: 0
+--- !u!114 &3471473987661277627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bb410de5c0bea54a9f5b6a5d539bdc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activatedState: {fileID: 8774568592001113569}
+  idleAnimation: Idle
+  activationAnimation: Run
+--- !u!114 &8774568592001113569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eb2bb0f338c9cd468d69f478331a1cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runAnimation: Run

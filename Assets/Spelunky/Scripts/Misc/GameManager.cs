@@ -16,6 +16,7 @@ namespace Spelunky {
             camInstance.Initialize(playerInstance);
             playerInstance.cam = camInstance;
         }
+
     }
 
 }

@@ -7,7 +7,7 @@ namespace Spelunky {
     /// This state is essentially just a transition to the HangingState, but you can only enter this state by crawling
     /// and you can only enter the HangingState by jumping so they behave very differently.
     /// </summary>
-    public class CrawlToHangState : State {
+    public class PlayerCrawlToHangState : PlayerState {
 
         public override bool CanEnterState() {
             // Find the collider we're going to grab on to.
