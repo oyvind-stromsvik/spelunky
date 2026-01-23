@@ -21,14 +21,8 @@ namespace Spelunky {
         }
 
         protected override void Update() {
-            // If we're not grounded we snap our x position to the tile grid to avoid floating point
-            // inaccuracies in our alignment and we zero out our x velocity.
-            if (!Physics.collisionInfo.down) {
-                Vector3 centerOfBlock = transform.position + (Vector3)Physics.Collider.offset;
-                Vector3 lowerLeftCornerOfTileWeAreIn = Tile.GetPositionOfLowerLeftOfNearestTile(centerOfBlock);
-                transform.position = new Vector3(lowerLeftCornerOfTileWeAreIn.x, transform.position.y, transform.position.z);
-                velocity.x = 0;
-            }
+            // Horizontal movement is handled by push-on-collision.
+            velocity.x = 0f;
 
             base.Update();
         }
@@ -53,7 +47,11 @@ namespace Spelunky {
         }
 
         public void Push(float pushSpeed) {
-            velocity.x = pushSpeed;
+            if (Mathf.Approximately(pushSpeed, 0f)) {
+                return;
+            }
+
+            Physics.Move(new Vector2(pushSpeed * Time.deltaTime, 0f));
         }
 
     }

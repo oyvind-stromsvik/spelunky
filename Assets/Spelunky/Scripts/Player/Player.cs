@@ -238,6 +238,8 @@ namespace Spelunky {
                 "--- Player info ---",
                 "State: " + stateMachine.CurrentState.GetType().Name,
                 "--- Physics info --- ",
+                "Requested Velocity X: " + velocity.x,
+                "Requested Velocity Y: " + velocity.y,
                 "Velocity X: " + Physics.Velocity.x,
                 "Velocity Y: " + Physics.Velocity.y,
                 "--- Physics Collision info --- ",

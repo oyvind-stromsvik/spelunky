@@ -55,7 +55,7 @@ namespace Spelunky {
                 player.Visuals.animator.Play("ClimbRope");
             }
 
-            transform.position = new Vector3(xPos, transform.position.y, 0);
+            player.Physics.SetPosition(new Vector2(xPos, transform.position.y));
             player.Audio.Play(player.Audio.grabClip);
         }
 

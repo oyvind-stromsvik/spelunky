@@ -33,7 +33,7 @@ namespace Spelunky {
         }
 
         private IEnumerator EnterDoor() {
-            transform.position = new Vector2(player._exitDoor.transform.position.x + Tile.Width / 2f, player._exitDoor.transform.position.y);
+            player.Physics.SetPosition(new Vector2(player._exitDoor.transform.position.x + Tile.Width / 2f, player._exitDoor.transform.position.y));
 
             player.Visuals.animator.Play("EnterDoor");
 

@@ -4,27 +4,14 @@ using UnityEngine;
 namespace Spelunky {
 
     /// <summary>
-    /// Our custom "Rigidbody2D" class.
-    /// TODO: Should there be a character controller wrapper class for this? So that rocks, bombs, blocks and other
-    /// actual rigidbodies can have this class and then our player can have the character controller class? Also is it
-    /// just ridiculous not to use the built-in Rigidbody2D for anything?
+    /// Our custom "Rigidbody2D" class using integer-based pixel-perfect movement.
+    /// Uses Physics2D.OverlapBox for collision detection with pixel-by-pixel movement.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
     public class EntityPhysics : MonoBehaviour {
 
         public CollisionInfoEvent OnCollisionEnterEvent { get; } = new CollisionInfoEvent();
         public CollisionInfoEvent OnCollisionExitEvent { get; } = new CollisionInfoEvent();
-
-        // TODO: I really want to get rid of all this raycast nonsense and just use Collider.Cast or Physics2D.Boxcast
-        // instead, but they don't return precise collisions so I would have to find a workaround for that.
-        // Ref. https://forum.unity.com/threads/spelunky-clone-open-source-2d-platformer.935966/#post-6172939
-        private struct RaycastOrigins {
-
-            public Vector2 topLeft;
-            public Vector2 bottomLeft;
-            public Vector2 bottomRight;
-
-        }
 
         public BoxCollider2D Collider { get; private set; }
         public Vector2 Velocity { get; private set; }
@@ -33,19 +20,25 @@ namespace Spelunky {
         public CollisionInfo collisionInfoLastFrame;
 
         public LayerMask collisionMask;
-        public float skinWidth;
-        public int horizontalRayCount;
-        public int verticalRayCount;
-
         public bool raycastsHitTriggers;
 
-        private float _horizontalRaySpacing;
-        private float _verticalRaySpacing;
-        private RaycastOrigins _raycastOrigins;
+        [Header("Push Settings")]
+        [Tooltip("Whether this entity can push blocks when moving horizontally.")]
+        // TODO: This is currently tied to player input logic so currently it has no purpose outside of that. It would
+        // make sense to change this so that it could be enabled for enemies/npcs to allow them to push blocks as well,
+        // but I couldn't be bothered right now. I'm thinking this setting needs to be split up into something like
+        // "Is ever allowed to push blocks" and "Can push blocks", and one is the configuration for any given entity,
+        // while the other is the runtime state for the entity, or something like that.
+        public bool canPushBlocks;
 
-        // The max number of colliders that our raycasts will register hits with at once.
-        private const int MaxCollisions = 32;
-        private static RaycastHit2D[] _raycastHits = new RaycastHit2D[MaxCollisions];
+        // Integer position tracking
+        private Vector2Int _pixelPosition;
+        private Vector2 _subPixelRemainder;
+        private bool _positionInitialized;
+
+        // Collision detection cache
+        private ContactFilter2D _contactFilter;
+        private Collider2D[] _overlapResults = new Collider2D[16];
 
         private void Reset() {
             // First time I've tried setting up layermasks in code.
@@ -53,9 +46,6 @@ namespace Spelunky {
             // then? Either way I will want more control over layers at some point. Like some layer manager which knows
             // all obstacle layers, all entity layers etc. etc.
             collisionMask = (1 << 8) | (1 << 12) | (1 << 13) | (1 << 15);
-            skinWidth = 0.4f;
-            horizontalRayCount = 2;
-            verticalRayCount = 2;
             raycastsHitTriggers = false;
 
             ValidateData();
@@ -86,228 +76,377 @@ namespace Spelunky {
         }
 
         private void Start() {
-            CalculateRaySpacing();
+            SetupContactFilter();
+        }
+
+        private void SetupContactFilter() {
+            _contactFilter = new ContactFilter2D();
+            _contactFilter.useTriggers = raycastsHitTriggers;
+            _contactFilter.useLayerMask = true;
+            _contactFilter.layerMask = collisionMask;
+        }
+
+        private void InitializePixelPosition() {
+            if (_positionInitialized) return;
+
+            // Round to nearest pixel
+            _pixelPosition = new Vector2Int(
+                Mathf.RoundToInt(transform.position.x),
+                Mathf.RoundToInt(transform.position.y)
+            );
+
+            // Push out of any initial overlaps (fixes entities spawning stuck in tiles)
+            // Use a smaller overlap check to avoid false positives from edge-touching
+            // Shrink by 0.5 pixels total for more reliable collision detection
+            Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
+
+            int maxPushAttempts = 32;
+            int pushAttempts = 0;
+            while (pushAttempts < maxPushAttempts) {
+                Vector2 checkPos = (Vector2)_pixelPosition + Collider.offset;
+
+                int hitCount = Physics2D.OverlapBox(
+                    checkPos,
+                    checkSize,
+                    0f,
+                    _contactFilter,
+                    _overlapResults
+                );
+
+                bool foundOverlap = false;
+                for (int i = 0; i < hitCount; i++) {
+                    Collider2D hit = _overlapResults[i];
+                    if (hit == Collider) continue;
+                    if (hit.isTrigger) continue;
+                    if (hit.CompareTag("OneWayPlatform")) continue;
+
+                    foundOverlap = true;
+                    break;
+                }
+
+                if (!foundOverlap) break;
+
+                _pixelPosition.y += 1;
+                pushAttempts++;
+            }
+
+            // Clear remainder on initialization
+            _subPixelRemainder = Vector2.zero;
+
+            // Sync transform to pixel position
+            transform.position = new Vector3(_pixelPosition.x, _pixelPosition.y, transform.position.z);
+
+            _positionInitialized = true;
+        }
+
+        /// <summary>
+        /// Set the entity's position directly (for snapping to ladders, doors, ledges, etc.)
+        /// Call this instead of setting transform.position directly.
+        /// </summary>
+        public void SetPosition(Vector2 newPosition) {
+            _pixelPosition = new Vector2Int(
+                Mathf.RoundToInt(newPosition.x),
+                Mathf.RoundToInt(newPosition.y)
+            );
+
+            _subPixelRemainder = new Vector2(
+                newPosition.x - _pixelPosition.x,
+                newPosition.y - _pixelPosition.y
+            );
+
+            transform.position = new Vector3(_pixelPosition.x, _pixelPosition.y, transform.position.z);
+
+            _positionInitialized = true;
         }
 
         /// <summary>
         /// Move the entity by the provided delta and do collision detection and handling for the move.
-        /// NOTE: Currently this is called from Update(). I want to make it so that it's called from FixedUpdate(), or
-        /// maybe even so that we remove Move() altogether and take full control over the call order so that the caller
-        /// can't do things in the wrong order. The reason I don't use FixedUpdate() at the moment is because I don't
-        /// understand how to properly interpolate the movement.
+        /// Uses pixel-by-pixel movement with Physics2D.OverlapBox for collision detection.
         /// </summary>
         /// <param name="moveDelta"></param>
         public void Move(Vector2 moveDelta) {
+            InitializePixelPosition();
+
             collisionInfoLastFrame = collisionInfo;
-
-            UpdateRaycastOrigins();
-
             collisionInfo.Reset();
 
-            // We don't need to check horizontal collisions if there are no horizontal movement.
-            if (moveDelta.x != 0) {
-                HorizontalCollisions(ref moveDelta.x);
+            // Add delta to sub-pixel accumulator
+            _subPixelRemainder += moveDelta;
+
+            // Extract integer pixels to move
+            Vector2Int pixelsToMove = new Vector2Int(
+                Mathf.RoundToInt(_subPixelRemainder.x),
+                Mathf.RoundToInt(_subPixelRemainder.y)
+            );
+
+            // Update remainder
+            _subPixelRemainder -= new Vector2(pixelsToMove.x, pixelsToMove.y);
+
+            // Move pixel-by-pixel
+            MoveX(pixelsToMove.x, moveDelta.x);
+            MoveY(pixelsToMove.y, moveDelta.y);
+
+            // Sync transform to pixel position
+            transform.position = new Vector3(_pixelPosition.x, _pixelPosition.y, transform.position.z);
+
+            Vector2 resolvedVelocity = moveDelta / Time.deltaTime;
+            if (collisionInfo.left || collisionInfo.right) {
+                resolvedVelocity.x = 0f;
             }
+            if (collisionInfo.up || collisionInfo.down) {
+                resolvedVelocity.y = 0f;
+            }
+            Velocity = resolvedVelocity;
 
-            // Even if there is no vertical movement we still want to check for ground.
-            VerticalCollisions(ref moveDelta.y);
-
-            // Actually move our entity, with the movement delta adjusted based on the resolved collisions above.
-            transform.Translate(moveDelta);
-
-            Velocity = moveDelta / Time.deltaTime;
-
-            // Set our becameGrounded state based on the previous and current collision state.
+            // Set becameGroundedThisFrame flag
             if (!collisionInfoLastFrame.down && collisionInfo.down) {
                 collisionInfo.becameGroundedThisFrame = true;
             }
 
-            if ((!collisionInfoLastFrame.left && collisionInfo.left) || (!collisionInfoLastFrame.right && collisionInfo.right) || (!collisionInfoLastFrame.down && collisionInfo.down) || (!collisionInfoLastFrame.up && collisionInfo.up)) {
-                OnCollisionEnterEvent?.Invoke(collisionInfo);
-            }
-
-            // TODO: If the collider is destroyed last frame this will cause an exception if someone tries to access it
-            // in this event. Figure out how to handle that.
-            if ((collisionInfoLastFrame.left && !collisionInfo.left) || (collisionInfoLastFrame.right && !collisionInfo.right) || (collisionInfoLastFrame.down && !collisionInfo.down) || (collisionInfoLastFrame.up && !collisionInfo.up)) {
-                OnCollisionExitEvent?.Invoke(collisionInfoLastFrame);
-            }
+            FireCollisionEvents();
         }
 
-        /// <summary>
-        /// Check for and resolve any horizontal collisions for this move.
-        /// </summary>
-        /// <param name="moveDeltaX">The horizontal translation to check for collisions.</param>
-        private void HorizontalCollisions(ref float moveDeltaX) {
-            float directionX = Mathf.Sign(moveDeltaX);
-            float rayLength = Mathf.Abs(moveDeltaX) + skinWidth;
+        private void MoveX(int pixelsX, float moveDeltaX) {
+            int direction = moveDeltaX > 0f ? 1 : -1;
+            if (pixelsX == 0) {
+                if (Mathf.Approximately(moveDeltaX, 0f)) {
+                    return;
+                }
 
-            if (Mathf.Abs(moveDeltaX) < skinWidth) {
-                rayLength = 2 * skinWidth;
+                Vector2Int nextPosition = _pixelPosition + new Vector2Int(direction, 0);
+
+                if (CheckCollisionX(nextPosition, direction)) {
+                    collisionInfo.left = direction == -1;
+                    collisionInfo.right = direction == 1;
+                }
+
+                return;
             }
 
-            bool resolvedCollision = false;
-            for (int i = 0; i < horizontalRayCount; i++) {
-                if (resolvedCollision) {
+            int pixelsRemaining = Mathf.Abs(pixelsX);
+            for (int i = 0; i < pixelsRemaining; i++) {
+                Vector2Int nextPosition = _pixelPosition + new Vector2Int(direction, 0);
+
+                if (CheckCollisionX(nextPosition, direction)) {
+                    if (TryPushBlock(collisionInfo.colliderHorizontal, direction)) {
+                        collisionInfo.left = direction == -1;
+                        collisionInfo.right = direction == 1;
+                        _pixelPosition.x += direction;
+                        continue;
+                    }
+
+                    collisionInfo.left = direction == -1;
+                    collisionInfo.right = direction == 1;
                     break;
                 }
 
-                Vector2 rayOrigin = directionX == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
-                rayOrigin += Vector2.up * (_horizontalRaySpacing * i);
-                int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.right * directionX, _raycastHits, rayLength, collisionMask);
-                Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
-
-                for (int j = 0; j < hits; j++) {
-                    RaycastHit2D hit = _raycastHits[j];
-                    if (hit) {
-                        if (IgnoreCollider(hit.collider, directionX, "horizontal")) {
-                            continue;
-                        }
-
-                        collisionInfo.left = directionX == -1;
-                        collisionInfo.right = directionX == 1;
-                        collisionInfo.colliderHorizontal = hit.collider;
-
-                        moveDeltaX = (hit.distance - skinWidth) * directionX;
-
-                        // In Sebastian Lague's original tutorial I think he supports slopes so he has to go through all
-                        // the hits because they could be different lengths due to us being on a slope. We don't support
-                        // that so there's no reason to check more than one hit. We only use multiple raycasts to ensure
-                        // nothing smaller than our bounds passes through us.
-                        resolvedCollision = true;
-                        break;
-                    }
-                }
+                _pixelPosition.x += direction;
             }
         }
 
-        /// <summary>
-        /// Check for and resolve vertical collisions for this move.
-        /// If we're not actually moving we still check to see if we're grounded without resolving any collisions.
-        /// </summary>
-        /// <param name="moveDeltaY">The vertical translation to check for collisions.</param>
-        private void VerticalCollisions(ref float moveDeltaY) {
-            bool justCheckForGround = moveDeltaY == 0;
-
-            float directionY = justCheckForGround ? -1 : Mathf.Sign(moveDeltaY);
-            float rayLength = Mathf.Abs(moveDeltaY) + skinWidth;
-
-            if (Mathf.Abs(moveDeltaY) < skinWidth) {
-                rayLength = 2 * skinWidth;
+        private bool TryPushBlock(Collider2D hit, int direction) {
+            if (!canPushBlocks) {
+                return false;
             }
 
-            bool resolvedCollision = false;
-            for (int i = 0; i < verticalRayCount; i++) {
-                if (resolvedCollision) {
+            if (hit == null || !hit.CompareTag("Block")) {
+                return false;
+            }
+
+            Block block = hit.GetComponent<Block>();
+            if (block == null) {
+                return false;
+            }
+
+            EntityPhysics blockPhysics = block.Physics;
+            if (blockPhysics == null) {
+                return false;
+            }
+
+            if (!blockPhysics.collisionInfo.down) {
+                return false;
+            }
+
+            blockPhysics.Move(new Vector2(direction, 0f));
+
+            if (direction == 1 && blockPhysics.collisionInfo.right) {
+                return false;
+            }
+
+            if (direction == -1 && blockPhysics.collisionInfo.left) {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void MoveY(int pixelsY, float moveDeltaY) {
+            int direction = moveDeltaY > 0f ? 1 : -1;
+            if (pixelsY == 0) {
+                if (moveDeltaY > 0f) {
+                    Vector2Int nextPosition = _pixelPosition + Vector2Int.up;
+                    if (CheckCollisionY(nextPosition, 1)) {
+                        collisionInfo.up = true;
+                    }
+                }
+                else {
+                    CheckGround();
+                }
+                return;
+            }
+
+            int pixelsRemaining = Mathf.Abs(pixelsY);
+            for (int i = 0; i < pixelsRemaining; i++) {
+                Vector2Int nextPosition = _pixelPosition + new Vector2Int(0, direction);
+
+                if (CheckCollisionY(nextPosition, direction)) {
+                    collisionInfo.down = direction == -1;
+                    collisionInfo.up = direction == 1;
                     break;
                 }
 
-                Vector2 rayOrigin = directionY == -1 ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
-                rayOrigin += Vector2.right * (_verticalRaySpacing * i);
-                int hits = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up * directionY, _raycastHits, rayLength, collisionMask);
-                Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
-
-                for (int j = 0; j < hits; j++) {
-                    RaycastHit2D hit = _raycastHits[j];
-                    if (hit) {
-                        if (IgnoreCollider(hit.collider, directionY, "vertical")) {
-                            continue;
-                        }
-
-                        collisionInfo.down = directionY == -1;
-                        collisionInfo.up = directionY == 1;
-                        collisionInfo.colliderVertical = hit.collider;
-
-                        if (!justCheckForGround) {
-                            moveDeltaY = (hit.distance - skinWidth) * directionY;
-                        }
-
-                        // In Sebastian Lague's original tutorial I think he supports slopes so he has to go through all
-                        // the hits because they could be different lengths due to us being on a slope. We don't support
-                        // that so there's no reason to check more than one hit. We only use multiple raycasts to ensure
-                        // nothing smaller than our bounds passes through us.
-                        resolvedCollision = true;
-                        break;
-                    }
-                }
+                _pixelPosition.y += direction;
             }
         }
 
-        /// <summary>
-        /// Check if we should ignore collisions with the given collider.
-        /// </summary>
-        /// <param name="collider">The collider to check if we want to ignore a collision with or not.</param>
-        /// <param name="direction">A signed value indicating the direction.</param>
-        /// <param name="type">Whether we were called from the horizontal or the vertical collision check.</param>
-        /// <returns>TRUE if we should ignore the collider, FALSE otherwise.</returns>
-        private bool IgnoreCollider(Collider2D collider, float direction, string type) {
-            if (!raycastsHitTriggers && collider.isTrigger) {
-                return true;
-            }
+        private void CheckGround() {
+            // Check one pixel below current position
+            Vector2Int checkPosition = _pixelPosition + new Vector2Int(0, -1);
+            Vector2 checkPos = (Vector2)checkPosition + Collider.offset;
+            Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
 
-            // If the collider we hit is ourself, ignore it.
-            if (collider == Collider) {
-                return true;
-            }
+            int hitCount = Physics2D.OverlapBox(
+                checkPos,
+                checkSize,
+                0f,
+                _contactFilter,
+                _overlapResults
+            );
 
-            // One way platform handling.
-            if (collider.CompareTag("OneWayPlatform")) {
-                // Always ignore them if we're colliding horizontally.
-                if (type == "horizontal") {
-                    return true;
+            for (int i = 0; i < hitCount; i++) {
+                Collider2D hit = _overlapResults[i];
+
+                if (hit == Collider) continue;
+                if (!raycastsHitTriggers && hit.isTrigger) continue;
+
+                // One-way platform logic - only detect as ground if we're above it
+                if (hit.CompareTag("OneWayPlatform")) {
+                    if (collisionInfo.fallingThroughPlatform) continue;
+
+                    // Check if we're above the platform (our bottom is at or above platform top)
+                    Vector2 ourBottom = (Vector2)checkPosition + Collider.offset - new Vector2(0, Collider.size.y / 2f);
+                    float platformTop = hit.bounds.max.y;
+
+                    // If we're below the platform, not grounded on it
+                    if (ourBottom.y < platformTop - 1f) continue;
                 }
 
-                // If we're colliding vertically...
-                if (type == "vertical") {
-                    /// ignore them if we're going up...
-                    if (direction == 1) {
-                        return true;
-                    }
+                collisionInfo.down = true;
+                collisionInfo.colliderVertical = hit;
+                return;
+            }
+        }
 
-                    /// or if we're going down and flagged to pass through them.
-                    if (direction == -1 && collisionInfo.fallingThroughPlatform) {
-                        return true;
-                    }
-                }
+        private bool CheckCollisionX(Vector2Int nextPosition, int direction) {
+            // Check if the NEXT position would overlap any colliders
+            // Use a shrunk size to detect actual overlap, not edge-touching
+            Vector2 checkPosition = (Vector2)nextPosition + Collider.offset;
+            Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
+
+            int hitCount = Physics2D.OverlapBox(
+                checkPosition,
+                checkSize,
+                0f,
+                _contactFilter,
+                _overlapResults
+            );
+
+            for (int i = 0; i < hitCount; i++) {
+                Collider2D hit = _overlapResults[i];
+
+                if (hit == Collider) continue;
+                if (!raycastsHitTriggers && hit.isTrigger) continue;
+
+                // One-way platforms: always ignore for horizontal collisions
+                if (hit.CompareTag("OneWayPlatform")) continue;
+
+                collisionInfo.colliderHorizontal = hit;
+                return true;
             }
 
             return false;
         }
 
-        /// <summary>
-        /// Update the raycast origins.
-        /// Because the bounds are in world space this needs to happen before every collision check.
-        /// </summary>
-        private void UpdateRaycastOrigins() {
-            Bounds bounds = CalculateBounds();
-            _raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-            _raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-            _raycastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
+        private bool CheckCollisionY(Vector2Int nextPosition, int direction) {
+            // Check if the NEXT position would overlap any colliders
+            // Use a shrunk size to detect actual overlap, not edge-touching
+            Vector2 checkPosition = (Vector2)nextPosition + Collider.offset;
+            Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
+
+            int hitCount = Physics2D.OverlapBox(
+                checkPosition,
+                checkSize,
+                0f,
+                _contactFilter,
+                _overlapResults
+            );
+
+            for (int i = 0; i < hitCount; i++) {
+                Collider2D hit = _overlapResults[i];
+
+                if (hit == Collider) continue;
+                if (!raycastsHitTriggers && hit.isTrigger) continue;
+
+                // One-way platform logic
+                if (hit.CompareTag("OneWayPlatform")) {
+                    // Always ignore when moving up (jumping from below)
+                    if (direction == 1) continue;
+
+                    // Ignore if intentionally falling through
+                    if (direction == -1 && collisionInfo.fallingThroughPlatform) continue;
+
+                    // Only collide when moving down AND our bottom WOULD BE above the platform top
+                    // This ensures we only land on platforms from above, not get stuck below them
+                    if (direction == -1) {
+                        // Calculate where our bottom would be at the NEXT position
+                        Vector2 nextBottom = (Vector2)nextPosition + Collider.offset - new Vector2(0, Collider.size.y / 2f);
+                        float platformTop = hit.bounds.max.y;
+
+                        // If our next bottom position would be below the platform top, ignore
+                        // (We're passing through from below)
+                        if (nextBottom.y < platformTop - 1f) continue;
+                    }
+                }
+
+                collisionInfo.colliderVertical = hit;
+                return true;
+            }
+
+            return false;
         }
 
-        /// <summary>
-        /// Calculate the spacing for our raycasts based on our adjusted bounds.
-        /// </summary>
-        private void CalculateRaySpacing() {
-            Bounds bounds = CalculateBounds();
-            _horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
-            _verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
-        }
+        private void FireCollisionEvents() {
+            // Check if any new collision started
+            bool anyCollisionEntered =
+                (!collisionInfoLastFrame.left && collisionInfo.left) ||
+                (!collisionInfoLastFrame.right && collisionInfo.right) ||
+                (!collisionInfoLastFrame.down && collisionInfo.down) ||
+                (!collisionInfoLastFrame.up && collisionInfo.up);
 
-        /// <summary>
-        /// Create bounds that are slightly smaller than our collider.
-        /// Bounds need to be created before every collision check because they are in world space.
-        /// TODO: I can't exactly remember why we have a value of -2 in here. Need to double check Sebastian Lague's
-        /// tutorial again, I guess. Without shrinking the bounds we'll catch on edges and trigger vertical collisions
-        /// when sliding along walls etc. at least which is very undesirable.
-        /// TODO: But this also means we're not getting pixel perfect collisions. For example when standing on an edge
-        /// we'll now fall off while our collider is still on the edge due to the bounds being shrunk. This is also not
-        /// desirable.
-        /// </summary>
-        /// <returns></returns>
-        private Bounds CalculateBounds() {
-            Bounds bounds = Collider.bounds;
-            bounds.Expand(skinWidth * -2);
-            return bounds;
+            if (anyCollisionEntered) {
+                OnCollisionEnterEvent?.Invoke(collisionInfo);
+            }
+
+            // Check if any collision ended
+            bool anyCollisionExited =
+                (collisionInfoLastFrame.left && !collisionInfo.left) ||
+                (collisionInfoLastFrame.right && !collisionInfo.right) ||
+                (collisionInfoLastFrame.down && !collisionInfo.down) ||
+                (collisionInfoLastFrame.up && !collisionInfo.up);
+
+            if (anyCollisionExited) {
+                OnCollisionExitEvent?.Invoke(collisionInfoLastFrame);
+            }
         }
 
     }

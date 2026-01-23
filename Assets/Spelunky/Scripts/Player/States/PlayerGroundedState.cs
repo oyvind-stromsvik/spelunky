@@ -21,15 +21,16 @@ namespace Spelunky {
         public override void ExitState() {
             player.Physics.OnCollisionEnterEvent.RemoveListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.RemoveListener(OnEntityPhysicsCollisionExit);
+            player.Physics.canPushBlocks = false;
 
             if (pushingBlock) {
-                pushingBlock.Push(0);
                 pushingBlock = null;
             }
         }
 
         public override void UpdateState() {
             player.groundedGraceTimer = 0;
+            player.Physics.canPushBlocks = player.directionalInput.x != 0 && player.directionalInput.y >= 0;
 
             HandleHorizontalInput();
             HandleLookUpDown();
@@ -55,8 +56,14 @@ namespace Spelunky {
         }
 
         public override void ChangePlayerVelocity(ref Vector2 velocity) {
-            if (pushingBlock != null && player.directionalInput.x == 0) {
-                velocity.x = 0;
+            // When pushing a block, use a fixed push speed for even pixel stepping.
+            if (pushingBlock != null) {
+                if (player.directionalInput.x == 0) {
+                    velocity.x = 0;
+                } else {
+                    // Use a fixed push speed to avoid uneven pixel stepping while pushing.
+                    velocity.x = player.pushBlockSpeed * Mathf.Sign(player.directionalInput.x);
+                }
             }
 
             velocity.y = 0;
@@ -69,7 +76,6 @@ namespace Spelunky {
                 }
                 else if (player.Physics.collisionInfo.colliderHorizontal != null && player.Physics.collisionInfo.colliderHorizontal.CompareTag("Block")) {
                     pushingBlock = player.Physics.collisionInfo.colliderHorizontal.GetComponent<Block>();
-                    pushingBlock.Push(player.pushBlockSpeed * player.directionalInput.x);
                     player.Visuals.animator.Play("Push", 1, false);
                 }
                 else {
@@ -81,10 +87,6 @@ namespace Spelunky {
                 }
             }
             else {
-                if (pushingBlock != null) {
-                    pushingBlock.Push(0);
-                }
-
                 if (player.directionalInput.y < 0) {
                     player.Visuals.animator.Play("Duck");
                 }
@@ -151,7 +153,6 @@ namespace Spelunky {
                     Debug.LogError("Trying to exit the collision from a different block than the one we entered the collision with!");
                 }
 
-                pushingBlock.Push(0);
                 pushingBlock = null;
             }
         }

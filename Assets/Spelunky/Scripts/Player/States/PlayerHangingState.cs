@@ -36,7 +36,7 @@ namespace Spelunky {
                 hangPosition.y = transform.position.y;
             }
 
-            transform.position = new Vector2(hangPosition.x, hangPosition.y);
+            player.Physics.SetPosition(hangPosition);
 
             // Set our sprite to the hang sprite immediately when we enter this state because the conditionals we
             // currently have in UpdateState() could lead to us not actually changing to the Hang sprite if we have tiny

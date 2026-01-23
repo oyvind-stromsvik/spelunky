@@ -396,10 +396,8 @@ MonoBehaviour:
   collisionMask:
     serializedVersion: 2
     m_Bits: 177408
-  skinWidth: 0.4
-  horizontalRayCount: 3
-  verticalRayCount: 3
   raycastsHitTriggers: 0
+  canPushBlocks: 0
 --- !u!114 &-5236971530926676888
 MonoBehaviour:
   m_ObjectHideFlags: 0
