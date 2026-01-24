@@ -358,10 +358,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 16
   damage: 1
+  contactKnockback: {x: 96, y: 96}
+  playerOverlapMask:
+    serializedVersion: 2
+    m_Bits: 512
   targetDetectionMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
   detectionRange: 128
+  detectionBox: {x: 128, y: 64}
+  detectionOffset: {x: 0, y: -32}
   initialState: {fileID: 8206166909450700608}
   velocity: {x: 0, y: 0}
 --- !u!114 &8206166909450700608
@@ -380,4 +386,4 @@ MonoBehaviour:
   turnAtWalls: 1
   walkAnimation: Walk
   attackAnimation: Attack
-  knockback: {x: 256, y: 512}
+  attackAnimationCooldown: 0.35

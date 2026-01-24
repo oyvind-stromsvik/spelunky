@@ -44,7 +44,9 @@ namespace Spelunky {
                 Die();
             }
             else {
-                StartCoroutine(InvulnerabilityTime());
+                if (invulnerabilityDuration > 0f) {
+                    StartCoroutine(InvulnerabilityTime());
+                }
             }
         }
 
@@ -64,17 +66,26 @@ namespace Spelunky {
         private IEnumerator InvulnerabilityTime() {
             isInvulnerable = true;
 
-            Color originalColor = spriteRenderer.color;
-            float flashInterval = invulnerabilityDuration / numberOfInvulnerabilityFlashes;
-            float _invulnerabilityTimer = 0;
+            Color originalColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
+            int flashCount = Mathf.Max(1, numberOfInvulnerabilityFlashes);
+            float startFlashInterval = invulnerabilityDuration / (flashCount * 0.5f); // Start slower
+            float endFlashInterval = invulnerabilityDuration / (flashCount * 2f);    // End faster
+            float elapsed = 0f;
 
-            while (_invulnerabilityTimer < invulnerabilityDuration) {
-                _invulnerabilityTimer += flashInterval;
-                
-                spriteRenderer.color = invulnerabilityFlashColor;
-                yield return new WaitForSeconds(flashInterval / 2);
-                spriteRenderer.color = originalColor;
-                yield return new WaitForSeconds(flashInterval / 2);
+            while (elapsed < invulnerabilityDuration) {
+                float t = elapsed / invulnerabilityDuration;
+                float flashInterval = Mathf.Lerp(startFlashInterval, endFlashInterval, t);
+
+                if (spriteRenderer != null) {
+                    spriteRenderer.color = invulnerabilityFlashColor;
+                    yield return new WaitForSeconds(flashInterval / 2);
+                    spriteRenderer.color = originalColor;
+                    yield return new WaitForSeconds(flashInterval / 2);
+                } else {
+                    yield return new WaitForSeconds(flashInterval);
+                }
+
+                elapsed += flashInterval;
             }
 
             isInvulnerable = false;

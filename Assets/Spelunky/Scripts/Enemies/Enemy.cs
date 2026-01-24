@@ -1,3 +1,4 @@
+using Gizmos = Popcron.Gizmos;
 using UnityEngine;
 
 namespace Spelunky {
@@ -6,15 +7,19 @@ namespace Spelunky {
     /// Base class for all enemies. Provides state machine support, velocity management,
     /// target tracking, and common enemy properties.
     /// </summary>
-    public class Enemy : Entity {
+    public class Enemy : Entity, ICrushable {
 
         [Header("Enemy Settings")]
         public float moveSpeed = 32f;
         public int damage = 1;
+        public Vector2 contactKnockback = new Vector2(256f, 512f);
+        public LayerMask playerOverlapMask;
 
         [Header("Target Detection")]
         public LayerMask targetDetectionMask;
         public float detectionRange = 128f;
+        public Vector2Int detectionBox = new Vector2Int(128, 64);
+        public Vector2Int detectionOffset = new Vector2Int(0, -32);
 
         [Header("State Machine")]
         [Tooltip("The initial state to enter on Start")]
@@ -44,6 +49,10 @@ namespace Spelunky {
             base.Awake();
             stateMachine = new StateMachine();
             Physics.OnCollisionEnterEvent.AddListener(OnCollisionEnter);
+
+            if (playerOverlapMask.value != 0) {
+                Physics.collisionMask &= ~playerOverlapMask;
+            }
         }
 
         protected virtual void Start() {
@@ -62,6 +71,10 @@ namespace Spelunky {
 
         protected virtual void OnTriggerEnter2D(Collider2D other) {
             (stateMachine.CurrentState as EnemyState)?.OnTriggerEnter(other);
+        }
+
+        public void NotifyContactWithPlayer(Player player) {
+            (stateMachine.CurrentState as EnemyState)?.OnContactWithPlayer(player);
         }
 
         /// <summary>
@@ -125,20 +138,34 @@ namespace Spelunky {
         /// <summary>
         /// Try to detect a target within range using a raycast in the specified direction.
         /// </summary>
-        public Transform DetectTargetInDirection(Vector2 direction) {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, detectionRange, targetDetectionMask);
-            Debug.DrawRay(transform.position, direction * detectionRange, Color.green);
+        public Transform DetectTargetInDirection(Vector2 position, Vector2 direction) {
+            RaycastHit2D hit = Physics2D.Raycast(position, direction, detectionRange, targetDetectionMask);
+            Debug.DrawRay(position, direction * detectionRange, Color.green);
             return hit.collider != null ? hit.transform : null;
         }
 
         /// <summary>
         /// Try to detect a target within a radius.
         /// </summary>
-        public Transform DetectTargetInRadius(float radius) {
-            Collider2D hit = Physics2D.OverlapCircle(transform.position, radius, targetDetectionMask);
+        public Transform DetectTargetInRadius(Vector2 position, float radius) {
+            Collider2D hit = Physics2D.OverlapCircle(position, radius, targetDetectionMask);
+            Gizmos.Circle(position, radius, Camera.main, Color.green);
             return hit != null ? hit.transform : null;
         }
 
+        /// <summary>
+        /// Try to detect a target within a box area.
+        /// </summary>
+        /// <param name="position">Position of the box in world space.</param>
+        /// <param name="size">Size of the box (width, height).</param>
+        /// <param name="angle">Rotation angle of the box in degrees.</param>
+        /// <returns>The transform of the detected target, or null if none found.</returns>
+        public Transform DetectTargetInBox(Vector2 position, Vector2 size, float angle = 0f) {
+            Collider2D hit = Physics2D.OverlapBox(position, size, angle, targetDetectionMask);
+            Gizmos.Square(position, size, Color.green);
+            return hit != null ? hit.transform : null;
+        }
+        
         /// <summary>
         /// Deal damage to a player.
         /// </summary>
@@ -149,6 +176,12 @@ namespace Spelunky {
 
             player.velocity = knockback;
             player.Health.TakeDamage(damage);
+        }
+
+        public bool IsCrushable => true;
+
+        public void Crush() {
+            Health.TakeDamage(int.MaxValue);
         }
 
     }

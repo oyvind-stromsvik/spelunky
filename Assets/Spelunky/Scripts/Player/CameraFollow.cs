@@ -3,6 +3,9 @@
 namespace Spelunky {
 
     public class CameraFollow : MonoBehaviour {
+        
+        [Tooltip("If true, the camera will act as if it's a child of the target. Mainly for while I'm refactoring my movement logic to ensure it's smooth.")]
+        public bool stickToTarget = true;
 
         public float verticalOffset;
         public float verticalSmoothTime;
@@ -29,6 +32,12 @@ namespace Spelunky {
             if (_target == null) {
                 return;
             }
+
+            if (stickToTarget) {
+                transform.position = new Vector3(_target.transform.position.x, _target.transform.position.y + verticalOffset, -10);
+                return;
+            }
+            
 
             _focusArea.Update(_target.Physics.Collider.bounds);
             Vector3 focusPosition = _focusArea.centre + Vector2.up * verticalOffset;

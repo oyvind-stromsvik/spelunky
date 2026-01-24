@@ -53,6 +53,12 @@ namespace Spelunky {
         public virtual void OnTriggerEnter(Collider2D other) {
         }
 
+        /// <summary>
+        /// Called when the player overlaps this enemy.
+        /// </summary>
+        public virtual void OnContactWithPlayer(Player player) {
+        }
+
     }
 
 }

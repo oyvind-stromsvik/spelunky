@@ -217,7 +217,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 45824
+    m_Bits: 242432
   raycastsHitTriggers: 0
   canPushBlocks: 0
 --- !u!114 &1081932905278690019

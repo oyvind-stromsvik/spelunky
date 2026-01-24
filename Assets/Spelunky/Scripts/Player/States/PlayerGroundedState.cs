@@ -7,10 +7,9 @@ namespace Spelunky {
     /// </summary>
     public class PlayerGroundedState : PlayerState {
 
-        public Block pushingBlock;
+        public IPushable pushingBlock;
 
         public override void EnterState() {
-            player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.AddListener(OnEntityPhysicsCollisionExit);
 
             if (ReferenceEquals(player.stateMachine.PreviousState, player.inAirState)) {
@@ -19,11 +18,10 @@ namespace Spelunky {
         }
 
         public override void ExitState() {
-            player.Physics.OnCollisionEnterEvent.RemoveListener(OnEntityPhysicsCollisionEnter);
             player.Physics.OnCollisionExitEvent.RemoveListener(OnEntityPhysicsCollisionExit);
             player.Physics.canPushBlocks = false;
 
-            if (pushingBlock) {
+            if (pushingBlock != null) {
                 pushingBlock = null;
             }
         }
@@ -74,9 +72,15 @@ namespace Spelunky {
                 if (player.directionalInput.y < 0) {
                     player.Visuals.animator.Play("Crawl", 1, false);
                 }
-                else if (player.Physics.collisionInfo.colliderHorizontal != null && player.Physics.collisionInfo.colliderHorizontal.CompareTag("Block")) {
-                    pushingBlock = player.Physics.collisionInfo.colliderHorizontal.GetComponent<Block>();
-                    player.Visuals.animator.Play("Push", 1, false);
+                else if (player.Physics.collisionInfo.colliderHorizontal != null) {
+                    IPushable pushable = player.Physics.collisionInfo.colliderHorizontal.GetComponent<IPushable>();
+                    if (pushable != null) {
+                        pushingBlock = pushable;
+                        player.Visuals.animator.Play("Push", 1, false);
+                    }
+                    else {
+                        player.Visuals.animator.Play("Run", 1, false);
+                    }
                 }
                 else {
                     player.Visuals.animator.Play("Run", 1, false);
@@ -134,25 +138,12 @@ namespace Spelunky {
             }
         }
 
-        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            // TODO: This is a hack to avoid us getting dragged after enemies due to some weird interaction with the
-            // collision detection. See the TODO in Player.CalculateVelocity() for more information.
-            if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Enemy")) {
-                player.velocity.x = 0;
-            }
-        }
-
         private void OnEntityPhysicsCollisionExit(CollisionInfo collisionInfo) {
             if (pushingBlock == null) {
                 return;
             }
 
-            if ((collisionInfo.left || collisionInfo.right) && collisionInfo.colliderHorizontal.CompareTag("Block")) {
-                // Just to see if things work as expected.
-                if (pushingBlock != collisionInfo.colliderHorizontal.GetComponent<Block>()) {
-                    Debug.LogError("Trying to exit the collision from a different block than the one we entered the collision with!");
-                }
-
+            if (collisionInfo.left || collisionInfo.right) {
                 pushingBlock = null;
             }
         }

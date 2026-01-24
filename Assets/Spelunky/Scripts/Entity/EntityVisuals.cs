@@ -5,7 +5,7 @@ namespace Spelunky {
     public class EntityVisuals : MonoBehaviour {
 
         public bool isFacingRight = false;
-        public float facingDirection = -1;
+        public int facingDirection = -1;
 
         // References.
         [HideInInspector] public new SpriteRenderer renderer;

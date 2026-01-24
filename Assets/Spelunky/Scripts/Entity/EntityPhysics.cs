@@ -1,4 +1,3 @@
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Spelunky {
@@ -15,6 +14,7 @@ namespace Spelunky {
 
         public BoxCollider2D Collider { get; private set; }
         public Vector2 Velocity { get; private set; }
+        public CollisionContext collisionContext;
 
         public CollisionInfo collisionInfo;
         public CollisionInfo collisionInfoLastFrame;
@@ -64,8 +64,8 @@ namespace Spelunky {
             rigidbody2D.isKinematic = true;
             // Disable and collapse the inspector.
 #if UNITY_EDITOR
+            UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(rigidbody2D, false);
             rigidbody2D.hideFlags = HideFlags.NotEditable;
-            InternalEditorUtility.SetIsInspectorExpanded(rigidbody2D, false);
 #endif
         }
 
@@ -87,7 +87,9 @@ namespace Spelunky {
         }
 
         private void InitializePixelPosition() {
-            if (_positionInitialized) return;
+            if (_positionInitialized) {
+                return;
+            }
 
             // Round to nearest pixel
             _pixelPosition = new Vector2Int(
@@ -103,7 +105,7 @@ namespace Spelunky {
             int maxPushAttempts = 32;
             int pushAttempts = 0;
             while (pushAttempts < maxPushAttempts) {
-                Vector2 checkPos = (Vector2)_pixelPosition + Collider.offset;
+                Vector2 checkPos = _pixelPosition + Collider.offset;
 
                 int hitCount = Physics2D.OverlapBox(
                     checkPos,
@@ -116,15 +118,25 @@ namespace Spelunky {
                 bool foundOverlap = false;
                 for (int i = 0; i < hitCount; i++) {
                     Collider2D hit = _overlapResults[i];
-                    if (hit == Collider) continue;
-                    if (hit.isTrigger) continue;
-                    if (hit.CompareTag("OneWayPlatform")) continue;
+                    if (hit == Collider) {
+                        continue;
+                    }
+
+                    if (hit.isTrigger) {
+                        continue;
+                    }
+
+                    if (hit.CompareTag("OneWayPlatform")) {
+                        continue;
+                    }
 
                     foundOverlap = true;
                     break;
                 }
 
-                if (!foundOverlap) break;
+                if (!foundOverlap) {
+                    break;
+                }
 
                 _pixelPosition.y += 1;
                 pushAttempts++;
@@ -170,8 +182,10 @@ namespace Spelunky {
             collisionInfoLastFrame = collisionInfo;
             collisionInfo.Reset();
 
+            Vector2 totalDelta = moveDelta + (Vector2)collisionContext.externalDelta;
+
             // Add delta to sub-pixel accumulator
-            _subPixelRemainder += moveDelta;
+            _subPixelRemainder += totalDelta;
 
             // Extract integer pixels to move
             Vector2Int pixelsToMove = new Vector2Int(
@@ -183,13 +197,13 @@ namespace Spelunky {
             _subPixelRemainder -= new Vector2(pixelsToMove.x, pixelsToMove.y);
 
             // Move pixel-by-pixel
-            MoveX(pixelsToMove.x, moveDelta.x);
-            MoveY(pixelsToMove.y, moveDelta.y);
+            MoveX(pixelsToMove.x, totalDelta.x);
+            MoveY(pixelsToMove.y, totalDelta.y);
 
             // Sync transform to pixel position
             transform.position = new Vector3(_pixelPosition.x, _pixelPosition.y, transform.position.z);
 
-            Vector2 resolvedVelocity = moveDelta / Time.deltaTime;
+            Vector2 resolvedVelocity = totalDelta / Time.deltaTime;
             if (collisionInfo.left || collisionInfo.right) {
                 resolvedVelocity.x = 0f;
             }
@@ -203,11 +217,13 @@ namespace Spelunky {
                 collisionInfo.becameGroundedThisFrame = true;
             }
 
+            ApplyCollisionContextOverrides();
+
             FireCollisionEvents();
         }
 
         private void MoveX(int pixelsX, float moveDeltaX) {
-            int direction = moveDeltaX > 0f ? 1 : -1;
+            int direction = pixelsX != 0 ? (pixelsX > 0 ? 1 : -1) : (moveDeltaX > 0f ? 1 : -1);
             if (pixelsX == 0) {
                 if (Mathf.Approximately(moveDeltaX, 0f)) {
                     return;
@@ -215,7 +231,7 @@ namespace Spelunky {
 
                 Vector2Int nextPosition = _pixelPosition + new Vector2Int(direction, 0);
 
-                if (CheckCollisionX(nextPosition, direction)) {
+                if (CheckCollisionX(nextPosition)) {
                     collisionInfo.left = direction == -1;
                     collisionInfo.right = direction == 1;
                 }
@@ -227,7 +243,7 @@ namespace Spelunky {
             for (int i = 0; i < pixelsRemaining; i++) {
                 Vector2Int nextPosition = _pixelPosition + new Vector2Int(direction, 0);
 
-                if (CheckCollisionX(nextPosition, direction)) {
+                if (CheckCollisionX(nextPosition)) {
                     if (TryPushBlock(collisionInfo.colliderHorizontal, direction)) {
                         collisionInfo.left = direction == -1;
                         collisionInfo.right = direction == 1;
@@ -249,39 +265,20 @@ namespace Spelunky {
                 return false;
             }
 
-            if (hit == null || !hit.CompareTag("Block")) {
+            if (hit == null) {
                 return false;
             }
 
-            Block block = hit.GetComponent<Block>();
-            if (block == null) {
+            IPushable pushable = hit.GetComponent<IPushable>();
+            if (pushable == null) {
                 return false;
             }
 
-            EntityPhysics blockPhysics = block.Physics;
-            if (blockPhysics == null) {
-                return false;
-            }
-
-            if (!blockPhysics.collisionInfo.down) {
-                return false;
-            }
-
-            blockPhysics.Move(new Vector2(direction, 0f));
-
-            if (direction == 1 && blockPhysics.collisionInfo.right) {
-                return false;
-            }
-
-            if (direction == -1 && blockPhysics.collisionInfo.left) {
-                return false;
-            }
-
-            return true;
+            return pushable.TryPush(new Vector2Int(direction, 0));
         }
 
         private void MoveY(int pixelsY, float moveDeltaY) {
-            int direction = moveDeltaY > 0f ? 1 : -1;
+            int direction = pixelsY != 0 ? (pixelsY > 0 ? 1 : -1) : (moveDeltaY > 0f ? 1 : -1);
             if (pixelsY == 0) {
                 if (moveDeltaY > 0f) {
                     Vector2Int nextPosition = _pixelPosition + Vector2Int.up;
@@ -312,8 +309,9 @@ namespace Spelunky {
         private void CheckGround() {
             // Check one pixel below current position
             Vector2Int checkPosition = _pixelPosition + new Vector2Int(0, -1);
-            Vector2 checkPos = (Vector2)checkPosition + Collider.offset;
+            Vector2 checkPos = checkPosition + Collider.offset;
             Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
+            Vector2 ourBottom = checkPosition + Collider.offset - new Vector2(0, Collider.size.y / 2f);
 
             int hitCount = Physics2D.OverlapBox(
                 checkPos,
@@ -323,34 +321,62 @@ namespace Spelunky {
                 _overlapResults
             );
 
+            Collider2D dynamicHit = null;
+            Collider2D staticHit = null;
+
             for (int i = 0; i < hitCount; i++) {
                 Collider2D hit = _overlapResults[i];
 
-                if (hit == Collider) continue;
-                if (!raycastsHitTriggers && hit.isTrigger) continue;
+                if (hit == Collider) {
+                    continue;
+                }
+
+                if (!raycastsHitTriggers && hit.isTrigger) {
+                    continue;
+                }
 
                 // One-way platform logic - only detect as ground if we're above it
                 if (hit.CompareTag("OneWayPlatform")) {
-                    if (collisionInfo.fallingThroughPlatform) continue;
+                    if (collisionInfo.fallingThroughPlatform) {
+                        continue;
+                    }
 
                     // Check if we're above the platform (our bottom is at or above platform top)
-                    Vector2 ourBottom = (Vector2)checkPosition + Collider.offset - new Vector2(0, Collider.size.y / 2f);
                     float platformTop = hit.bounds.max.y;
 
                     // If we're below the platform, not grounded on it
-                    if (ourBottom.y < platformTop - 1f) continue;
+                    if (ourBottom.y < platformTop - 1f) {
+                        continue;
+                    }
+                }
+                else {
+                    float colliderTop = hit.bounds.max.y;
+                    if (ourBottom.y < colliderTop - 1f) {
+                        continue;
+                    }
                 }
 
+                if (hit.GetComponentInParent<EntityPhysics>() != null) {
+                    dynamicHit = hit;
+                    break;
+                }
+
+                if (staticHit == null) {
+                    staticHit = hit;
+                }
+            }
+
+            Collider2D selectedHit = dynamicHit ?? staticHit;
+            if (selectedHit != null) {
                 collisionInfo.down = true;
-                collisionInfo.colliderVertical = hit;
-                return;
+                collisionInfo.colliderVertical = selectedHit;
             }
         }
 
-        private bool CheckCollisionX(Vector2Int nextPosition, int direction) {
+        private bool CheckCollisionX(Vector2Int nextPosition) {
             // Check if the NEXT position would overlap any colliders
             // Use a shrunk size to detect actual overlap, not edge-touching
-            Vector2 checkPosition = (Vector2)nextPosition + Collider.offset;
+            Vector2 checkPosition = nextPosition + Collider.offset;
             Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
 
             int hitCount = Physics2D.OverlapBox(
@@ -361,16 +387,38 @@ namespace Spelunky {
                 _overlapResults
             );
 
+            Collider2D dynamicHit = null;
+            Collider2D staticHit = null;
+
             for (int i = 0; i < hitCount; i++) {
                 Collider2D hit = _overlapResults[i];
 
-                if (hit == Collider) continue;
-                if (!raycastsHitTriggers && hit.isTrigger) continue;
+                if (hit == Collider) {
+                    continue;
+                }
+
+                if (!raycastsHitTriggers && hit.isTrigger) {
+                    continue;
+                }
 
                 // One-way platforms: always ignore for horizontal collisions
-                if (hit.CompareTag("OneWayPlatform")) continue;
+                if (hit.CompareTag("OneWayPlatform")) {
+                    continue;
+                }
 
-                collisionInfo.colliderHorizontal = hit;
+                if (hit.GetComponentInParent<EntityPhysics>() != null) {
+                    dynamicHit = hit;
+                    break;
+                }
+
+                if (staticHit == null) {
+                    staticHit = hit;
+                }
+            }
+
+            Collider2D selectedHit = dynamicHit ?? staticHit;
+            if (selectedHit != null) {
+                collisionInfo.colliderHorizontal = selectedHit;
                 return true;
             }
 
@@ -380,7 +428,7 @@ namespace Spelunky {
         private bool CheckCollisionY(Vector2Int nextPosition, int direction) {
             // Check if the NEXT position would overlap any colliders
             // Use a shrunk size to detect actual overlap, not edge-touching
-            Vector2 checkPosition = (Vector2)nextPosition + Collider.offset;
+            Vector2 checkPosition = nextPosition + Collider.offset;
             Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
 
             int hitCount = Physics2D.OverlapBox(
@@ -391,34 +439,60 @@ namespace Spelunky {
                 _overlapResults
             );
 
+            Collider2D dynamicHit = null;
+            Collider2D staticHit = null;
+
             for (int i = 0; i < hitCount; i++) {
                 Collider2D hit = _overlapResults[i];
 
-                if (hit == Collider) continue;
-                if (!raycastsHitTriggers && hit.isTrigger) continue;
+                if (hit == Collider) {
+                    continue;
+                }
+
+                if (!raycastsHitTriggers && hit.isTrigger) {
+                    continue;
+                }
 
                 // One-way platform logic
                 if (hit.CompareTag("OneWayPlatform")) {
                     // Always ignore when moving up (jumping from below)
-                    if (direction == 1) continue;
+                    if (direction == 1) {
+                        continue;
+                    }
 
                     // Ignore if intentionally falling through
-                    if (direction == -1 && collisionInfo.fallingThroughPlatform) continue;
+                    if (direction == -1 && collisionInfo.fallingThroughPlatform) {
+                        continue;
+                    }
 
                     // Only collide when moving down AND our bottom WOULD BE above the platform top
                     // This ensures we only land on platforms from above, not get stuck below them
                     if (direction == -1) {
                         // Calculate where our bottom would be at the NEXT position
-                        Vector2 nextBottom = (Vector2)nextPosition + Collider.offset - new Vector2(0, Collider.size.y / 2f);
+                        Vector2 nextBottom = nextPosition + Collider.offset - new Vector2(0, Collider.size.y / 2f);
                         float platformTop = hit.bounds.max.y;
 
                         // If our next bottom position would be below the platform top, ignore
                         // (We're passing through from below)
-                        if (nextBottom.y < platformTop - 1f) continue;
+                        if (nextBottom.y < platformTop - 1f) {
+                            continue;
+                        }
                     }
                 }
 
-                collisionInfo.colliderVertical = hit;
+                if (hit.GetComponentInParent<EntityPhysics>() != null) {
+                    dynamicHit = hit;
+                    break;
+                }
+
+                if (staticHit == null) {
+                    staticHit = hit;
+                }
+            }
+
+            Collider2D selectedHit = dynamicHit ?? staticHit;
+            if (selectedHit != null) {
+                collisionInfo.colliderVertical = selectedHit;
                 return true;
             }
 
@@ -447,6 +521,21 @@ namespace Spelunky {
             if (anyCollisionExited) {
                 OnCollisionExitEvent?.Invoke(collisionInfoLastFrame);
             }
+        }
+
+        private void ApplyCollisionContextOverrides() {
+            if (collisionContext.groundedOverride && collisionContext.groundColliderOverride != null) {
+                collisionInfo.down = true;
+                collisionInfo.colliderVertical = collisionContext.groundColliderOverride;
+
+                if (collisionInfo.colliderHorizontal == collisionContext.groundColliderOverride) {
+                    collisionInfo.left = false;
+                    collisionInfo.right = false;
+                    collisionInfo.colliderHorizontal = null;
+                }
+            }
+
+            collisionContext.Reset();
         }
 
     }

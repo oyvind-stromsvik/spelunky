@@ -9,7 +9,6 @@ namespace Spelunky {
 
         private RaycastHit2D _lastEdgeGrabRayCastHit;
         private bool _hitHead;
-        private bool _bouncedOnEnemy;
 
         public override void EnterState() {
             player.Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
@@ -51,12 +50,6 @@ namespace Spelunky {
                 velocity.y = 0;
                 _hitHead = false;
             }
-
-            if (_bouncedOnEnemy) {
-                // TODO: This should not be a full jump. Maybe half height or something.
-                velocity.y = player._maxJumpVelocity;
-                _bouncedOnEnemy = false;
-            }
         }
 
         private void HandleEdgeGrabbing() {
@@ -78,7 +71,7 @@ namespace Spelunky {
             bool movingIntoWallOnTheLeft = player.Physics.collisionInfo.left && player.directionalInput.x < 0 && !player.Visuals.isFacingRight;
             bool movingIntoWallOnTheRight = player.Physics.collisionInfo.right && player.directionalInput.x > 0 && player.Visuals.isFacingRight;
 
-            if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.velocity.y < 0 && hit.collider != null) {
+            if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.velocity.y < 0 && CanHangFrom(hit.collider)) {
                 // If we have the glove we can grab anything.
                 if (player.Inventory.hasClimbingGlove) {
                     // TODO: How do we pass data to a state?
@@ -98,19 +91,21 @@ namespace Spelunky {
             _lastEdgeGrabRayCastHit = hit;
         }
 
+        private bool CanHangFrom(Collider2D collider) {
+            if (collider == null) {
+                return false;
+            }
+
+            if (collider.CompareTag("OneWayPlatform")) {
+                return false;
+            }
+
+            return true;
+        }
+
         private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
             if (collisionInfo.becameGroundedThisFrame) {
-                if (collisionInfo.colliderVertical.CompareTag("Enemy")) {
-                    // TODO: Show some blood particles, play a sound etc. when this happened. Can maybe be generic in
-                    // the EntityHealth class for all damage? At least for now.
-                    collisionInfo.colliderVertical.GetComponent<EntityHealth>().TakeDamage(1);
-                    // Set a temporary flag so that we can apply the bounce velocity next frame. It's too late to do
-                    // it here. Update() calls Move() which checks for collisions which invokes this event. We won't
-                    // move again until the next frame so if we change the velocity here it will be changed/overridden
-                    // before it's applied.
-                    _bouncedOnEnemy = true;
-                }
-                else if (collisionInfo.colliderVertical.CompareTag("Spikes")) {
+                if (collisionInfo.colliderVertical.CompareTag("Spikes")) {
                     player.Splat();
                 }
                 else {
@@ -119,7 +114,7 @@ namespace Spelunky {
             }
 
             if (collisionInfo.up) {
-                // Same as _bouncedOnEnemy.
+                // Same reasoning as above for handling velocity changes after Move().
                 _hitHead = true;
             }
         }

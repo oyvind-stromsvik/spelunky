@@ -6,7 +6,7 @@ namespace Spelunky {
     /// <summary>
     /// A throwable bomb that explodes after a delay.
     /// </summary>
-    public class Bomb : PhysicsBody {
+    public class Bomb : PhysicsBody, ICrushable {
 
         public Explosion explosion;
         public AudioClip bombTimerClip;
@@ -53,6 +53,12 @@ namespace Spelunky {
             if (audioSource != null && bounceClip != null && Physics.Velocity.magnitude > bounceSoundThreshold) {
                 audioSource.PlayOneShot(bounceClip);
             }
+        }
+
+        public bool IsCrushable => true;
+
+        public void Crush() {
+            Explode();
         }
 
     }

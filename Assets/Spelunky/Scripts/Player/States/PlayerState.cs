@@ -67,10 +67,8 @@ namespace Spelunky {
 
             if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.colliderVertical.CompareTag("OneWayPlatform")) {
                 player.velocity.y = 0;
-                player.Physics.collisionInfo.fallingThroughPlatform = true;
+                player.BeginFallThroughPlatformWindow(0.1f);
             }
-
-            Invoke("ResetFallingThroughPlatform", .1f);
 
             player.Audio.Play(player.Audio.jumpClip);
             player.recentlyJumped = true;
@@ -111,12 +109,6 @@ namespace Spelunky {
         /// </summary>
         public virtual void OnAttackInputDown() {
             player.Attack();
-        }
-
-        /// <summary>
-        /// </summary>
-        public void ResetFallingThroughPlatform() {
-            player.Physics.collisionInfo.fallingThroughPlatform = false;
         }
 
         /// <summary>

@@ -59,6 +59,10 @@ namespace Spelunky {
             player.Audio.Play(player.Audio.grabClip);
         }
 
+        public override void ExitState() {
+            player.Physics.collisionInfo.fallingThroughPlatform = false;
+        }
+
         public override void UpdateState() {
             if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && !player.Physics.collisionInfo.colliderVertical.CompareTag("OneWayPlatform")) {
                 player.stateMachine.AttemptToChangeState(player.groundedState);
@@ -66,7 +70,11 @@ namespace Spelunky {
 
             // Continously look for a ladder collider so that we can react accordingly.
             _closestCollider = FindClosestOverlappedLadder();
-            if (_closestCollider) {
+            if (_closestCollider == null) {
+                player.stateMachine.AttemptToChangeState(player.inAirState);
+                return;
+            }
+            else {
 
                 if (_closestCollider.CompareTag("Ladder")) {
                     player.Visuals.animator.Play("ClimbLadder");

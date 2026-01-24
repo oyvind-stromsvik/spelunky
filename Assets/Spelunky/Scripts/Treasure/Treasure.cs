@@ -5,7 +5,7 @@ namespace Spelunky {
     /// <summary>
     /// Collectible treasure that can be picked up by the player.
     /// </summary>
-    public class Treasure : PhysicsBody {
+    public class Treasure : PhysicsBody, ICrushable {
 
         public AudioClip pickUpSound;
         public int value;
@@ -17,6 +17,12 @@ namespace Spelunky {
                 AudioManager.Instance.PlaySoundAtPosition(pickUpSound, transform.position, AudioManager.AudioGroup.SFX);
                 Destroy(gameObject);
             }
+        }
+
+        public bool IsCrushable => true;
+
+        public void Crush() {
+            Destroy(gameObject);
         }
 
     }

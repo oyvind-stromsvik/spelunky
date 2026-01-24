@@ -122,7 +122,6 @@ GameObject:
   - component: {fileID: 1619121511715360887}
   - component: {fileID: 6396263571779178972}
   - component: {fileID: 5329803368010108068}
-  - component: {fileID: 6672550340453556833}
   - component: {fileID: 7783447880178257433}
   - component: {fileID: 1065666531198532826}
   m_Layer: 17
@@ -359,38 +358,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 24
   damage: 1
+  contactKnockback: {x: 96, y: 96}
+  playerOverlapMask:
+    serializedVersion: 2
+    m_Bits: 512
   targetDetectionMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
   detectionRange: 128
+  detectionBox: {x: 128, y: 64}
+  detectionOffset: {x: 0, y: -34}
   initialState: {fileID: 7783447880178257433}
   velocity: {x: 0, y: 0}
---- !u!61 &6672550340453556833
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611851042852994}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -32}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 128, y: 64}
-  m_EdgeRadius: 0
 --- !u!114 &7783447880178257433
 MonoBehaviour:
   m_ObjectHideFlags: 0

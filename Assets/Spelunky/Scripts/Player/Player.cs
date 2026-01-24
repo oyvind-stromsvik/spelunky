@@ -1,15 +1,20 @@
+using Gizmos = Popcron.Gizmos;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spelunky {
 
-    public class Player : Entity {
+    public class Player : Entity, ICrushable {
 
         public PlayerInput Input { get; private set; }
         public PlayerAudio Audio { get; private set; }
         public PlayerInventory Inventory { get; private set; }
-
-        public Collider2D whipCollider;
+        
+        [Header("Whip")]
+        public Vector2Int whipDamageArea = new Vector2Int(42, 20);
+        public Vector2Int whipOffset = new Vector2Int(-3, 10);
+        public int whipDamage = 1;
 
         [Header("States")]
         public PlayerGroundedState groundedState;
@@ -28,6 +33,12 @@ namespace Spelunky {
         [Header("Abilities")]
         public Bomb bomb;
         public Rope rope;
+
+        [Header("Combat")]
+        public LayerMask enemyOverlapMask;
+        public int stompDamage = 1;
+        public float stompTopTolerance = 1f;
+        public float knockbackDuration = 0.2f;
 
         [Header("Movement")]
         public float maxJumpHeight;
@@ -67,6 +78,11 @@ namespace Spelunky {
 
         public StateMachine stateMachine = new StateMachine();
 
+        private readonly Collider2D[] _enemyOverlapResults = new Collider2D[8];
+        private ContactFilter2D _enemyOverlapFilter;
+        private float _knockbackTimer;
+        private Coroutine _fallThroughCoroutine;
+
         /// <summary>
         /// Helper property to access the current state as a player-specific State.
         /// Use this when calling player-specific methods like UpdateState(), ChangePlayerVelocity(), etc.
@@ -87,6 +103,12 @@ namespace Spelunky {
             Inventory = GetComponent<PlayerInventory>();
 
             Health.HealthChangedEvent.AddListener(OnHealthChanged);
+
+            SetupEnemyOverlapFilter();
+
+            if (enemyOverlapMask.value != 0) {
+                Physics.collisionMask &= ~enemyOverlapMask;
+            }
         }
 
         private void Start() {
@@ -94,6 +116,14 @@ namespace Spelunky {
         }
 
         private void Update() {
+            if (_isAttacking) {
+                Gizmos.Square(
+                    (Vector2)transform.position + new Vector2Int(whipOffset.x * Visuals.facingDirection, whipOffset.y), 
+                    whipDamageArea, 
+                    Color.yellow
+                );
+            }
+            
             CurrentPlayerState.UpdateState();
 
             SetPlayerSpeed();
@@ -113,6 +143,8 @@ namespace Spelunky {
 
             Physics.Move(velocity * Time.deltaTime);
 
+            HandleEnemyOverlaps();
+
             CurrentPlayerState.ChangePlayerVelocityAfterMove(ref velocity);
         }
 
@@ -131,6 +163,12 @@ namespace Spelunky {
         }
 
         private void CalculateVelocity() {
+            if (_knockbackTimer > 0f) {
+                _knockbackTimer -= Time.deltaTime;
+                velocity.y += _gravity * Time.deltaTime;
+                return;
+            }
+
             float targetVelocityX = directionalInput.x * _speed;
             // TODO: This means we have a horizontal velocity for many seconds after letting go of the input. This tiny
             // velocity apparently can cause us to get dragged after enemies. It's of course the collision detection
@@ -203,15 +241,44 @@ namespace Spelunky {
 
         private IEnumerator DoAttack() {
             _isAttacking = true;
-            whipCollider.enabled = true;
 
             Visuals.animator.PlayOnceUninterrupted("AttackWithWhip");
             Audio.Play(Audio.whipClip, 0.7f);
 
-            yield return new WaitForSeconds(Visuals.animator.GetAnimationLength("AttackWithWhip"));
+            // Damage enemies in whip area.
+            float attackDuration = Visuals.animator.GetAnimationLength("AttackWithWhip");
+            float timer = 0f;
+            HashSet<Enemy> hitEnemies = new HashSet<Enemy>();
 
+            while (timer < attackDuration) {
+                int hitCount = Physics2D.OverlapBox(
+                    (Vector2)transform.position + new Vector2Int(whipOffset.x * Visuals.facingDirection, whipOffset.y),
+                    whipDamageArea,
+                    0f,
+                    _enemyOverlapFilter,
+                    _enemyOverlapResults
+                );
+
+                for (int i = 0; i < hitCount; i++) {
+                    Collider2D hit = _enemyOverlapResults[i];
+                    if (hit == null || hit == Physics.Collider) {
+                        continue;
+                    }
+
+                    Enemy enemy = hit.GetComponentInParent<Enemy>();
+                    if (enemy == null || hitEnemies.Contains(enemy)) {
+                        continue;
+                    }
+
+                    enemy.Health.TakeDamage(whipDamage);
+                    hitEnemies.Add(enemy);
+                }
+
+                timer += Time.deltaTime;
+                yield return null;
+            }
+            
             _isAttacking = false;
-            whipCollider.enabled = false;
         }
 
         public void EnteredDoorway(Exit door) {
@@ -226,10 +293,140 @@ namespace Spelunky {
             stateMachine.AttemptToChangeState(splatState);
         }
 
+        public bool IsCrushable => true;
+
+        public void Crush() {
+            if (!ReferenceEquals(stateMachine.CurrentState, splatState)) {
+                Splat();
+            }
+        }
+
         private void OnHealthChanged() {
             if (Health.CurrentHealth <= 0) {
                 stateMachine.AttemptToChangeState(splatState);
             }
+        }
+
+        private void HandleEnemyOverlaps() {
+            if (enemyOverlapMask.value == 0) {
+                return;
+            }
+
+            Vector2 overlapSize = GetEnemyOverlapSize();
+            Vector2 overlapPosition = (Vector2)transform.position + Physics.Collider.offset;
+
+            int hitCount = Physics2D.OverlapBox(
+                overlapPosition,
+                overlapSize,
+                0f,
+                _enemyOverlapFilter,
+                _enemyOverlapResults
+            );
+
+            if (hitCount == 0) {
+                return;
+            }
+
+            for (int i = 0; i < hitCount; i++) {
+                Collider2D hit = _enemyOverlapResults[i];
+                if (hit == null || hit == Physics.Collider) {
+                    continue;
+                }
+
+                Enemy enemy = hit.GetComponentInParent<Enemy>();
+                if (enemy == null) {
+                    continue;
+                }
+
+                if (TryStompEnemy(enemy, hit)) {
+                    break;
+                }
+
+                if (Health.isInvulnerable) {
+                    break;
+                }
+
+                ApplyContactDamage(enemy);
+                break;
+            }
+        }
+
+        private Vector2 GetEnemyOverlapSize() {
+            Vector2 size = Physics.Collider.size - Vector2.one * 0.5f;
+            return new Vector2(Mathf.Max(1f, size.x), Mathf.Max(1f, size.y));
+        }
+
+        private bool TryStompEnemy(Enemy enemy, Collider2D enemyCollider) {
+            float playerBottom = Physics.Collider.bounds.min.y;
+            float enemyTop = enemyCollider.bounds.max.y;
+            if (playerBottom < enemyTop - stompTopTolerance) {
+                return false;
+            }
+
+            EntityHealth enemyHealth = enemy.Health;
+            if (enemyHealth == null) {
+                return false;
+            }
+
+            enemyHealth.TakeDamage(stompDamage);
+            BounceOffEnemy();
+            return true;
+        }
+
+        private void BounceOffEnemy() {
+            velocity.y = _maxJumpVelocity;
+            if (!ReferenceEquals(stateMachine.CurrentState, inAirState)) {
+                stateMachine.AttemptToChangeState(inAirState);
+            }
+        }
+
+        private void ApplyContactDamage(Enemy enemy) {
+            float direction = Mathf.Sign(transform.position.x - enemy.transform.position.x);
+            if (Mathf.Approximately(direction, 0f)) {
+                direction = Visuals.facingDirection;
+            }
+
+            Vector2 knockback = new Vector2(Mathf.Abs(enemy.contactKnockback.x) * direction, enemy.contactKnockback.y);
+            ApplyKnockback(knockback);
+
+            enemy.NotifyContactWithPlayer(this);
+            Health.TakeDamage(enemy.damage);
+        }
+
+        private void ApplyKnockback(Vector2 knockback) {
+            velocity = knockback;
+            _knockbackTimer = knockbackDuration;
+
+            if (!ReferenceEquals(stateMachine.CurrentState, inAirState)) {
+                stateMachine.AttemptToChangeState(inAirState);
+            }
+        }
+
+        private void SetupEnemyOverlapFilter() {
+            _enemyOverlapFilter = new ContactFilter2D {
+                useLayerMask = true,
+                layerMask = enemyOverlapMask,
+                useTriggers = false
+            };
+        }
+
+        private void OnValidate() {
+            SetupEnemyOverlapFilter();
+        }
+
+        public void BeginFallThroughPlatformWindow(float duration) {
+            if (_fallThroughCoroutine != null) {
+                StopCoroutine(_fallThroughCoroutine);
+            }
+
+            _fallThroughCoroutine = StartCoroutine(FallThroughPlatformWindow(duration));
+        }
+
+        private IEnumerator FallThroughPlatformWindow(float duration) {
+            Physics.collisionInfo.fallingThroughPlatform = true;
+            yield return new WaitForSeconds(duration);
+            Physics.collisionInfo.fallingThroughPlatform = false;
+            _fallThroughCoroutine = null;
         }
 
         // TODO: Make it so that we can show debug info for whatever entity we select.

@@ -28,13 +28,9 @@ namespace Spelunky {
         }
 
         public override void UpdateState() {
-            // Bat stays completely still until triggered
-            // No movement, no detection - only OnTriggerEnter2D activates it
-        }
-
-        public override void OnTriggerEnter(Collider2D other) {
-            if (other.CompareTag("Player")) {
-                Activate(other.transform);
+            Transform target = enemy.DetectTargetInBox((Vector2)transform.position + enemy.detectionOffset, enemy.detectionBox, 0f);
+            if (target != null) {
+                Activate(target);
             }
         }
 

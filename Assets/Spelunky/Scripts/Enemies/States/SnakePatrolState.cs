@@ -20,8 +20,8 @@ namespace Spelunky {
         public string attackAnimation = "Attack";
 
         [Header("Combat")]
-        [Tooltip("Knockback applied to player on hit")]
-        public Vector2 knockback = new Vector2(256, 512);
+        public float attackAnimationCooldown = 0.35f;
+        private float _nextAttackAnimationTime;
 
         public override void EnterState() {
             if (!string.IsNullOrEmpty(walkAnimation)) {
@@ -47,31 +47,30 @@ namespace Spelunky {
 
         public override void OnCollisionEnter(CollisionInfo collisionInfo) {
             if (collisionInfo.left || collisionInfo.right) {
-                // Check if we hit the player
-                if (collisionInfo.colliderHorizontal.CompareTag("Player")) {
-                    AttackPlayer(collisionInfo.colliderHorizontal);
-                }
-                else if (turnAtWalls) {
+                if (turnAtWalls) {
                     // Hit a wall - turn around
                     enemy.Visuals.FlipCharacter();
                 }
             }
         }
 
-        private void AttackPlayer(Collider2D playerCollider) {
-            Player player = playerCollider.GetComponent<Player>();
-            if (player == null) {
+        public override void OnContactWithPlayer(Player player) {
+            // If facing away from player, flip.
+            float directionToPlayer = Mathf.Sign(player.transform.position.x - enemy.transform.position.x);
+            if (directionToPlayer != 0 && directionToPlayer != enemy.Visuals.facingDirection) {
+                enemy.Visuals.FlipCharacter();
+            }
+            
+            if (string.IsNullOrEmpty(attackAnimation)) {
                 return;
             }
 
-            // Play attack animation
-            if (!string.IsNullOrEmpty(attackAnimation)) {
-                enemy.Visuals.animator.PlayOnceUninterrupted(attackAnimation);
+            if (Time.time < _nextAttackAnimationTime) {
+                return;
             }
 
-            // Apply knockback in the direction the snake is facing
-            Vector2 appliedKnockback = new Vector2(knockback.x * enemy.Visuals.facingDirection, knockback.y);
-            enemy.DealDamage(player, appliedKnockback);
+            enemy.Visuals.animator.PlayOnceUninterrupted(attackAnimation);
+            _nextAttackAnimationTime = Time.time + attackAnimationCooldown;
         }
 
     }
