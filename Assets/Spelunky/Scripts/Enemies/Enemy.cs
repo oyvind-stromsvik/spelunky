@@ -7,7 +7,12 @@ namespace Spelunky {
     /// Base class for all enemies. Provides state machine support, velocity management,
     /// target tracking, and common enemy properties.
     /// </summary>
-    public class Enemy : Entity, ICrushable {
+    [RequireComponent(typeof(EntityPhysics), typeof(EntityHealth), typeof(EntityVisuals))]
+    public class Enemy : MonoBehaviour, ICrushable, IImpulseReceiver {
+
+        public EntityPhysics Physics { get; private set; }
+        public EntityHealth Health { get; private set; }
+        public EntityVisuals Visuals { get; private set; }
 
         [Header("Enemy Settings")]
         public float moveSpeed = 32f;
@@ -45,13 +50,15 @@ namespace Spelunky {
         /// </summary>
         public bool isActivated { get; set; }
 
-        public override void Awake() {
-            base.Awake();
+        protected virtual void Awake() {
+            Physics = GetComponent<EntityPhysics>();
+            Health = GetComponent<EntityHealth>();
+            Visuals = GetComponent<EntityVisuals>();
             stateMachine = new StateMachine();
             Physics.OnCollisionEnterEvent.AddListener(OnCollisionEnter);
 
             if (playerOverlapMask.value != 0) {
-                Physics.collisionMask &= ~playerOverlapMask;
+                Physics.blockingMask &= ~playerOverlapMask;
             }
         }
 
@@ -130,7 +137,7 @@ namespace Spelunky {
         /// </summary>
         public bool IsAtLedge() {
             Vector3 offsetForward = new Vector3(Physics.Collider.size.x * Visuals.facingDirection / 2f, 1, 0);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position + offsetForward, Vector2.down, 2, Physics.collisionMask);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position + offsetForward, Vector2.down, 2, Physics.blockingMask);
             Debug.DrawRay(transform.position + offsetForward, Vector2.down * 2, Color.green);
             return Physics.collisionInfo.down && hit.collider == null;
         }
@@ -182,6 +189,10 @@ namespace Spelunky {
 
         public void Crush() {
             Health.TakeDamage(int.MaxValue);
+        }
+
+        public void ApplyImpulse(Vector2 impulse) {
+            velocity += impulse;
         }
 
     }

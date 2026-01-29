@@ -5,7 +5,12 @@ using UnityEngine;
 
 namespace Spelunky {
 
-    public class Player : Entity, ICrushable {
+    [RequireComponent(typeof(EntityPhysics), typeof(EntityHealth), typeof(EntityVisuals))]
+    public class Player : MonoBehaviour, ICrushable, IImpulseReceiver {
+
+        public EntityPhysics Physics { get; private set; }
+        public EntityHealth Health { get; private set; }
+        public EntityVisuals Visuals { get; private set; }
 
         public PlayerInput Input { get; private set; }
         public PlayerAudio Audio { get; private set; }
@@ -91,8 +96,10 @@ namespace Spelunky {
             get { return (PlayerState)stateMachine.CurrentState; }
         }
 
-        public override void Awake() {
-            base.Awake();
+        protected virtual void Awake() {
+            Physics = GetComponent<EntityPhysics>();
+            Health = GetComponent<EntityHealth>();
+            Visuals = GetComponent<EntityVisuals>();
 
             _gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
             _maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
@@ -107,7 +114,7 @@ namespace Spelunky {
             SetupEnemyOverlapFilter();
 
             if (enemyOverlapMask.value != 0) {
-                Physics.collisionMask &= ~enemyOverlapMask;
+                Physics.blockingMask &= ~enemyOverlapMask;
             }
         }
 
@@ -400,6 +407,10 @@ namespace Spelunky {
             if (!ReferenceEquals(stateMachine.CurrentState, inAirState)) {
                 stateMachine.AttemptToChangeState(inAirState);
             }
+        }
+
+        public void ApplyImpulse(Vector2 impulse) {
+            ApplyKnockback(impulse);
         }
 
         private void SetupEnemyOverlapFilter() {

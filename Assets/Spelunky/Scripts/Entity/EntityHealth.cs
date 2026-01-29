@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace Spelunky {
 
-    public class EntityHealth : MonoBehaviour {
+    public class EntityHealth : MonoBehaviour, IDamageable {
 
         public GameObject bloodParticles;
 
@@ -48,6 +48,15 @@ namespace Spelunky {
                     StartCoroutine(InvulnerabilityTime());
                 }
             }
+        }
+
+        public bool TryTakeDamage(int damage) {
+            if (isInvulnerable) {
+                return false;
+            }
+
+            TakeDamage(damage);
+            return true;
         }
 
         private void SetHealth(int value) {

@@ -6,13 +6,14 @@ namespace Spelunky {
     /// <summary>
     /// A throwable bomb that explodes after a delay.
     /// </summary>
+    [RequireComponent(typeof(EntityVisuals))]
     public class Bomb : PhysicsBody, ICrushable {
 
         public Explosion explosion;
         public AudioClip bombTimerClip;
         public float timeToExplode;
 
-        public override void Awake() {
+        protected override void Awake() {
             base.Awake();
 
             // Bomb always falls (doesn't stop on ground), but does have friction.

@@ -3,14 +3,18 @@ using UnityEngine;
 namespace Spelunky {
 
     /// <summary>
-    /// Base class for entities that have physics-based movement (gravity, velocity, bouncing).
-    /// Extends Entity and provides common physics behavior used by Bomb, Treasure, Block, etc.
+    /// Base class for objects that have physics-based movement (gravity, velocity, bouncing).
+    /// Provides common physics behavior used by Bomb, Treasure, Block, etc.
     /// Subclasses can override behavior by:
     /// - Setting configuration fields (bounciness, friction, etc.)
     /// - Overriding virtual methods for custom physics behavior
     /// - Overriding OnPhysicsCollisionEnter for custom collision response
     /// </summary>
-    public class PhysicsBody : Entity {
+    [RequireComponent(typeof(EntityPhysics))]
+    public class PhysicsBody : MonoBehaviour, IImpulseReceiver {
+
+        public EntityPhysics Physics { get; private set; }
+        public EntityVisuals Visuals { get; private set; }
 
         [Header("Physics Settings")]
         [Tooltip("Multiplier applied to velocity on bounce (0.5 = lose half velocity)")]
@@ -27,6 +31,16 @@ namespace Spelunky {
 
         [Tooltip("Whether to apply friction when grounded")]
         public bool applyFriction = true;
+
+        [Header("Impact Damage")]
+        [Tooltip("Whether this body deals damage on impact.")]
+        public bool dealsImpactDamage = true;
+
+        [Tooltip("Velocity threshold required to deal impact damage.")]
+        public float impactDamageThreshold = 256f;
+
+        [Tooltip("Damage dealt on impact when above the threshold.")]
+        public int impactDamage = 1;
 
         [Header("Audio")]
         public AudioClip bounceClip;
@@ -45,10 +59,12 @@ namespace Spelunky {
             set { velocity = value; }
         }
 
-        public override void Awake() {
-            base.Awake();
+        protected virtual void Awake() {
+            Physics = GetComponent<EntityPhysics>();
+            Visuals = GetComponent<EntityVisuals>();
             audioSource = GetComponent<AudioSource>();
             Physics.OnCollisionEnterEvent.AddListener(OnPhysicsCollisionEnter);
+            Physics.OnOverlapEnterEvent.AddListener(OnPhysicsOverlapEnter);
         }
 
         protected virtual void Update() {
@@ -90,6 +106,8 @@ namespace Spelunky {
         /// Override for custom collision response.
         /// </summary>
         protected virtual void OnPhysicsCollisionEnter(CollisionInfo collisionInfo) {
+            HandleImpactDamage(collisionInfo);
+
             if (!bounces) {
                 return;
             }
@@ -119,6 +137,66 @@ namespace Spelunky {
             }
         }
 
+        protected void HandleImpactDamage(CollisionInfo collisionInfo) {
+            if (!dealsImpactDamage || impactDamage <= 0) {
+                return;
+            }
+
+            IDamageable damageableHorizontal = null;
+            IDamageable damageableVertical = null;
+
+            if (collisionInfo.left && velocity.x <= -impactDamageThreshold || collisionInfo.right && velocity.x >= impactDamageThreshold) {
+                damageableHorizontal = GetDamageable(collisionInfo.colliderHorizontal);
+            }
+
+            if (collisionInfo.down && velocity.y <= -impactDamageThreshold || collisionInfo.up && velocity.y >= impactDamageThreshold) {
+                damageableVertical = GetDamageable(collisionInfo.colliderVertical);
+            }
+
+            if (damageableHorizontal != null) {
+                damageableHorizontal.TryTakeDamage(impactDamage);
+            }
+
+            if (damageableVertical != null && !ReferenceEquals(damageableVertical, damageableHorizontal)) {
+                damageableVertical.TryTakeDamage(impactDamage);
+            }
+        }
+
+        protected void HandleOverlapImpactDamage(Collider2D collider2D) {
+            if (!dealsImpactDamage || impactDamage <= 0) {
+                return;
+            }
+
+            if (collider2D == null) {
+                return;
+            }
+
+            if (IsLayerInMask(collider2D.gameObject.layer, Physics.blockingMask)) {
+                return;
+            }
+
+            if (velocity.magnitude < impactDamageThreshold) {
+                return;
+            }
+
+            IDamageable damageable = GetDamageable(collider2D);
+            if (damageable != null) {
+                damageable.TryTakeDamage(impactDamage);
+            }
+        }
+
+        private static IDamageable GetDamageable(Collider2D collider2D) {
+            if (collider2D == null) {
+                return null;
+            }
+
+            return collider2D.GetComponentInParent<IDamageable>();
+        }
+
+        private static bool IsLayerInMask(int layer, LayerMask mask) {
+            return (mask.value & (1 << layer)) != 0;
+        }
+
         /// <summary>
         /// Play the bounce sound effect. Override to customize sound behavior.
         /// </summary>
@@ -126,6 +204,14 @@ namespace Spelunky {
             if (audioSource != null && bounceClip != null) {
                 audioSource.PlayOneShot(bounceClip);
             }
+        }
+
+        private void OnPhysicsOverlapEnter(Collider2D collider2D) {
+            HandleOverlapImpactDamage(collider2D);
+        }
+
+        public void ApplyImpulse(Vector2 impulse) {
+            velocity += impulse;
         }
 
     }

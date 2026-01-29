@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Spelunky {
 
@@ -11,6 +13,8 @@ namespace Spelunky {
 
         public CollisionInfoEvent OnCollisionEnterEvent { get; } = new CollisionInfoEvent();
         public CollisionInfoEvent OnCollisionExitEvent { get; } = new CollisionInfoEvent();
+        public ColliderEvent OnOverlapEnterEvent { get; } = new ColliderEvent();
+        public ColliderEvent OnOverlapExitEvent { get; } = new ColliderEvent();
 
         public BoxCollider2D Collider { get; private set; }
         public Vector2 Velocity { get; private set; }
@@ -19,7 +23,13 @@ namespace Spelunky {
         public CollisionInfo collisionInfo;
         public CollisionInfo collisionInfoLastFrame;
 
-        public LayerMask collisionMask;
+        [Header("Collision Masks")]
+        [Tooltip("Layers that block movement and are resolved by physics.")]
+        [FormerlySerializedAs("collisionMask")]
+        public LayerMask blockingMask;
+
+        [Tooltip("Layers that are detected for overlap events but do not block movement.")]
+        public LayerMask overlapMask;
         public bool raycastsHitTriggers;
 
         [Header("Push Settings")]
@@ -37,15 +47,20 @@ namespace Spelunky {
         private bool _positionInitialized;
 
         // Collision detection cache
-        private ContactFilter2D _contactFilter;
+        private ContactFilter2D _blockingFilter;
+        private ContactFilter2D _overlapFilter;
         private Collider2D[] _overlapResults = new Collider2D[16];
+        private Collider2D[] _overlapEventResults = new Collider2D[32];
+        private HashSet<Collider2D> _overlapsLastFrame = new HashSet<Collider2D>();
+        private HashSet<Collider2D> _overlapsThisFrame = new HashSet<Collider2D>();
 
         private void Reset() {
             // First time I've tried setting up layermasks in code.
             // TODO: This will break if the layers change, but maybe the layers assigned in the inspector also break
             // then? Either way I will want more control over layers at some point. Like some layer manager which knows
             // all obstacle layers, all entity layers etc. etc.
-            collisionMask = (1 << 8) | (1 << 12) | (1 << 13) | (1 << 15);
+            blockingMask = (1 << 8) | (1 << 12) | (1 << 13) | (1 << 15);
+            overlapMask = 0;
             raycastsHitTriggers = false;
 
             ValidateData();
@@ -53,6 +68,7 @@ namespace Spelunky {
 
         private void OnValidate() {
             ValidateData();
+            SetupContactFilters();
         }
 
         private void ValidateData() {
@@ -76,14 +92,19 @@ namespace Spelunky {
         }
 
         private void Start() {
-            SetupContactFilter();
+            SetupContactFilters();
         }
 
-        private void SetupContactFilter() {
-            _contactFilter = new ContactFilter2D();
-            _contactFilter.useTriggers = raycastsHitTriggers;
-            _contactFilter.useLayerMask = true;
-            _contactFilter.layerMask = collisionMask;
+        private void SetupContactFilters() {
+            _blockingFilter = new ContactFilter2D();
+            _blockingFilter.useTriggers = raycastsHitTriggers;
+            _blockingFilter.useLayerMask = true;
+            _blockingFilter.layerMask = blockingMask;
+
+            _overlapFilter = new ContactFilter2D();
+            _overlapFilter.useTriggers = raycastsHitTriggers;
+            _overlapFilter.useLayerMask = true;
+            _overlapFilter.layerMask = overlapMask;
         }
 
         private void InitializePixelPosition() {
@@ -111,7 +132,7 @@ namespace Spelunky {
                     checkPos,
                     checkSize,
                     0f,
-                    _contactFilter,
+                    _blockingFilter,
                     _overlapResults
                 );
 
@@ -220,6 +241,7 @@ namespace Spelunky {
             ApplyCollisionContextOverrides();
 
             FireCollisionEvents();
+            UpdateOverlapEvents();
         }
 
         private void MoveX(int pixelsX, float moveDeltaX) {
@@ -317,7 +339,7 @@ namespace Spelunky {
                 checkPos,
                 checkSize,
                 0f,
-                _contactFilter,
+                _blockingFilter,
                 _overlapResults
             );
 
@@ -383,7 +405,7 @@ namespace Spelunky {
                 checkPosition,
                 checkSize,
                 0f,
-                _contactFilter,
+                _blockingFilter,
                 _overlapResults
             );
 
@@ -435,7 +457,7 @@ namespace Spelunky {
                 checkPosition,
                 checkSize,
                 0f,
-                _contactFilter,
+                _blockingFilter,
                 _overlapResults
             );
 
@@ -536,6 +558,62 @@ namespace Spelunky {
             }
 
             collisionContext.Reset();
+        }
+
+        private void UpdateOverlapEvents() {
+            if (overlapMask.value == 0) {
+                if (_overlapsLastFrame.Count > 0) {
+                    foreach (Collider2D previous in _overlapsLastFrame) {
+                        OnOverlapExitEvent?.Invoke(previous);
+                    }
+
+                    _overlapsLastFrame.Clear();
+                }
+
+                return;
+            }
+
+            _overlapsThisFrame.Clear();
+
+            Vector2 checkPosition = _pixelPosition + Collider.offset;
+            Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
+
+            int hitCount = Physics2D.OverlapBox(
+                checkPosition,
+                checkSize,
+                0f,
+                _overlapFilter,
+                _overlapEventResults
+            );
+
+            for (int i = 0; i < hitCount; i++) {
+                Collider2D hit = _overlapEventResults[i];
+                if (hit == null || hit == Collider) {
+                    continue;
+                }
+
+                if (!raycastsHitTriggers && hit.isTrigger) {
+                    continue;
+                }
+
+                _overlapsThisFrame.Add(hit);
+            }
+
+            foreach (Collider2D current in _overlapsThisFrame) {
+                if (!_overlapsLastFrame.Contains(current)) {
+                    OnOverlapEnterEvent?.Invoke(current);
+                }
+            }
+
+            foreach (Collider2D previous in _overlapsLastFrame) {
+                if (!_overlapsThisFrame.Contains(previous)) {
+                    OnOverlapExitEvent?.Invoke(previous);
+                }
+            }
+
+            HashSet<Collider2D> temp = _overlapsLastFrame;
+            _overlapsLastFrame = _overlapsThisFrame;
+            _overlapsThisFrame = temp;
         }
 
     }

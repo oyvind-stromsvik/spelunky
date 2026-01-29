@@ -11,7 +11,7 @@ namespace Spelunky {
 
         private bool _initialized;
 
-        public override void Awake() {
+        protected override void Awake() {
             base.Awake();
 
             // Blocks don't bounce or have friction.
@@ -28,6 +28,8 @@ namespace Spelunky {
         }
 
         protected override void OnPhysicsCollisionEnter(CollisionInfo collisionInfo) {
+            HandleImpactDamage(collisionInfo);
+
             // Skip first collision to avoid landClip playing on level start for all blocks.
             if (!_initialized) {
                 _initialized = true;
