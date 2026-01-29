@@ -127,6 +127,7 @@ GameObject:
   - component: {fileID: 6131912778525804599}
   - component: {fileID: 567770363022045472}
   - component: {fileID: 4076317311270918087}
+  - component: {fileID: 8338526977092097121}
   m_Layer: 17
   m_Name: Spider
   m_TagString: Enemy
@@ -333,7 +334,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockingMask:
     serializedVersion: 2
-    m_Bits: 45824
+    m_Bits: 570112
   overlapMask:
     serializedVersion: 2
     m_Bits: 0
@@ -437,3 +438,18 @@ MonoBehaviour:
   idleAnimation: Idle
   jumpAnimation: Jump
   fallAnimation: Fall
+--- !u!114 &8338526977092097121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a34e8ca66110c284fbdd7162462854a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damageOverlapMask:
+    serializedVersion: 2
+    m_Bits: 263168

@@ -13,7 +13,6 @@ TagManager:
   - Bounds
   - Block
   - Enemy
-  - Spikes
   layers:
   - Default
   - TransparentFX
@@ -33,8 +32,8 @@ TagManager:
   - Block
   - Pickups
   - Enemy
-  - 
-  - 
+  - DamageObstacle
+  - DamageArea
   - 
   - 
   - 

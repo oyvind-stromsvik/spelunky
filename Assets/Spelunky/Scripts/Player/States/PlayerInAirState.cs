@@ -105,12 +105,7 @@ namespace Spelunky {
 
         private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
             if (collisionInfo.becameGroundedThisFrame) {
-                if (collisionInfo.colliderVertical.CompareTag("Spikes")) {
-                    player.Splat();
-                }
-                else {
-                    player.stateMachine.AttemptToChangeState(player.groundedState);
-                }
+                player.stateMachine.AttemptToChangeState(player.groundedState);
             }
 
             if (collisionInfo.up) {

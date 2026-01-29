@@ -153,6 +153,7 @@ GameObject:
   - component: {fileID: -3941064224825093986}
   - component: {fileID: -6787339454029924957}
   - component: {fileID: 3574339902112029639}
+  - component: {fileID: 4464221334681575081}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -427,7 +428,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockingMask:
     serializedVersion: 2
-    m_Bits: 177408
+    m_Bits: 438528
   overlapMask:
     serializedVersion: 2
     m_Bits: 0
@@ -630,3 +631,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   splatClip: {fileID: 8300000, guid: ce97d43f667bf854ca80975db390f396, type: 3}
+--- !u!114 &4464221334681575081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611851042852994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a34e8ca66110c284fbdd7162462854a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damageOverlapMask:
+    serializedVersion: 2
+    m_Bits: 787456

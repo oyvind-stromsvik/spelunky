@@ -13,10 +13,13 @@ namespace Spelunky {
 
         public CollisionInfoEvent OnCollisionEnterEvent { get; } = new CollisionInfoEvent();
         public CollisionInfoEvent OnCollisionExitEvent { get; } = new CollisionInfoEvent();
+        public CollisionInfoEvent OnCollisionStayEvent { get; } = new CollisionInfoEvent();
         public ColliderEvent OnOverlapEnterEvent { get; } = new ColliderEvent();
         public ColliderEvent OnOverlapExitEvent { get; } = new ColliderEvent();
+        public ColliderEvent OnOverlapStayEvent { get; } = new ColliderEvent();
 
         public BoxCollider2D Collider { get; private set; }
+        public Vector2 RequestedVelocity { get; private set; }
         public Vector2 Velocity { get; private set; }
         public CollisionContext collisionContext;
 
@@ -204,6 +207,7 @@ namespace Spelunky {
             collisionInfo.Reset();
 
             Vector2 totalDelta = moveDelta + (Vector2)collisionContext.externalDelta;
+            RequestedVelocity = Time.deltaTime > 0f ? totalDelta / Time.deltaTime : Vector2.zero;
 
             // Add delta to sub-pixel accumulator
             _subPixelRemainder += totalDelta;
@@ -543,6 +547,16 @@ namespace Spelunky {
             if (anyCollisionExited) {
                 OnCollisionExitEvent?.Invoke(collisionInfoLastFrame);
             }
+
+            bool anyCollisionStayed =
+                (collisionInfoLastFrame.left && collisionInfo.left) ||
+                (collisionInfoLastFrame.right && collisionInfo.right) ||
+                (collisionInfoLastFrame.down && collisionInfo.down) ||
+                (collisionInfoLastFrame.up && collisionInfo.up);
+
+            if (anyCollisionStayed) {
+                OnCollisionStayEvent?.Invoke(collisionInfo);
+            }
         }
 
         private void ApplyCollisionContextOverrides() {
@@ -602,6 +616,9 @@ namespace Spelunky {
             foreach (Collider2D current in _overlapsThisFrame) {
                 if (!_overlapsLastFrame.Contains(current)) {
                     OnOverlapEnterEvent?.Invoke(current);
+                }
+                else {
+                    OnOverlapStayEvent?.Invoke(current);
                 }
             }
 
