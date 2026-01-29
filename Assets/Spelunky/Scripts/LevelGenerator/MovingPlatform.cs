@@ -378,16 +378,12 @@ namespace Spelunky {
 
         private void HandleBlockedEntity(EntityPhysics otherPhysics) {
             ICrushable crushable = otherPhysics.GetComponent<ICrushable>();
-            if (crushable != null) {
-                if (!crushable.IsCrushable) {
-                    ReverseDirection();
-                    return;
-                }
-
+            if (crushable != null && crushable.IsCrushable) {
                 crushable.Crush();
                 return;
             }
-
+            
+            ReverseDirection();
         }
 
         private void ReverseDirection() {
