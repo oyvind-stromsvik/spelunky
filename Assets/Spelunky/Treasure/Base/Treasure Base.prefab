@@ -166,6 +166,7 @@ MonoBehaviour:
   bounceSoundThreshold: 100
   pickUpSound: {fileID: 0}
   value: 0
+  crushClip: {fileID: 8300000, guid: d841ef127a7e4884a87824b6fa097082, type: 3}
 --- !u!61 &4153403453399211046
 BoxCollider2D:
   m_ObjectHideFlags: 0

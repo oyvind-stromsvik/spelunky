@@ -188,7 +188,9 @@ namespace Spelunky {
         public bool IsCrushable => true;
 
         public void Crush() {
-            Health.TakeDamage(int.MaxValue);
+            if (Health != null) {
+                Health.KillByCrush();
+            }
         }
 
         public void ApplyImpulse(Vector2 impulse) {

@@ -13,6 +13,9 @@ namespace Spelunky {
         public AudioClip bombTimerClip;
         public float timeToExplode;
 
+        [Header("Audio")]
+        public AudioClip crushClip;
+
         protected override void Awake() {
             base.Awake();
 
@@ -59,7 +62,18 @@ namespace Spelunky {
         public bool IsCrushable => true;
 
         public void Crush() {
+            PlayCrushSound();
             Explode();
+        }
+
+        private void PlayCrushSound() {
+            if (crushClip == null) {
+                return;
+            }
+
+            if (AudioManager.Instance != null) {
+                AudioManager.Instance.PlaySoundAtPosition(crushClip, transform.position, AudioManager.AudioGroup.SFX);
+            }
         }
 
     }

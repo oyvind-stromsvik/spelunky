@@ -13,6 +13,10 @@ namespace Spelunky {
         public int maxHealth;
         public int CurrentHealth { get; private set; }
 
+        [Header("Audio")]
+        public AudioClip killedClip;
+        public AudioClip crushedClip;
+
         [Header("Invulnerability")]
         public SpriteRenderer spriteRenderer;
         public float invulnerabilityDuration;
@@ -21,6 +25,8 @@ namespace Spelunky {
         // TODO: We probably want to differentiate between being invulnerable and recently being damage and
         // "not touchable".
         public bool isInvulnerable;
+
+        private bool _isCrushDeath;
 
         private void Awake() {
             SetHealth(maxHealth);
@@ -65,7 +71,30 @@ namespace Spelunky {
         }
 
         private void Die() {
+            PlayDeathSound();
             Destroy(gameObject);
+        }
+
+        public void KillByCrush() {
+            if (isInvulnerable) {
+                return;
+            }
+
+            _isCrushDeath = true;
+            TakeDamage(int.MaxValue);
+        }
+
+        private void PlayDeathSound() {
+            AudioClip clip = _isCrushDeath && crushedClip != null ? crushedClip : killedClip;
+            _isCrushDeath = false;
+
+            if (clip == null) {
+                return;
+            }
+
+            if (AudioManager.Instance != null) {
+                AudioManager.Instance.PlaySoundAtPosition(clip, transform.position, AudioManager.AudioGroup.SFX);
+            }
         }
 
         /// <summary>

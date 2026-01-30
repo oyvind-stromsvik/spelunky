@@ -465,6 +465,8 @@ MonoBehaviour:
   bloodParticles: {fileID: 4977885386077022190, guid: ac56d8435831b3745ae13ea96b8b3651,
     type: 3}
   maxHealth: 4
+  killedClip: {fileID: 8300000, guid: ce97d43f667bf854ca80975db390f396, type: 3}
+  crushedClip: {fileID: 8300000, guid: ce97d43f667bf854ca80975db390f396, type: 3}
   spriteRenderer: {fileID: 782368879}
   invulnerabilityDuration: 2
   numberOfInvulnerabilityFlashes: 20
