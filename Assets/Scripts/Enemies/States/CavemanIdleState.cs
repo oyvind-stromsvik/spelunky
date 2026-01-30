@@ -33,7 +33,7 @@ namespace Spelunky {
             enemy.Move();
         }
 
-        public override void OnTriggerEnter(Collider2D other) {
+        public override void OnEnemyTriggerEnter(Collider2D other) {
             if (other.CompareTag("Player")) {
                 Activate(other.transform);
             }

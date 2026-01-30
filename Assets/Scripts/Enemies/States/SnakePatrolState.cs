@@ -45,7 +45,7 @@ namespace Spelunky {
             enemy.Move();
         }
 
-        public override void OnCollisionEnter(CollisionInfo collisionInfo) {
+        public override void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
             if (collisionInfo.left || collisionInfo.right) {
                 if (turnAtWalls) {
                     // Hit a wall - turn around

@@ -77,7 +77,7 @@ namespace Spelunky {
             _isJumping = true;
         }
 
-        public override void OnCollisionEnter(CollisionInfo collisionInfo) {
+        public override void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
             // Hit ceiling - stop upward velocity
             if (collisionInfo.up) {
                 enemy.velocity.y = 0;

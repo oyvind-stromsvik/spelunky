@@ -28,21 +28,21 @@ namespace Spelunky {
                 _physics.OnOverlapEnterEvent.AddListener(OnOverlapEnter);
                 _physics.OnOverlapExitEvent.AddListener(OnOverlapExit);
                 _physics.OnOverlapStayEvent.AddListener(OnOverlapStay);
-                _physics.OnCollisionEnterEvent.AddListener(OnCollisionEnter);
-                _physics.OnCollisionExitEvent.AddListener(OnCollisionExit);
-                _physics.OnCollisionStayEvent.AddListener(OnCollisionStay);
+                _physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
+                _physics.OnCollisionExitEvent.AddListener(OnEntityPhysicsCollisionExit);
+                _physics.OnCollisionStayEvent.AddListener(OnEntityPhysicsCollisionStay);
             }
         }
 
-        private void OnCollisionEnter(CollisionInfo collisionInfo) {
+        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
             HandleCollisionDamage(collisionInfo, true);
         }
 
-        private void OnCollisionStay(CollisionInfo collisionInfo) {
+        private void OnEntityPhysicsCollisionStay(CollisionInfo collisionInfo) {
             HandleCollisionDamage(collisionInfo, false);
         }
 
-        private void OnCollisionExit(CollisionInfo collisionInfo) {
+        private void OnEntityPhysicsCollisionExit(CollisionInfo collisionInfo) {
             if (_damageable == null) {
                 return;
             }

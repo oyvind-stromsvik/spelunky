@@ -87,7 +87,7 @@ namespace Spelunky {
             return hit != null ? hit.transform : null;
         }
 
-        public override void OnCollisionEnter(CollisionInfo collisionInfo) {
+        public override void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
             if (_isFalling && collisionInfo.becameGroundedThisFrame) {
                 if (landedState != null) {
                     enemy.stateMachine.AttemptToChangeState(landedState);

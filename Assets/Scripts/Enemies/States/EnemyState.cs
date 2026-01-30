@@ -44,13 +44,13 @@ namespace Spelunky {
         /// <summary>
         /// Called when a physics collision occurs.
         /// </summary>
-        public virtual void OnCollisionEnter(CollisionInfo collisionInfo) {
+        public virtual void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
         }
 
         /// <summary>
         /// Called when a trigger is entered.
         /// </summary>
-        public virtual void OnTriggerEnter(Collider2D other) {
+        public virtual void OnEnemyTriggerEnter(Collider2D other) {
         }
 
         /// <summary>

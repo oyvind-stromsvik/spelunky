@@ -55,7 +55,7 @@ namespace Spelunky {
             Health = GetComponent<EntityHealth>();
             Visuals = GetComponent<EntityVisuals>();
             stateMachine = new StateMachine();
-            Physics.OnCollisionEnterEvent.AddListener(OnCollisionEnter);
+            Physics.OnCollisionEnterEvent.AddListener(OnEntityPhysicsCollisionEnter);
 
             if (playerOverlapMask.value != 0) {
                 Physics.blockingMask &= ~playerOverlapMask;
@@ -72,12 +72,12 @@ namespace Spelunky {
             (stateMachine.CurrentState as EnemyState)?.UpdateState();
         }
 
-        private void OnCollisionEnter(CollisionInfo collisionInfo) {
-            (stateMachine.CurrentState as EnemyState)?.OnCollisionEnter(collisionInfo);
+        private void OnEntityPhysicsCollisionEnter(CollisionInfo collisionInfo) {
+            (stateMachine.CurrentState as EnemyState)?.OnEntityPhysicsCollisionEnter(collisionInfo);
         }
 
         protected virtual void OnTriggerEnter2D(Collider2D other) {
-            (stateMachine.CurrentState as EnemyState)?.OnTriggerEnter(other);
+            (stateMachine.CurrentState as EnemyState)?.OnEnemyTriggerEnter(other);
         }
 
         public void NotifyContactWithPlayer(Player player) {
