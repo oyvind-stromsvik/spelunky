@@ -15,6 +15,8 @@ namespace Spelunky {
         public PlayerInput Input { get; private set; }
         public PlayerAudio Audio { get; private set; }
         public PlayerInventory Inventory { get; private set; }
+        public PlayerAccessories Accessories { get; private set; }
+        public PlayerHolding Holding { get; private set; }
         
         [Header("Whip")]
         public Vector2Int whipDamageArea = new Vector2Int(42, 20);
@@ -64,9 +66,10 @@ namespace Spelunky {
         [HideInInspector] public float groundedGraceTimer;
 
         private float _gravity;
-        [HideInInspector] public float _maxJumpVelocity;
+        private float _maxJumpVelocity;
+        private float _minJumpVelocity;
 
-        [HideInInspector] public float _minJumpVelocity;
+        public float MinJumpVelocity => _minJumpVelocity;
 
         // TODO: Make this private. Currently the jump logic in State.cs is the only place we set this, but I'm not
         // entirely sure how to refactor that so that.
@@ -102,12 +105,14 @@ namespace Spelunky {
             Visuals = GetComponent<EntityVisuals>();
 
             _gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-            _maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
-            _minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(_gravity) * minJumpHeight);
+            _maxJumpVelocity = CalculateJumpVelocityForHeight(maxJumpHeight);
+            _minJumpVelocity = CalculateJumpVelocityForHeight(minJumpHeight);
 
             Input = GetComponent<PlayerInput>();
             Audio = GetComponent<PlayerAudio>();
             Inventory = GetComponent<PlayerInventory>();
+            Accessories = GetComponent<PlayerAccessories>();
+            Holding = GetComponent<PlayerHolding>();
 
             Health.HealthChangedEvent.AddListener(OnHealthChanged);
 
@@ -199,20 +204,48 @@ namespace Spelunky {
             Inventory.UseBomb();
 
             Bomb bombInstance = Instantiate(bomb, transform.position + Vector3.up * 2f, Quaternion.identity);
-            Vector2 bombVelocity = new Vector2(256 * Visuals.facingDirection, 128);
-            if (directionalInput.y == 1) {
-                bombVelocity = new Vector2(128 * Visuals.facingDirection, 256);
-            }
-            else if (directionalInput.y == -1) {
-                if (Physics.collisionInfo.down) {
-                    bombVelocity = new Vector2(64 * Visuals.facingDirection, 0);
-                }
-                else {
-                    bombVelocity = new Vector2(128 * Visuals.facingDirection, -256);
-                }
+            Vector2 throwVelocity = CalculateThrowVelocity();
+            bool affectedByGravity = !Accessories.HasPitchersMitt;
+
+            bombInstance.OnThrown(this, throwVelocity, affectedByGravity);
+        }
+
+        public Vector2 CalculateThrowVelocity() {
+            // Holding up: upward throw (same with or without PitchersMitt).
+            if (directionalInput.y > 0) {
+                return new Vector2(128 * Visuals.facingDirection, 256);
             }
 
-            bombInstance.Velocity = bombVelocity;
+            // PitchersMitt makes throws perfectly horizontal when not holding up.
+            if (Accessories.HasPitchersMitt) {
+                return new Vector2(256 * Visuals.facingDirection, 0);
+            }
+
+            // Normal throw behavior without PitchersMitt.
+            if (directionalInput.y < 0) {
+                if (Physics.collisionInfo.down) {
+                    return new Vector2(64 * Visuals.facingDirection, 0);
+                }
+
+                return new Vector2(128 * Visuals.facingDirection, -256);
+            }
+
+            return new Vector2(256 * Visuals.facingDirection, 128);
+        }
+
+        /// <summary>
+        /// Calculates the initial velocity needed to reach a specific jump height.
+        /// Uses the kinematic equation: v = sqrt(2 * g * h)
+        /// </summary>
+        public float CalculateJumpVelocityForHeight(float height) {
+            return Mathf.Sqrt(2 * Mathf.Abs(_gravity) * height);
+        }
+
+        /// <summary>
+        /// Gets the current maximum jump height including any bonuses from accessories.
+        /// </summary>
+        public float GetCurrentMaxJumpHeight() {
+            return maxJumpHeight + Accessories.JumpHeightBonus;
         }
 
         public void ThrowRope() {
@@ -460,7 +493,7 @@ namespace Spelunky {
                 "Falling through platform: " + Physics.collisionInfo.fallingThroughPlatform
             };
             for (int i = 0; i < debugInfo.Length; i++) {
-                GUI.Label(new Rect(8, 52 + 16 * i, 300, 22), debugInfo[i]);
+                GUI.Label(new Rect(8, 100 + 16 * i, 300, 22), debugInfo[i]);
             }
         }
 

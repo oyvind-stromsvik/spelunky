@@ -73,7 +73,7 @@ namespace Spelunky {
 
             if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.velocity.y < 0 && CanHangFrom(hit.collider)) {
                 // If we have the glove we can grab anything.
-                if (player.Inventory.hasClimbingGlove) {
+                if (player.Accessories.HasClimbingGlove) {
                     // TODO: How do we pass data to a state?
                     player.hangingState.colliderToHangFrom = hit.collider;
                     player.hangingState.grabbedWallUsingGlove = true;

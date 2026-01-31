@@ -20,10 +20,6 @@ namespace Spelunky {
         public int numberOfRopes;
         public int goldAmount;
 
-        public bool hasClimbingGlove;
-        public bool hasSpringBoots;
-        public bool hasPitchersMitt;
-
         private Player _player;
 
         private void Reset() {

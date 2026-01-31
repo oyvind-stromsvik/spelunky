@@ -6,6 +6,10 @@ namespace Spelunky {
     [RequireComponent(typeof(Player))]
     public class PlayerUI : MonoBehaviour {
 
+        [Header("Accessories")]
+        public GameObject accessoryIconPrefab;
+        public Transform accessoriesContainer;
+
         private Player _player;
         private Text _lifeAmountText;
         private Text _bombAmountText;
@@ -31,11 +35,13 @@ namespace Spelunky {
             _ropeAmountText = GameObject.Find("RopeAmountText").GetComponent<Text>();
             _totalGoldAmountText = GameObject.Find("TotalGoldAmountText").GetComponent<Text>();
             _currentGoldAmountText = GameObject.Find("CurrentGoldAmountText").GetComponent<Text>();
+            accessoriesContainer = GameObject.Find("AccessoriesUIContainer").transform;
 
             _player.Health.HealthChangedEvent.AddListener(OnHealthChanged);
             _player.Inventory.BombsChangedEvent.AddListener(OnBombsChanged);
             _player.Inventory.RopesChangedEvent.AddListener(OnRopesChanged);
             _player.Inventory.GoldAmountChangedEvent.AddListener(OnGoldChanged);
+            _player.Accessories.AccessoryAdded += OnAccessoryAdded;
 
             // The hackiest of hacks to ensure the black background on the HUD actually cover all the elements.
             // Otherwise it doesn't until you pickup the first piece of gold.
@@ -94,6 +100,20 @@ namespace Spelunky {
             _totalGoldAmount += goldToAdd;
             _currentGoldAmountText.text = " +" + _currentGoldAmount;
             _totalGoldAmountText.text = _totalGoldAmount.ToString();
+        }
+
+        private void OnAccessoryAdded(Sprite icon) {
+            GameObject iconInstance = Instantiate(accessoryIconPrefab, accessoriesContainer);
+            Image image = iconInstance.GetComponent<Image>();
+            if (image != null) {
+                image.sprite = icon;
+            }
+        }
+
+        private void OnDestroy() {
+            if (_player != null && _player.Accessories != null) {
+                _player.Accessories.AccessoryAdded -= OnAccessoryAdded;
+            }
         }
 
     }

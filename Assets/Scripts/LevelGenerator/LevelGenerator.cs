@@ -9,6 +9,9 @@ namespace Spelunky {
     /// </summary>
     public class LevelGenerator : MonoBehaviour {
 
+        public bool generateLevelOnStart = true;
+        
+        [Header("Debug")]
         public bool debug;
 
         public SpriteRenderer boundsStraight;
@@ -59,8 +62,8 @@ namespace Spelunky {
 
         private Room firstRoom;
         private Room lastRoom;
-        private Tile entrance;
-        private Tile exit;
+        [HideInInspector] public Tile entrance;
+        [HideInInspector] public Tile exit;
 
         private bool _hasSpawnedTrapRoom;
         private bool _hasSpawnedSacrificalAltar;
@@ -101,11 +104,13 @@ namespace Spelunky {
         /// </summary>
         /// <exception cref="Exception"></exception>
         private void CreateLevel() {
-            // 1. First create the main path from entrance to exit.
-            CreateMainPathRooms();
+            if (generateLevelOnStart) {
+                // 1. First create the main path from entrance to exit.
+                CreateMainPathRooms();
 
-            // 2. Then create any rooms not on the main path.
-            CreateRemainingRooms();
+                // 2. Then create any rooms not on the main path.
+                CreateRemainingRooms();
+            }
 
             // 3. Setup the tiles (add variations, decorations etc.)
             InitializeTiles();
@@ -117,8 +122,10 @@ namespace Spelunky {
             // 5. Create the background sprites.
             CreateBackground();
 
-            // 6. Place the entrace and exit.
-            PlaceEntranceAndExit();
+            if (generateLevelOnStart) {
+                // 6. Place the entrace and exit.
+                PlaceEntranceAndExit();
+            }
 
             // 7. Spawn the player at the entrance.
             FindObjectOfType<GameManager>().SpawnPlayer(entrance.transform.position);

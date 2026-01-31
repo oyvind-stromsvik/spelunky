@@ -60,7 +60,9 @@ namespace Spelunky {
         /// <summary>
         /// </summary>
         public virtual void OnJumpInputDown() {
-            player.velocity.y = player._maxJumpVelocity;
+            float jumpHeight = player.GetCurrentMaxJumpHeight();
+            player.velocity.y = player.CalculateJumpVelocityForHeight(jumpHeight);
+
             if ((ReferenceEquals(player.stateMachine.CurrentState, player.climbingState) || ReferenceEquals(player.stateMachine.CurrentState, player.hangingState)) && player.directionalInput.y < 0) {
                 player.velocity.y = 0;
             }
@@ -82,8 +84,8 @@ namespace Spelunky {
         /// <summary>
         /// </summary>
         public virtual void OnJumpInputUp() {
-            if (player.velocity.y > player._minJumpVelocity) {
-                player.velocity.y = player._minJumpVelocity;
+            if (player.velocity.y > player.MinJumpVelocity) {
+                player.velocity.y = player.MinJumpVelocity;
             }
         }
 
@@ -108,6 +110,32 @@ namespace Spelunky {
         /// <summary>
         /// </summary>
         public virtual void OnAttackInputDown() {
+            // Crouch + Attack = pickup/drop (works for both equipment and throwables).
+            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down) {
+                if (player.Holding.IsHoldingItem) {
+                    player.Holding.Drop();
+                }
+                else {
+                    player.Holding.TryPickupNearby();
+                }
+
+                return;
+            }
+
+            // Holding a throwable? Throw it.
+            if (player.Holding.IsHoldingThrowable) {
+                Vector2 throwVelocity = player.CalculateThrowVelocity();
+                player.Holding.ThrowHeldItem(throwVelocity);
+                return;
+            }
+
+            // Holding equipment? Use it.
+            if (player.Holding.IsHoldingEquipment) {
+                player.Holding.UseEquipment();
+                return;
+            }
+
+            // Default: whip attack.
             player.Attack();
         }
 
