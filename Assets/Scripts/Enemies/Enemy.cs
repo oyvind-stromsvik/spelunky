@@ -20,6 +20,9 @@ namespace Spelunky {
         public Vector2 contactKnockback = new Vector2(256f, 512f);
         public LayerMask playerOverlapMask;
 
+        [Header("Debug")]
+        public bool showDebugVisuals;
+
         [Header("Target Detection")]
         public LayerMask targetDetectionMask;
         public float detectionRange = 128f;
@@ -138,7 +141,9 @@ namespace Spelunky {
         public bool IsAtLedge() {
             Vector3 offsetForward = new Vector3(Physics.Collider.size.x * Visuals.facingDirection / 2f, 1, 0);
             RaycastHit2D hit = Physics2D.Raycast(transform.position + offsetForward, Vector2.down, 2, Physics.blockingMask);
-            Debug.DrawRay(transform.position + offsetForward, Vector2.down * 2, Color.green);
+            if (showDebugVisuals) {
+                Debug.DrawRay(transform.position + offsetForward, Vector2.down * 2, Color.green);
+            }
             return Physics.collisionInfo.down && hit.collider == null;
         }
 
@@ -147,7 +152,9 @@ namespace Spelunky {
         /// </summary>
         public Transform DetectTargetInDirection(Vector2 position, Vector2 direction) {
             RaycastHit2D hit = Physics2D.Raycast(position, direction, detectionRange, targetDetectionMask);
-            Debug.DrawRay(position, direction * detectionRange, Color.green);
+            if (showDebugVisuals) {
+                Debug.DrawRay(position, direction * detectionRange, Color.green);
+            }
             return hit.collider != null ? hit.transform : null;
         }
 
@@ -156,7 +163,9 @@ namespace Spelunky {
         /// </summary>
         public Transform DetectTargetInRadius(Vector2 position, float radius) {
             Collider2D hit = Physics2D.OverlapCircle(position, radius, targetDetectionMask);
-            Gizmos.Circle(position, radius, Camera.main, Color.green);
+            if (showDebugVisuals) {
+                Gizmos.Circle(position, radius, Camera.main, Color.green);
+            }
             return hit != null ? hit.transform : null;
         }
 
@@ -169,7 +178,9 @@ namespace Spelunky {
         /// <returns>The transform of the detected target, or null if none found.</returns>
         public Transform DetectTargetInBox(Vector2 position, Vector2 size, float angle = 0f) {
             Collider2D hit = Physics2D.OverlapBox(position, size, angle, targetDetectionMask);
-            Gizmos.Square(position, size, Color.green);
+            if (showDebugVisuals) {
+                Gizmos.Square(position, size, Color.green);
+            }
             return hit != null ? hit.transform : null;
         }
         
