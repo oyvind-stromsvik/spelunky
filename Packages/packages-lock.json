@@ -12,14 +12,14 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "59db0179aac29cac60616859cfc91f609a266a1a"
+      "hash": "af671f4687dd341f557f68049645b69baba71b0e"
     },
     "com.twiik.utility": {
       "version": "git@github.com:oyvind-stromsvik/upm-utility.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "910d08efbaa5ac86d2ff1033316978e55016cf80"
+      "hash": "48569aa9eca48f31b231572521c81b3fcfc1795e"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
