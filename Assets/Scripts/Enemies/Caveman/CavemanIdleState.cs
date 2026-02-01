@@ -8,27 +8,17 @@ namespace Spelunky {
     /// </summary>
     public class CavemanIdleState : EnemyState {
 
-        [Header("State Transitions")]
+        public SpriteAnimation idleAnimation;
+
         [Tooltip("State to enter when player is detected")]
         public EnemyState activatedState;
 
-        [Header("Animation")]
-        [Tooltip("Animation to play while idle (optional)")]
-        public string idleAnimation = "";
-
-        [Tooltip("Animation to play when activated")]
-        public string activationAnimation = "Run";
-
         public override void EnterState() {
             enemy.velocity = Vector2.zero;
-
-            if (!string.IsNullOrEmpty(idleAnimation)) {
-                enemy.Visuals.animator.Play(idleAnimation);
-            }
+            enemy.Visuals.animator.Play(idleAnimation);
         }
 
         public override void UpdateState() {
-            // Apply gravity so caveman stays grounded
             enemy.ApplyGravity();
             enemy.Move();
         }
@@ -42,11 +32,6 @@ namespace Spelunky {
         private void Activate(Transform target) {
             enemy.target = target;
             enemy.isActivated = true;
-
-            if (!string.IsNullOrEmpty(activationAnimation)) {
-                enemy.Visuals.animator.Play(activationAnimation);
-            }
-
             if (activatedState != null) {
                 enemy.stateMachine.AttemptToChangeState(activatedState);
             }

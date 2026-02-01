@@ -12,7 +12,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "af671f4687dd341f557f68049645b69baba71b0e"
+      "hash": "9d454c2de602be9c04c024f18fa6f8089ae1d555"
     },
     "com.twiik.utility": {
       "version": "git@github.com:oyvind-stromsvik/upm-utility.git",

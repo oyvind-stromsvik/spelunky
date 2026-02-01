@@ -17,8 +17,8 @@ namespace Spelunky {
         public EnemyState landedState;
 
         [Header("Animation")]
-        public string hangingAnimation = "";
-        public string fallingAnimation = "Flip";
+        public SpriteAnimation hangingAnimation;
+        public SpriteAnimation fallingAnimation;
 
         private Collider2D _ceilingCollider;
         private bool _isFalling;
@@ -29,18 +29,15 @@ namespace Spelunky {
             // Find ceiling above us
             RaycastHit2D hit = Physics2D.Raycast(enemy.transform.position, Vector2.up, 24f, ceilingMask);
             _ceilingCollider = hit.collider;
-
-            if (!string.IsNullOrEmpty(hangingAnimation)) {
-                enemy.Visuals.animator.Play(hangingAnimation);
-            }
+            
+            enemy.Visuals.animator.Play(hangingAnimation);
         }
 
         public override void UpdateState() {
             // Check if our ceiling was destroyed
             if (_ceilingCollider == null && !_isFalling) {
                 StartFalling();
-                // When ceiling is destroyed, auto-target player globally
-                // This matches Spelunky behavior where spiders auto-target when their ceiling is destroyed
+                // When ceiling is destroyed, auto-target player globally.
                 enemy.target = DetectPlayerGlobally();
             }
 
@@ -62,9 +59,7 @@ namespace Spelunky {
 
         private void StartFalling() {
             _isFalling = true;
-            if (!string.IsNullOrEmpty(fallingAnimation)) {
-                enemy.Visuals.animator.Play(fallingAnimation);
-            }
+            enemy.Visuals.animator.Play(fallingAnimation);
         }
 
         /// <summary>

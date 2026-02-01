@@ -9,10 +9,11 @@ namespace Spelunky {
     /// </summary>
     public class PlayerSplatState : PlayerState {
 
+        public SpriteAnimation splatAnimation;
         public AudioClip splatClip;
 
         public override void EnterState() {
-            player.Visuals.animator.Play("Splat");
+            player.Visuals.animator.Play(splatAnimation);
             player.Audio.Play(splatClip);
             // TODO: This is temporary. The health class should handle dying and death effects. We're not technically
             // dead here currently either as nothing has reduced our health.

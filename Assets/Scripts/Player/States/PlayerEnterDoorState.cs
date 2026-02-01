@@ -10,6 +10,7 @@ namespace Spelunky {
     /// </summary>
     public class PlayerEnterDoorState : PlayerState {
 
+        public SpriteAnimation enterDoorAnimation;
         public AudioClip enterDoorClip;
 
         public override bool CanEnterState() {
@@ -35,12 +36,12 @@ namespace Spelunky {
         private IEnumerator EnterDoor() {
             player.Physics.SetPosition(new Vector2(player._exitDoor.transform.position.x + Tile.Width / 2f, player._exitDoor.transform.position.y));
 
-            player.Visuals.animator.Play("EnterDoor");
+            player.Visuals.animator.Play(enterDoorAnimation);
 
             player.Audio.Play(enterDoorClip);
 
             Color color = player.Visuals.renderer.color;
-            float animationLength = player.Visuals.animator.GetAnimationLength("EnterDoor");
+            float animationLength = player.Visuals.animator.GetAnimationLength(enterDoorAnimation);
             float t = 0;
             while (t <= animationLength) {
                 t += Time.deltaTime;

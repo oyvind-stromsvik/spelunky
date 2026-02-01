@@ -8,13 +8,10 @@ namespace Spelunky {
     /// </summary>
     public class BatFlyingState : EnemyState {
 
-        [Header("Animation")]
-        public string flyAnimation = "Fly";
+        public SpriteAnimation flyAnimation;
 
         public override void EnterState() {
-            if (!string.IsNullOrEmpty(flyAnimation)) {
-                enemy.Visuals.animator.Play(flyAnimation);
-            }
+            enemy.Visuals.animator.Play(flyAnimation);
         }
 
         public override void UpdateState() {
@@ -22,14 +19,9 @@ namespace Spelunky {
                 return;
             }
 
-            // Calculate direction to target and move directly toward it
             Vector2 direction = (enemy.target.position - enemy.transform.position).normalized;
             enemy.velocity = direction * enemy.moveSpeed;
-
-            // Face the direction we're moving
             enemy.FaceMovementDirection();
-
-            // Move the bat
             enemy.Move();
         }
 

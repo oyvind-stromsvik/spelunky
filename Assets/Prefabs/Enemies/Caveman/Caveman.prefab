@@ -97,9 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63e55705684df834e80421c395716e14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animations:
-  - {fileID: 11400000, guid: ce595750b519e2249ad078d600a2b643, type: 2}
-  - {fileID: 11400000, guid: 5ab23b3ddb38b25408bd3da6158426dc, type: 2}
+  animations: []
   fps: 0
   looping: 0
   pingPong: 0
@@ -394,6 +392,7 @@ MonoBehaviour:
   playerOverlapMask:
     serializedVersion: 2
     m_Bits: 512
+  showDebugVisuals: 0
   targetDetectionMask:
     serializedVersion: 2
     m_Bits: 512
@@ -460,8 +459,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activatedState: {fileID: 8774568592001113569}
-  idleAnimation: Idle
-  activationAnimation: Run
+  idleAnimation: {fileID: 11400000, guid: ce595750b519e2249ad078d600a2b643, type: 2}
+  activationAnimation: {fileID: 11400000, guid: 5ab23b3ddb38b25408bd3da6158426dc,
+    type: 2}
 --- !u!114 &8774568592001113569
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -474,7 +474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9eb2bb0f338c9cd468d69f478331a1cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runAnimation: Run
+  runAnimation: {fileID: 11400000, guid: 5ab23b3ddb38b25408bd3da6158426dc, type: 2}
 --- !u!114 &7818226037950886227
 MonoBehaviour:
   m_ObjectHideFlags: 0

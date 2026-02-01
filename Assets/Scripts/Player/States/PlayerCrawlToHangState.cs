@@ -9,6 +9,8 @@ namespace Spelunky {
     /// </summary>
     public class PlayerCrawlToHangState : PlayerState {
 
+        public SpriteAnimation crawlToHangAnimation;
+
         public override bool CanEnterState() {
             // Find the collider we're going to grab on to.
             Vector3 offset = new Vector3(-6 * player.Visuals.facingDirection, 1, 0);
@@ -31,9 +33,9 @@ namespace Spelunky {
         }
 
         private IEnumerator CrawlToHang() {
-            player.Visuals.animator.Play("CrawlToHang");
+            player.Visuals.animator.Play(crawlToHangAnimation);
 
-            yield return new WaitForSeconds(player.Visuals.animator.GetAnimationLength("CrawlToHang"));
+            yield return new WaitForSeconds(player.Visuals.animator.GetAnimationLength(crawlToHangAnimation));
 
             player.stateMachine.AttemptToChangeState(player.hangingState);
         }

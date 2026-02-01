@@ -97,12 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63e55705684df834e80421c395716e14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animations:
-  - {fileID: 11400000, guid: f0cebc4c17c493144b78d3d7f1c39ceb, type: 2}
-  - {fileID: 11400000, guid: 9ae57aa7cfe20b244a72679226691dea, type: 2}
-  - {fileID: 11400000, guid: 7685140a89ee4154cbf8f42a911204c2, type: 2}
-  - {fileID: 11400000, guid: 5c77a3780f528674184359d5bfc70690, type: 2}
-  - {fileID: 11400000, guid: 91f4cfc4103caed4bad1e7180d554d8a, type: 2}
+  animations: []
   fps: 0
   looping: 0
   pingPong: 0
@@ -396,6 +391,7 @@ MonoBehaviour:
   playerOverlapMask:
     serializedVersion: 2
     m_Bits: 512
+  showDebugVisuals: 0
   targetDetectionMask:
     serializedVersion: 2
     m_Bits: 512
@@ -420,8 +416,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 41216
   landedState: {fileID: 4076317311270918087}
-  hangingAnimation: Hang
-  fallingAnimation: Flip
+  hangingAnimation: {fileID: 11400000, guid: 7685140a89ee4154cbf8f42a911204c2, type: 2}
+  fallingAnimation: {fileID: 11400000, guid: f0cebc4c17c493144b78d3d7f1c39ceb, type: 2}
 --- !u!114 &4076317311270918087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -437,9 +433,9 @@ MonoBehaviour:
   jumpVelocity: {x: 96, y: 196}
   minJumpWaitTime: 1
   maxJumpWaitTime: 3
-  idleAnimation: Idle
-  jumpAnimation: Jump
-  fallAnimation: Fall
+  idleAnimation: {fileID: 11400000, guid: 5c77a3780f528674184359d5bfc70690, type: 2}
+  jumpAnimation: {fileID: 11400000, guid: 91f4cfc4103caed4bad1e7180d554d8a, type: 2}
+  fallAnimation: {fileID: 11400000, guid: f0cebc4c17c493144b78d3d7f1c39ceb, type: 2}
 --- !u!114 &8338526977092097121
 MonoBehaviour:
   m_ObjectHideFlags: 0

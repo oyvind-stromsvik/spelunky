@@ -97,9 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63e55705684df834e80421c395716e14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animations:
-  - {fileID: 11400000, guid: 17fdac9abba718b4cb7580cbeab0551c, type: 2}
-  - {fileID: 11400000, guid: 99256439485f1f749bba1448b00c6d9b, type: 2}
+  animations: []
   fps: 0
   looping: 0
   pingPong: 0
@@ -393,6 +391,7 @@ MonoBehaviour:
   playerOverlapMask:
     serializedVersion: 2
     m_Bits: 512
+  showDebugVisuals: 0
   targetDetectionMask:
     serializedVersion: 2
     m_Bits: 512
@@ -413,9 +412,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed4565656f01f254b89ddc080b2fb726, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  idleAnimation: {fileID: 11400000, guid: 99256439485f1f749bba1448b00c6d9b, type: 2}
   activatedState: {fileID: 1065666531198532826}
-  idleAnimation: Hang
-  activationAnimation: Fly
 --- !u!114 &1065666531198532826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,7 +426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 365d772927c0bff4182967796dd91e89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flyAnimation: Fly
+  flyAnimation: {fileID: 11400000, guid: 17fdac9abba718b4cb7580cbeab0551c, type: 2}
 --- !u!114 &4507993098118663202
 MonoBehaviour:
   m_ObjectHideFlags: 0

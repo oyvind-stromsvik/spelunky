@@ -7,6 +7,8 @@ namespace Spelunky {
     /// </summary>
     public class PlayerInAirState : PlayerState {
 
+        public SpriteAnimation jumpAnimation;
+
         private RaycastHit2D _lastEdgeGrabRayCastHit;
         private bool _hitHead;
 
@@ -24,7 +26,7 @@ namespace Spelunky {
             // TODO: We currently only have a single sprite for anything "air" related. Later on we would probably
             // created animations for jumping, falling etc. It's especially important to have something for when we're
             // ragdolled.
-            player.Visuals.animator.Play("Jump");
+            player.Visuals.animator.Play(jumpAnimation);
 
             HandleEdgeGrabbing();
         }

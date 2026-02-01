@@ -19,6 +19,7 @@ namespace Spelunky {
         public PlayerHolding Holding { get; private set; }
         
         [Header("Whip")]
+        public SpriteAnimation attackWithWhipAnimation;
         public Vector2Int whipDamageArea = new Vector2Int(42, 20);
         public Vector2Int whipOffset = new Vector2Int(-3, 10);
         public int whipDamage = 1;
@@ -282,11 +283,11 @@ namespace Spelunky {
         private IEnumerator DoAttack() {
             _isAttacking = true;
 
-            Visuals.animator.PlayOnceUninterrupted("AttackWithWhip");
+            Visuals.animator.PlayOnceUninterrupted(attackWithWhipAnimation);
             Audio.Play(Audio.whipClip, 0.7f);
 
             // Damage enemies in whip area.
-            float attackDuration = Visuals.animator.GetAnimationLength("AttackWithWhip");
+            float attackDuration = Visuals.animator.GetAnimationLength(attackWithWhipAnimation);
             float timer = 0f;
             HashSet<Enemy> hitEnemies = new HashSet<Enemy>();
 

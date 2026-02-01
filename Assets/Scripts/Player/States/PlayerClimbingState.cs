@@ -9,6 +9,10 @@ namespace Spelunky {
     /// </summary>
     public class PlayerClimbingState : PlayerState {
 
+        [Header("Animations")]
+        public SpriteAnimation climbLadderAnimation;
+        public SpriteAnimation climbRopeAnimation;
+
         public ContactFilter2D ladderFilter;
         public LayerMask ladderLayerMask;
 
@@ -49,10 +53,10 @@ namespace Spelunky {
             float xPos = _closestCollider.transform.position.x;
             if (_closestCollider.CompareTag("Ladder")) {
                 xPos += Tile.Width / 2f;
-                player.Visuals.animator.Play("ClimbLadder");
+                player.Visuals.animator.Play(climbLadderAnimation);
             }
             else {
-                player.Visuals.animator.Play("ClimbRope");
+                player.Visuals.animator.Play(climbRopeAnimation);
             }
 
             player.Physics.SetPosition(new Vector2(xPos, transform.position.y));
@@ -77,10 +81,10 @@ namespace Spelunky {
             else {
 
                 if (_closestCollider.CompareTag("Ladder")) {
-                    player.Visuals.animator.Play("ClimbLadder");
+                    player.Visuals.animator.Play(climbLadderAnimation);
                 }
                 else {
-                    player.Visuals.animator.Play("ClimbRope");
+                    player.Visuals.animator.Play(climbRopeAnimation);
                 }
             }
 

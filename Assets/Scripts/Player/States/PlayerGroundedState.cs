@@ -7,6 +7,15 @@ namespace Spelunky {
     /// </summary>
     public class PlayerGroundedState : PlayerState {
 
+        [Header("Animations")]
+        public SpriteAnimation crawlAnimation;
+        public SpriteAnimation pushAnimation;
+        public SpriteAnimation runAnimation;
+        public SpriteAnimation duckAnimation;
+        public SpriteAnimation idleAnimation;
+        public SpriteAnimation lookUpAnimation;
+        public SpriteAnimation unsteadyAnimation;
+
         public IPushable pushingBlock;
 
         public override void EnterState() {
@@ -70,20 +79,20 @@ namespace Spelunky {
         private void HandleHorizontalInput() {
             if (player.directionalInput.x != 0) {
                 if (player.directionalInput.y < 0) {
-                    player.Visuals.animator.Play("Crawl", 1, false);
+                    player.Visuals.animator.Play(crawlAnimation, 1, false);
                 }
                 else if (player.Physics.collisionInfo.colliderHorizontal != null) {
                     IPushable pushable = player.Physics.collisionInfo.colliderHorizontal.GetComponent<IPushable>();
                     if (pushable != null) {
                         pushingBlock = pushable;
-                        player.Visuals.animator.Play("Push", 1, false);
+                        player.Visuals.animator.Play(pushAnimation, 1, false);
                     }
                     else {
-                        player.Visuals.animator.Play("Run", 1, false);
+                        player.Visuals.animator.Play(runAnimation, 1, false);
                     }
                 }
                 else {
-                    player.Visuals.animator.Play("Run", 1, false);
+                    player.Visuals.animator.Play(runAnimation, 1, false);
                 }
 
                 if (player.sprinting) {
@@ -92,10 +101,10 @@ namespace Spelunky {
             }
             else {
                 if (player.directionalInput.y < 0) {
-                    player.Visuals.animator.Play("Duck");
+                    player.Visuals.animator.Play(duckAnimation);
                 }
                 else {
-                    player.Visuals.animator.Play("Idle", 1, false);
+                    player.Visuals.animator.Play(idleAnimation, 1, false);
                 }
             }
         }
@@ -108,7 +117,7 @@ namespace Spelunky {
             if (player.directionalInput.y != 0) {
                 player._lookTimer += Time.deltaTime;
                 if (player.directionalInput.y > 0) {
-                    player.Visuals.animator.Play("LookUp");
+                    player.Visuals.animator.Play(lookUpAnimation);
                 }
 
                 if (player._lookTimer > player._timeBeforeLook) {
@@ -133,7 +142,7 @@ namespace Spelunky {
             // Play unsteady animation
             if (player.Physics.collisionInfo.down && hitCenter.collider == null && hitForward.collider == null) {
                 if (player.directionalInput.y >= 0) {
-                    player.Visuals.animator.Play("Unsteady", 1, false);
+                    player.Visuals.animator.Play(unsteadyAnimation, 1, false);
                 }
             }
         }

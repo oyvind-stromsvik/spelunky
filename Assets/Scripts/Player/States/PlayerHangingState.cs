@@ -7,6 +7,10 @@ namespace Spelunky {
     /// </summary>
     public class PlayerHangingState : PlayerState {
 
+        [Header("Animations")]
+        public SpriteAnimation hangAnimation;
+        public SpriteAnimation hangLookUpAnimation;
+
         public bool grabbedWallUsingGlove;
         public Collider2D colliderToHangFrom;
 
@@ -54,7 +58,7 @@ namespace Spelunky {
             // currently have in UpdateState() could lead to us not actually changing to the Hang sprite if we have tiny
             // amount of vertical directional input.
             // TODO: This can probably be fixed properly in the UpdateState() instead?
-            player.Visuals.animator.Play("Hang");
+            player.Visuals.animator.Play(hangAnimation);
 
             player.Audio.Play(player.Audio.grabClip);
         }
@@ -75,7 +79,7 @@ namespace Spelunky {
             if (player.directionalInput.y != 0) {
                 player._lookTimer += Time.deltaTime;
                 if (player.directionalInput.y > 0) {
-                    player.Visuals.animator.Play("HangLookUp");
+                    player.Visuals.animator.Play(hangLookUpAnimation);
                 }
 
                 if (player._lookTimer > player._timeBeforeLook) {
@@ -86,7 +90,7 @@ namespace Spelunky {
             else {
                 player._lookTimer = 0;
                 player.cam.SetVerticalOffset(0);
-                player.Visuals.animator.Play("Hang");
+                player.Visuals.animator.Play(hangAnimation);
             }
         }
 
