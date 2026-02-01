@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c4f7c00eaf86b4baa85a30ab291174, type: 3}
+  m_Name: Player_Attack
+  m_EditorClassIdentifier: 
+  frames:
+  - {fileID: -7008412969330441016, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: -7763475090823894447, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: 302641331129538988, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: -6329420634031446844, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: -910092549403018386, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: 221524225039350300, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: 1290532464073988732, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: 4780903288873104255, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: -2238382357930459393, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: -297473348006037033, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  - {fileID: -4098942091326826159, guid: 3426a5c204f25cf4b9edae817ddc8ed8, type: 3}
+  fps: 12
+  looping: 0
+  pingPong: 0
+  showBlankFrameAtTheEnd: 0
