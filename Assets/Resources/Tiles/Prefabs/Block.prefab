@@ -40,7 +40,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &-1406077606388180878
 BoxCollider2D:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -242,12 +242,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colliderOffset: {x: 8, y: 8}
+  _colliderSize: {x: 16, y: 16}
   blockingMask:
     serializedVersion: 2
     m_Bits: 242432
   overlapMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 197120
   raycastsHitTriggers: 0
   canPushBlocks: 0
 --- !u!114 &8361724842540983642

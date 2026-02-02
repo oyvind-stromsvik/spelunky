@@ -1,9 +1,8 @@
-using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
 
-    public class Rope : MonoBehaviour {
+    public class Rope : MonoBehaviour, ITickable {
 
         public AudioClip ropeTossClip;
         public AudioClip ropeHitClip;
@@ -26,6 +25,11 @@ namespace Spelunky {
         private bool _placed;
         private AudioSource _audioSource;
 
+        // Extension state (replaces coroutine)
+        private bool _isExtending;
+        private float _targetRopeLength;
+        private bool _initialized;
+
         // Incremented for every new rope. Used for ensuring ropes that are
         // placed later are drawn in front of ropes that already exist.
         private static int _sortingOrder;
@@ -47,9 +51,27 @@ namespace Spelunky {
             ropeTop.sortingOrder = _sortingOrder + 1;
             ropeMiddle.sortingOrder = _sortingOrder;
             ropeEnd.sortingOrder = _sortingOrder + 1;
+
+            _initialized = true;
         }
 
-        private void Update() {
+        private void OnEnable() {
+            EntityManager.Instance?.Register(this);
+        }
+
+        private void OnDisable() {
+            EntityManager.Instance?.Unregister(this);
+        }
+
+        // ITickable implementation
+        public bool IsTickActive => _initialized && (!_placed || _isExtending);
+
+        public void Tick() {
+            if (_isExtending) {
+                UpdateExtension();
+                return;
+            }
+
             if (_placed) {
                 return;
             }
@@ -97,27 +119,37 @@ namespace Spelunky {
             _placed = true;
             transform.position = Tile.GetPositionOfCenterOfNearestTile(position);
 
-            StartCoroutine(ExtendRope());
+            BeginExtension();
 
             _audioSource.clip = ropeHitClip;
             _audioSource.Play();
         }
 
-        private IEnumerator ExtendRope() {
+        private void BeginExtension() {
             ropeTop.gameObject.SetActive(true);
             ropeMiddle.gameObject.SetActive(true);
 
-            float ropeLength = maxRopeLength;
+            _targetRopeLength = maxRopeLength;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, maxRopeLength, layerMask);
             if (hit.collider != null && !hit.transform.CompareTag("OneWayPlatform")) {
-                ropeLength = hit.distance;
+                _targetRopeLength = hit.distance;
             }
 
-            while (ropeMiddle.size.y <= ropeLength) {
+            _isExtending = true;
+        }
+
+        private void UpdateExtension() {
+            if (ropeMiddle.size.y <= _targetRopeLength) {
                 ropeMiddle.size += new Vector2(0, ropeSpeed * Time.deltaTime * 0.5f);
                 ropeEnd.transform.position = new Vector3(transform.position.x, transform.position.y - ropeMiddle.size.y, 0);
-                yield return null;
             }
+            else {
+                FinishExtension();
+            }
+        }
+
+        private void FinishExtension() {
+            _isExtending = false;
 
             ropeMiddle.size = new Vector2(ropeMiddle.size.x, Mathf.FloorToInt(ropeMiddle.size.y / Tile.Height) * Tile.Height);
             ropeMiddle.GetComponent<BoxCollider2D>().size = new Vector2(ropeMiddle.GetComponent<BoxCollider2D>().size.x, ropeMiddle.size.y);

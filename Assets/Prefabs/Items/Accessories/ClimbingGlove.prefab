@@ -144,3 +144,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   accessoryType: 0
+  icon: {fileID: 0}

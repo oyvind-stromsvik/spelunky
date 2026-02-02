@@ -8,7 +8,7 @@ namespace Spelunky {
     /// target tracking, and common enemy properties.
     /// </summary>
     [RequireComponent(typeof(EntityPhysics), typeof(EntityHealth), typeof(EntityVisuals))]
-    public class Enemy : MonoBehaviour, ICrushable, IImpulseReceiver {
+    public class Enemy : MonoBehaviour, ICrushable, IImpulseReceiver, ITickable {
 
         public EntityPhysics Physics { get; private set; }
         public EntityHealth Health { get; private set; }
@@ -71,7 +71,18 @@ namespace Spelunky {
             }
         }
 
-        protected virtual void Update() {
+        protected virtual void OnEnable() {
+            EntityManager.Instance?.Register(this);
+        }
+
+        protected virtual void OnDisable() {
+            EntityManager.Instance?.Unregister(this);
+        }
+
+        // ITickable implementation
+        public virtual bool IsTickActive => true;
+
+        public virtual void Tick() {
             (stateMachine.CurrentState as EnemyState)?.UpdateState();
         }
 
@@ -192,7 +203,7 @@ namespace Spelunky {
                 return;
             }
 
-            player.velocity = knockback;
+            player.requestedVelocity = knockback;
             player.Health.TakeDamage(damage);
         }
 

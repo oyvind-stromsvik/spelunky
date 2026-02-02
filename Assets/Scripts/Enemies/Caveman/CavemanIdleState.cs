@@ -21,12 +21,25 @@ namespace Spelunky {
         public override void UpdateState() {
             enemy.ApplyGravity();
             enemy.Move();
+            
+            Transform detected = DetectPlayer();
+            if (detected != null) {
+                Activate(detected);
+            }
         }
 
         public override void OnEnemyTriggerEnter(Collider2D other) {
             if (other.CompareTag("Player")) {
                 Activate(other.transform);
             }
+        }
+
+        private Transform DetectPlayer() {
+            Vector2 origin = (Vector2)enemy.transform.position + new Vector2(0, enemy.Physics.Collider.size.y);
+            Vector2 direction = Vector2.left;
+            RaycastHit2D hit = Physics2D.Raycast(origin, direction, enemy.detectionRange, enemy.targetDetectionMask);
+            Debug.DrawRay(origin, direction * enemy.detectionRange, Color.green);
+            return hit.collider != null ? hit.transform : null;
         }
 
         private void Activate(Transform target) {

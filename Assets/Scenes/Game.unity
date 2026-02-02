@@ -158,7 +158,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 18, y: 0}
-  m_SizeDelta: {x: 0, y: 16}
+  m_SizeDelta: {x: 12.8125, y: 16}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &28306172
 MonoBehaviour:
@@ -260,7 +260,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a0aaecb2b7ea7549bd8e9c24eefaf1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generateLevelOnStart: 1
   debug: 0
   boundsStraight: {fileID: 7019423646051681708, guid: bc7c3ac4de0ddf54984836dbc57ea86d,
     type: 3}
@@ -273,8 +272,8 @@ MonoBehaviour:
     type: 3}
   arrowLeft: {fileID: 1327977706111001672, guid: 2f70c13379260714ebe17bda19d247a7,
     type: 3}
-  roomsHorizontal: 8
-  roomsVertical: 8
+  roomsHorizontal: 4
+  roomsVertical: 4
   normalRooms:
   - {fileID: 6398162121198865019, guid: 535620be7e5fb134bbfd353c4fadd3df, type: 3}
   - {fileID: 6398162121198865019, guid: 7f19fdf2b587e5a419ff5a473dc1fc7d, type: 3}
@@ -470,7 +469,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 2, y: -2}
-  m_SizeDelta: {x: 0, y: 16}
+  m_SizeDelta: {x: 30.8125, y: 16}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &346147939
 MonoBehaviour:
@@ -694,7 +693,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 20}
+  m_SizeDelta: {x: 213.6875, y: 20}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &609958590
 MonoBehaviour:
@@ -842,7 +841,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 16}
+  m_SizeDelta: {x: 69.25, y: 16}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &813139756
 MonoBehaviour:
@@ -1428,6 +1427,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 8245114911552847639, guid: 891694c520594f84cbe2de3217804ea6, type: 3}
   playerCamera: {fileID: 924695847, guid: 9270f9088940c6f4f8bfea680dff183f, type: 3}
+  levelGenerator: {fileID: 62649536}
+  useExistingSceneContent: 0
 --- !u!4 &1438897276
 Transform:
   m_ObjectHideFlags: 0

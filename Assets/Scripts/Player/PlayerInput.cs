@@ -6,17 +6,26 @@ namespace Spelunky {
     /// TODO: Replace with new input system. To be honest I thought I had done that ages ago.
     /// </summary>
     [RequireComponent(typeof(Player))]
-    public class PlayerInput : MonoBehaviour {
+    public class PlayerInput : MonoBehaviour, IEarlyTickable {
 
         public float joystickDeadzone;
 
         private Player _player;
 
-        private void Start() {
+        private void Awake() {
             _player = GetComponent<Player>();
         }
 
-        private void Update() {
+        private void OnEnable() {
+            EntityManager.Instance?.RegisterEarlyTickable(this);
+        }
+
+        private void OnDisable() {
+            EntityManager.Instance?.UnregisterEarlyTickable(this);
+        }
+
+        // IEarlyTickable implementation
+        public void EarlyTick() {
             if (_player.CurrentPlayerState.LockInput()) {
                 return;
             }

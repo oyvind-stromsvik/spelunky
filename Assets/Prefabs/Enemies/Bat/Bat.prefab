@@ -175,7 +175,7 @@ Rigidbody2D:
   m_Constraints: 0
 --- !u!61 &61633986752685120
 BoxCollider2D:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -327,6 +327,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colliderOffset: {x: 0, y: 6}
+  _colliderSize: {x: 12, y: 8}
   blockingMask:
     serializedVersion: 2
     m_Bits: 570112

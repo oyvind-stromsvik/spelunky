@@ -26,6 +26,33 @@ namespace Spelunky {
         public CollisionInfo collisionInfo;
         public CollisionInfo collisionInfoLastFrame;
 
+        [Header("Collider Settings")]
+        [Tooltip("The offset of the collision box.")]
+        [SerializeField] private Vector2 _colliderOffset = new Vector2(0f, 8f);
+        
+        [Tooltip("The size of the collision box.")]
+        [SerializeField] private Vector2 _colliderSize = new Vector2(16f, 16f);
+
+        public Vector2 ColliderOffset {
+            get => _colliderOffset;
+            set {
+                _colliderOffset = value;
+                if (Collider != null) {
+                    Collider.offset = value;
+                }
+            }
+        }
+
+        public Vector2 ColliderSize {
+            get => _colliderSize;
+            set {
+                _colliderSize = value;
+                if (Collider != null) {
+                    Collider.size = value;
+                }
+            }
+        }
+
         [Header("Collision Masks")]
         [Tooltip("Layers that block movement and are resolved by physics.")]
         [FormerlySerializedAs("collisionMask")]
@@ -81,20 +108,26 @@ namespace Spelunky {
             Rigidbody2D rigidbody2D = GetComponent<Rigidbody2D>();
             // Ensure the rigidbody doesn't actually affect us.
             rigidbody2D.isKinematic = true;
-            // Disable and collapse the inspector.
+            // Do the same for the BoxCollider2D - we expose only the properties we need
+            BoxCollider2D boxCollider = GetComponent<BoxCollider2D>();
+            // I literally think this doesn't actually matter. We don't use colliders or triggers in this sense anyway,
+            // but for our custom physics to detect triggers we need to set that up in the contact filters.
+            boxCollider.isTrigger = false;
+            // Sync the collider offset and size with our exposed properties
+            boxCollider.offset = _colliderOffset;
+            boxCollider.size = _colliderSize;
+            
 #if UNITY_EDITOR
+            // Disable and collapse the inspectors for these components to avoid confusion.
             UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(rigidbody2D, false);
             rigidbody2D.hideFlags = HideFlags.NotEditable;
+            UnityEditorInternal.InternalEditorUtility.SetIsInspectorExpanded(boxCollider, false);
+            boxCollider.hideFlags = HideFlags.NotEditable;
 #endif
         }
 
         private void Awake() {
-            // TODO: Do the same for the collider as for the rigidbody above? We just need to expose the variables we
-            // need to be able to change like size, offset, bounds etc.
             Collider = GetComponent<BoxCollider2D>();
-        }
-
-        private void Start() {
             SetupContactFilters();
         }
 
@@ -206,7 +239,7 @@ namespace Spelunky {
             collisionInfoLastFrame = collisionInfo;
             collisionInfo.Reset();
 
-            Vector2 totalDelta = moveDelta + (Vector2)collisionContext.externalDelta;
+            Vector2 totalDelta = moveDelta + collisionContext.externalDelta;
             RequestedVelocity = Time.deltaTime > 0f ? totalDelta / Time.deltaTime : Vector2.zero;
 
             // Add delta to sub-pixel accumulator
@@ -628,9 +661,7 @@ namespace Spelunky {
                 }
             }
 
-            HashSet<Collider2D> temp = _overlapsLastFrame;
-            _overlapsLastFrame = _overlapsThisFrame;
-            _overlapsThisFrame = temp;
+            (_overlapsLastFrame, _overlapsThisFrame) = (_overlapsThisFrame, _overlapsLastFrame);
         }
 
     }

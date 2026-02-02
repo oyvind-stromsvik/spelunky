@@ -8,7 +8,7 @@ namespace Spelunky {
     /// Moves along a single axis until blocked by static colliders, then reverses.
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D))]
-    public class MovingPlatform : MonoBehaviour {
+    public class MovingPlatform : MonoBehaviour, ITickable {
 
         public enum StartDirection {
             Up,
@@ -54,15 +54,22 @@ namespace Spelunky {
             SyncTransform();
         }
 
+        private void OnEnable() {
+            PlatformManager.Instance?.Register(this);
+        }
+
+        private void OnDisable() {
+            PlatformManager.Instance?.Unregister(this);
+        }
+
         private void OnValidate() {
             SetupContactFilter();
         }
 
-        private void LateUpdate() {
-            if (!isActive) {
-                return;
-            }
+        // ITickable implementation
+        public bool IsTickActive => isActive;
 
+        public void Tick() {
             MoveAlongPath();
         }
 

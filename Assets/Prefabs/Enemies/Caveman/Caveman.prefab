@@ -120,7 +120,6 @@ GameObject:
   - component: {fileID: 1619121511715360887}
   - component: {fileID: 6396263571779178972}
   - component: {fileID: 4675926317218313548}
-  - component: {fileID: 6672550340453556833}
   - component: {fileID: 3471473987661277627}
   - component: {fileID: 8774568592001113569}
   - component: {fileID: 7818226037950886227}
@@ -176,7 +175,7 @@ Rigidbody2D:
   m_Constraints: 0
 --- !u!61 &61633986752685120
 BoxCollider2D:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -328,6 +327,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colliderOffset: {x: 0, y: 6}
+  _colliderSize: {x: 10, y: 12}
   blockingMask:
     serializedVersion: 2
     m_Bits: 570112
@@ -401,51 +402,6 @@ MonoBehaviour:
   detectionOffset: {x: 0, y: -32}
   initialState: {fileID: 3471473987661277627}
   velocity: {x: 0, y: 0}
---- !u!61 &6672550340453556833
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611851042852994}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -64, y: 8}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 128, y: 16}
-  m_EdgeRadius: 0
 --- !u!114 &3471473987661277627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,10 +414,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bb410de5c0bea54a9f5b6a5d539bdc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activatedState: {fileID: 8774568592001113569}
   idleAnimation: {fileID: 11400000, guid: ce595750b519e2249ad078d600a2b643, type: 2}
-  activationAnimation: {fileID: 11400000, guid: 5ab23b3ddb38b25408bd3da6158426dc,
-    type: 2}
+  activatedState: {fileID: 8774568592001113569}
 --- !u!114 &8774568592001113569
 MonoBehaviour:
   m_ObjectHideFlags: 0

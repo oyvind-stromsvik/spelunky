@@ -4,7 +4,7 @@ namespace Spelunky {
 
     [RequireComponent(typeof(Player))]
     public class PlayerHolding : MonoBehaviour {
-
+        
         public Transform holdPosition;
         public LayerMask pickupLayerMask;
         public float pickupRadius = 12f;
@@ -103,6 +103,8 @@ namespace Spelunky {
             if (HeldItem is not IThrowable throwable) {
                 return;
             }
+
+            _player.Visuals.animator.PlayOnceUninterrupted(_player.throwAnimation);
 
             throwable.transform.SetParent(null);
             bool affectedByGravity = !_player.Accessories.HasPitchersMitt;

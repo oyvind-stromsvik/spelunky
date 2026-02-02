@@ -61,14 +61,14 @@ namespace Spelunky {
         /// </summary>
         public virtual void OnJumpInputDown() {
             float jumpHeight = player.GetCurrentMaxJumpHeight();
-            player.velocity.y = player.CalculateJumpVelocityForHeight(jumpHeight);
+            player.requestedVelocity.y = player.CalculateJumpVelocityForHeight(jumpHeight);
 
             if ((ReferenceEquals(player.stateMachine.CurrentState, player.climbingState) || ReferenceEquals(player.stateMachine.CurrentState, player.hangingState)) && player.directionalInput.y < 0) {
-                player.velocity.y = 0;
+                player.requestedVelocity.y = 0;
             }
 
             if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down && player.Physics.collisionInfo.colliderVertical.CompareTag("OneWayPlatform")) {
-                player.velocity.y = 0;
+                player.requestedVelocity.y = 0;
                 player.BeginFallThroughPlatformWindow(0.1f);
             }
 
@@ -84,8 +84,8 @@ namespace Spelunky {
         /// <summary>
         /// </summary>
         public virtual void OnJumpInputUp() {
-            if (player.velocity.y > player.MinJumpVelocity) {
-                player.velocity.y = player.MinJumpVelocity;
+            if (player.requestedVelocity.y > player.MinJumpVelocity) {
+                player.requestedVelocity.y = player.MinJumpVelocity;
             }
         }
 
@@ -110,8 +110,18 @@ namespace Spelunky {
         /// <summary>
         /// </summary>
         public virtual void OnAttackInputDown() {
-            // Crouch + Attack = pickup/drop (works for both equipment and throwables).
-            if (player.directionalInput.y < 0 && player.Physics.collisionInfo.down) {
+            bool isCrouching = player.directionalInput.y < 0 && player.Physics.collisionInfo.down;
+
+            // Holding a throwable? Throw it (or place it gently if crouching).
+            if (player.Holding.IsHoldingThrowable) {
+                IThrowable throwable = (IThrowable)player.Holding.HeldItem;
+                Vector2 throwVelocity = player.CalculateThrowVelocity(throwable.ThrowVelocityMultiplier);
+                player.Holding.ThrowHeldItem(throwVelocity);
+                return;
+            }
+
+            // Crouch + Attack = pickup/drop (for equipment or when not holding anything).
+            if (isCrouching) {
                 if (player.Holding.IsHoldingItem) {
                     player.Holding.Drop();
                 }
@@ -119,13 +129,6 @@ namespace Spelunky {
                     player.Holding.TryPickupNearby();
                 }
 
-                return;
-            }
-
-            // Holding a throwable? Throw it.
-            if (player.Holding.IsHoldingThrowable) {
-                Vector2 throwVelocity = player.CalculateThrowVelocity();
-                player.Holding.ThrowHeldItem(throwVelocity);
                 return;
             }
 

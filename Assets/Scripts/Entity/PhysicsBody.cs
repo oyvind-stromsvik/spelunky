@@ -11,7 +11,7 @@ namespace Spelunky {
     /// - Overriding OnPhysicsCollisionEnter for custom collision response
     /// </summary>
     [RequireComponent(typeof(EntityPhysics))]
-    public class PhysicsBody : MonoBehaviour, IImpulseReceiver {
+    public class PhysicsBody : MonoBehaviour, IImpulseReceiver, ITickable {
 
         public EntityPhysics Physics { get; private set; }
         public EntityVisuals Visuals { get; private set; }
@@ -67,7 +67,18 @@ namespace Spelunky {
             Physics.OnOverlapEnterEvent.AddListener(OnPhysicsOverlapEnter);
         }
 
-        protected virtual void Update() {
+        protected virtual void OnEnable() {
+            EntityManager.Instance?.Register(this);
+        }
+
+        protected virtual void OnDisable() {
+            EntityManager.Instance?.Unregister(this);
+        }
+
+        // ITickable implementation
+        public virtual bool IsTickActive => true;
+
+        public virtual void Tick() {
             ApplyGravity();
             ApplyFriction();
             Move();
@@ -106,8 +117,6 @@ namespace Spelunky {
         /// Override for custom collision response.
         /// </summary>
         protected virtual void OnPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            HandleImpactDamage(collisionInfo);
-
             if (!bounces) {
                 return;
             }
@@ -137,31 +146,14 @@ namespace Spelunky {
             }
         }
 
-        protected void HandleImpactDamage(CollisionInfo collisionInfo) {
-            if (!dealsImpactDamage || impactDamage <= 0) {
-                return;
-            }
-
-            IDamageable damageableHorizontal = null;
-            IDamageable damageableVertical = null;
-
-            if (collisionInfo.left && velocity.x <= -impactDamageThreshold || collisionInfo.right && velocity.x >= impactDamageThreshold) {
-                damageableHorizontal = GetDamageable(collisionInfo.colliderHorizontal);
-            }
-
-            if (collisionInfo.down && velocity.y <= -impactDamageThreshold || collisionInfo.up && velocity.y >= impactDamageThreshold) {
-                damageableVertical = GetDamageable(collisionInfo.colliderVertical);
-            }
-
-            if (damageableHorizontal != null) {
-                damageableHorizontal.TryTakeDamage(impactDamage);
-            }
-
-            if (damageableVertical != null && !ReferenceEquals(damageableVertical, damageableHorizontal)) {
-                damageableVertical.TryTakeDamage(impactDamage);
-            }
+        protected virtual void OnPhysicsOverlapEnter(Collider2D collider2D) {
+            HandleOverlapImpactDamage(collider2D);
         }
 
+        /// <summary>
+        /// This mirrors how it is in Spelunky where thrown/falling objects deal damage when they pass over an enemy or
+        /// the player or anything breakable, but this doesn't deflect them or cause them in any way.
+        /// </summary>
         protected void HandleOverlapImpactDamage(Collider2D collider2D) {
             if (!dealsImpactDamage || impactDamage <= 0) {
                 return;
@@ -204,10 +196,6 @@ namespace Spelunky {
             if (audioSource != null && bounceClip != null) {
                 audioSource.PlayOneShot(bounceClip);
             }
-        }
-
-        private void OnPhysicsOverlapEnter(Collider2D collider2D) {
-            HandleOverlapImpactDamage(collider2D);
         }
 
         public void ApplyImpulse(Vector2 impulse) {

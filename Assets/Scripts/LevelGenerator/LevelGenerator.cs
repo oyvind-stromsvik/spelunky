@@ -9,8 +9,6 @@ namespace Spelunky {
     /// </summary>
     public class LevelGenerator : MonoBehaviour {
 
-        public bool generateLevelOnStart = true;
-        
         [Header("Debug")]
         public bool debug;
 
@@ -96,44 +94,40 @@ namespace Spelunky {
             Tiles = new Tile[roomsHorizontal * RoomWidth, roomsVertical * RoomHeight];
         }
 
-        private void Start() {
-            CreateLevel();
+        /// <summary>
+        /// Procedurally generates rooms and main path.
+        /// Call this for normal gameplay. Skip this for testing scenes with hand-placed content.
+        /// </summary>
+        public void GenerateLevel() {
+            // 1. First create the main path from entrance to exit.
+            CreateMainPathRooms();
+
+            // 2. Then create any rooms not on the main path.
+            CreateRemainingRooms();
         }
 
         /// <summary>
+        /// Sets up the level (tiles, bounds, background).
+        /// Always call this after GenerateLevel() or after hand-placing content.
         /// </summary>
-        /// <exception cref="Exception"></exception>
-        private void CreateLevel() {
-            if (generateLevelOnStart) {
-                // 1. First create the main path from entrance to exit.
-                CreateMainPathRooms();
-
-                // 2. Then create any rooms not on the main path.
-                CreateRemainingRooms();
-            }
-
-            // 3. Setup the tiles (add variations, decorations etc.)
+        public void SetupLevel() {
+            // 1. Setup the tiles (add variations, decorations etc.)
             InitializeTiles();
             SetupTiles();
 
-            // 4. Create the indestructable bounds around the level.
+            // 2. Create the indestructible bounds around the level.
             CreateLevelBounds();
 
-            // 5. Create the background sprites.
+            // 3. Create the background sprites.
             CreateBackground();
-
-            if (generateLevelOnStart) {
-                // 6. Place the entrace and exit.
-                PlaceEntranceAndExit();
-            }
-
-            // 7. Spawn the player at the entrance.
-            FindObjectOfType<GameManager>().SpawnPlayer(entrance.transform.position);
         }
 
         /// <summary>
+        /// Places the entrance and exit tiles. Must be called after SetupLevel()
+        /// since it needs initialized tiles to find suitable placement spots.
+        /// Skip this for testing scenes where entrance/exit are hand-placed.
         /// </summary>
-        private void PlaceEntranceAndExit() {
+        public void PlaceEntranceAndExit() {
             Tile tileToSpawnEntranceOn = firstRoom.GetSuitableEntranceOrExitTile();
             entrance = Instantiate(_tilePrefabs["Entrance"], tileToSpawnEntranceOn.transform.position + new Vector3(0, Tile.Height, 0), Quaternion.identity);
 

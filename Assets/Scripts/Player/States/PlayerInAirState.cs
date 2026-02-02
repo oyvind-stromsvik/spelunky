@@ -73,7 +73,7 @@ namespace Spelunky {
             bool movingIntoWallOnTheLeft = player.Physics.collisionInfo.left && player.directionalInput.x < 0 && !player.Visuals.isFacingRight;
             bool movingIntoWallOnTheRight = player.Physics.collisionInfo.right && player.directionalInput.x > 0 && player.Visuals.isFacingRight;
 
-            if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.velocity.y < 0 && CanHangFrom(hit.collider)) {
+            if ((movingIntoWallOnTheLeft || movingIntoWallOnTheRight) && player.requestedVelocity.y < 0 && CanHangFrom(hit.collider)) {
                 // If we have the glove we can grab anything.
                 if (player.Accessories.HasClimbingGlove) {
                     // TODO: How do we pass data to a state?

@@ -110,6 +110,10 @@ namespace Spelunky {
         }
 
         private void HandleLookUpDown() {
+            // TODO: While the camera is fixed to the player this behaves fucky.
+            // The camera I think needs to be refactored to move smoother in general.
+            return;
+            
             if (player.directionalInput.x != 0) {
                 return;
             }

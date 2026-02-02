@@ -66,8 +66,10 @@ namespace Spelunky {
         /// Detect player directly below the spider using a raycast.
         /// </summary>
         private Transform DetectPlayerBelow() {
-            RaycastHit2D hit = Physics2D.Raycast(enemy.transform.position, Vector2.down, enemy.detectionRange, enemy.targetDetectionMask);
-            Debug.DrawRay(enemy.transform.position, Vector2.down * enemy.detectionRange, Color.green);
+            Vector2 origin = (Vector2)enemy.transform.position + new Vector2(0, enemy.Physics.Collider.size.y);
+            Vector2 direction = Vector2.down;
+            RaycastHit2D hit = Physics2D.Raycast(origin, direction, enemy.detectionRange, enemy.targetDetectionMask);
+            Debug.DrawRay(origin, direction * enemy.detectionRange, Color.green);
             return hit.collider != null ? hit.transform : null;
         }
 

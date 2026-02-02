@@ -135,7 +135,7 @@ Transform:
   m_GameObject: {fileID: 8880961820490091281}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 32, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -169,7 +169,7 @@ MonoBehaviour:
   crushClip: {fileID: 8300000, guid: d841ef127a7e4884a87824b6fa097082, type: 3}
 --- !u!61 &4153403453399211046
 BoxCollider2D:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -210,7 +210,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 8, y: 8}
+  m_Size: {x: 16, y: 8}
   m_EdgeRadius: 0
 --- !u!114 &8068006891338379872
 MonoBehaviour:
@@ -224,6 +224,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colliderOffset: {x: 0, y: 4}
+  _colliderSize: {x: 16, y: 8}
   blockingMask:
     serializedVersion: 2
     m_Bits: 41216

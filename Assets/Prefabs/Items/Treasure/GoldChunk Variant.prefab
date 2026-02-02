@@ -109,6 +109,21 @@ PrefabInstance:
       propertyPath: m_WasSpriteAssigned
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8068006891338379872, guid: 9ba129196ec6aed458841b87f74f3f8c,
+        type: 3}
+      propertyPath: _colliderSize.x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8068006891338379872, guid: 9ba129196ec6aed458841b87f74f3f8c,
+        type: 3}
+      propertyPath: _colliderSize.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8068006891338379872, guid: 9ba129196ec6aed458841b87f74f3f8c,
+        type: 3}
+      propertyPath: _colliderOffset.y
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8880961820490091281, guid: 9ba129196ec6aed458841b87f74f3f8c,
         type: 3}
       propertyPath: m_Name

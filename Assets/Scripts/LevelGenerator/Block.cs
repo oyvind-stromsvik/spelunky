@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+using UnityEngine;
 
 namespace Spelunky {
 
@@ -20,27 +20,29 @@ namespace Spelunky {
             stopOnGround = true;
         }
 
-        protected override void Update() {
+        public override void Tick() {
             // Horizontal movement is handled by push-on-collision.
             velocity.x = 0f;
 
-            base.Update();
+            base.Tick();
         }
 
         protected override void OnPhysicsCollisionEnter(CollisionInfo collisionInfo) {
-            HandleImpactDamage(collisionInfo);
-
             // Skip first collision to avoid landClip playing on level start for all blocks.
             if (!_initialized) {
                 _initialized = true;
                 return;
             }
 
-            bool crushed = TryCrushOnVerticalCollision(collisionInfo);
-            if (collisionInfo.becameGroundedThisFrame && !crushed) {
+            if (collisionInfo.becameGroundedThisFrame) {
                 audioSource.clip = landClip;
                 audioSource.Play();
             }
+        }
+
+        protected override void OnPhysicsOverlapEnter(Collider2D other) {
+            base.OnPhysicsOverlapEnter(other);
+            TryCrushOverlappingTarget(other);
         }
 
         public bool TryPush(Vector2Int step) {
@@ -77,34 +79,24 @@ namespace Spelunky {
             crushable.Crush();
         }
 
-        private bool TryCrushOnVerticalCollision(CollisionInfo collisionInfo) {
+        private void TryCrushOverlappingTarget(Collider2D other) {
+            // Only crush when moving with gravity (falling).
             int gravityDirection = PhysicsManager.gravity.y > 0f ? 1 : (PhysicsManager.gravity.y < 0f ? -1 : 0);
             if (gravityDirection == 0) {
-                return false;
+                return;
             }
 
             bool movingWithGravity = gravityDirection > 0 ? velocity.y > 0f : velocity.y < 0f;
             if (!movingWithGravity) {
-                return false;
+                return;
             }
 
-            bool hitInGravityDirection = gravityDirection > 0 ? collisionInfo.up : collisionInfo.down;
-            if (!hitInGravityDirection) {
-                return false;
-            }
-
-            Collider2D hit = collisionInfo.colliderVertical;
-            if (hit == null) {
-                return false;
-            }
-
-            ICrushable crushable = hit.GetComponentInParent<ICrushable>();
+            ICrushable crushable = other.GetComponentInParent<ICrushable>();
             if (crushable == null || !crushable.IsCrushable) {
-                return false;
+                return;
             }
 
             crushable.Crush();
-            return true;
         }
 
         private static bool IsBlocked(EntityPhysics otherPhysics, Vector2Int step) {

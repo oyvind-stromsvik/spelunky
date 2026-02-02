@@ -120,7 +120,7 @@ GameObject:
   - component: {fileID: 2648272047989946846}
   - component: {fileID: 7578273585626949003}
   - component: {fileID: 1685072814841818973}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: Pickaxe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -136,7 +136,7 @@ Transform:
   m_GameObject: {fileID: 5814848657081708227}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 80, y: 16, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -172,7 +172,7 @@ Rigidbody2D:
   m_Constraints: 0
 --- !u!61 &9026072446328404546
 BoxCollider2D:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -227,6 +227,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colliderOffset: {x: 7, y: 0}
+  _colliderSize: {x: 16, y: 12}
   blockingMask:
     serializedVersion: 2
     m_Bits: 45312

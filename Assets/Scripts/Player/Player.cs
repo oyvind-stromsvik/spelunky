@@ -1,12 +1,11 @@
 using Gizmos = Popcron.Gizmos;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spelunky {
 
     [RequireComponent(typeof(EntityPhysics), typeof(EntityHealth), typeof(EntityVisuals))]
-    public class Player : MonoBehaviour, ICrushable, IImpulseReceiver {
+    public class Player : MonoBehaviour, ICrushable, IImpulseReceiver, ILateTickable {
 
         public EntityPhysics Physics { get; private set; }
         public EntityHealth Health { get; private set; }
@@ -41,6 +40,13 @@ namespace Spelunky {
         [Header("Abilities")]
         public Bomb bomb;
         public Rope rope;
+        public SpriteAnimation throwAnimation;
+
+        [Header("Throwing")]
+        [Tooltip("The speed at which items are thrown.")]
+        public float throwItemSpeed = 286f;
+        [Tooltip("The speed at which items are placed when crouching.")]
+        public float placeItemSpeed = 64f;
 
         [Header("Combat")]
         public LayerMask enemyOverlapMask;
@@ -74,7 +80,8 @@ namespace Spelunky {
 
         // TODO: Make this private. Currently the jump logic in State.cs is the only place we set this, but I'm not
         // entirely sure how to refactor that so that.
-        [HideInInspector] public Vector2 velocity;
+        // This is the velocity we want to apply to the player this frame.
+        [HideInInspector] public Vector2 requestedVelocity;
         private float _velocityXSmoothing;
         [HideInInspector] public Vector2 directionalInput;
         private float _speed;
@@ -90,7 +97,13 @@ namespace Spelunky {
         private readonly Collider2D[] _enemyOverlapResults = new Collider2D[8];
         private ContactFilter2D _enemyOverlapFilter;
         private float _knockbackTimer;
-        private Coroutine _fallThroughCoroutine;
+        private Timer _fallThroughTimer;
+
+        // Attack state
+        private bool _isAttacking;
+        private float _attackTimer;
+        private float _attackDuration;
+        private HashSet<Enemy> _hitEnemies;
 
         /// <summary>
         /// Helper property to access the current state as a player-specific State.
@@ -128,15 +141,27 @@ namespace Spelunky {
             stateMachine.AttemptToChangeState(groundedState);
         }
 
-        private void Update() {
+        protected virtual void OnEnable() {
+            EntityManager.Instance?.Register(this);
+        }
+
+        protected virtual void OnDisable() {
+            EntityManager.Instance?.Unregister(this);
+        }
+
+        // ITickable implementation
+        public bool IsTickActive => true;
+
+        public void Tick() {
             if (_isAttacking) {
                 Gizmos.Square(
-                    (Vector2)transform.position + new Vector2Int(whipOffset.x * Visuals.facingDirection, whipOffset.y), 
-                    whipDamageArea, 
+                    (Vector2)transform.position + new Vector2Int(whipOffset.x * Visuals.facingDirection, whipOffset.y),
+                    whipDamageArea,
                     Color.yellow
                 );
+                UpdateAttack();
             }
-            
+
             CurrentPlayerState.UpdateState();
 
             SetPlayerSpeed();
@@ -154,11 +179,14 @@ namespace Spelunky {
                 }
             }
 
-            Physics.Move(velocity * Time.deltaTime);
+            Physics.Move(requestedVelocity * Time.deltaTime);
+        }
 
+        // ILateTickable implementation
+        public void LateTick() {
             HandleEnemyOverlaps();
 
-            CurrentPlayerState.ChangePlayerVelocityAfterMove(ref velocity);
+            CurrentPlayerState.ChangePlayerVelocityAfterMove(ref requestedVelocity);
         }
 
         private void SetPlayerSpeed() {
@@ -178,7 +206,7 @@ namespace Spelunky {
         private void CalculateVelocity() {
             if (_knockbackTimer > 0f) {
                 _knockbackTimer -= Time.deltaTime;
-                velocity.y += _gravity * Time.deltaTime;
+                requestedVelocity.y += _gravity * Time.deltaTime;
                 return;
             }
 
@@ -190,11 +218,11 @@ namespace Spelunky {
             // want. I don't want us to have a lingering velocity for many seconds after we stop moving. I want this to
             // just simulate some slight acceleration and deceleration, maybe over a second or something? And then we
             // also need to be able to affect this when we introduce ice which should be slippery.
-            velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+            requestedVelocity.x = Mathf.SmoothDamp(requestedVelocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
 
-            velocity.y += _gravity * Time.deltaTime;
+            requestedVelocity.y += _gravity * Time.deltaTime;
 
-            CurrentPlayerState.ChangePlayerVelocity(ref velocity);
+            CurrentPlayerState.ChangePlayerVelocity(ref requestedVelocity);
         }
 
         public void ThrowBomb() {
@@ -204,34 +232,62 @@ namespace Spelunky {
 
             Inventory.UseBomb();
 
-            Bomb bombInstance = Instantiate(bomb, transform.position + Vector3.up * 2f, Quaternion.identity);
+            Bomb bombInstance = Instantiate(bomb, Holding.holdPosition.position, Quaternion.identity);
             Vector2 throwVelocity = CalculateThrowVelocity();
             bool affectedByGravity = !Accessories.HasPitchersMitt;
 
             bombInstance.OnThrown(this, throwVelocity, affectedByGravity);
+            
+            Visuals.animator.PlayOnceUninterrupted(throwAnimation);
         }
 
-        public Vector2 CalculateThrowVelocity() {
+        public Vector2 CalculateThrowVelocity(float itemVelocityMultiplier = 1f) {
+            // Throw angles in degrees (0 = horizontal, positive = upward).
+            const float upwardThrowAngle = 60f;
+            const float normalThrowAngle = 25f;
+            const float downwardThrowAngle = -60f;
+            const float horizontalAngle = 0f;
+
+            float angle;
+            float speed;
+
             // Holding up: upward throw (same with or without PitchersMitt).
             if (directionalInput.y > 0) {
-                return new Vector2(128 * Visuals.facingDirection, 256);
+                angle = upwardThrowAngle;
+                speed = throwItemSpeed;
             }
-
             // PitchersMitt makes throws perfectly horizontal when not holding up.
-            if (Accessories.HasPitchersMitt) {
-                return new Vector2(256 * Visuals.facingDirection, 0);
+            else if (Accessories.HasPitchersMitt) {
+                angle = horizontalAngle;
+                speed = throwItemSpeed;
+            }
+            // Holding down while grounded: place item gently.
+            else if (directionalInput.y < 0 && Physics.collisionInfo.down) {
+                angle = normalThrowAngle;
+                speed = placeItemSpeed;
+            }
+            // Holding down while in air: downward throw.
+            else if (directionalInput.y < 0) {
+                angle = downwardThrowAngle;
+                speed = throwItemSpeed;
+            }
+            // Normal throw: slight upward arc.
+            else {
+                angle = normalThrowAngle;
+                speed = throwItemSpeed;
             }
 
-            // Normal throw behavior without PitchersMitt.
-            if (directionalInput.y < 0) {
-                if (Physics.collisionInfo.down) {
-                    return new Vector2(64 * Visuals.facingDirection, 0);
-                }
+            // Convert angle to direction vector.
+            float radians = angle * Mathf.Deg2Rad;
+            Vector2 direction = new Vector2(Mathf.Cos(radians) * Visuals.facingDirection, Mathf.Sin(radians));
 
-                return new Vector2(128 * Visuals.facingDirection, -256);
-            }
+            // Calculate base throw velocity.
+            Vector2 throwVelocity = direction * speed * itemVelocityMultiplier;
 
-            return new Vector2(256 * Visuals.facingDirection, 128);
+            // Add player's velocity to throw for momentum transfer.
+            throwVelocity += requestedVelocity;
+
+            return throwVelocity;
         }
 
         /// <summary>
@@ -260,6 +316,9 @@ namespace Spelunky {
             if (ReferenceEquals(stateMachine.CurrentState, groundedState) && directionalInput.y < 0) {
                 ropeInstance.placePosition = transform.position + Visuals.facingDirection * Vector3.right * Tile.Width;
             }
+            else {
+                Visuals.animator.PlayOnceUninterrupted(throwAnimation);
+            }
         }
 
         public void Use() {
@@ -270,56 +329,58 @@ namespace Spelunky {
             stateMachine.AttemptToChangeState(enterDoorState);
         }
 
-        private bool _isAttacking;
-
         public void Attack() {
             if (_isAttacking) {
                 return;
             }
 
-            StartCoroutine(DoAttack());
+            BeginAttack();
         }
 
-        private IEnumerator DoAttack() {
+        private void BeginAttack() {
             _isAttacking = true;
+            _attackTimer = 0f;
+            _attackDuration = Visuals.animator.GetAnimationLength(attackWithWhipAnimation);
+            _hitEnemies = new HashSet<Enemy>();
 
             Visuals.animator.PlayOnceUninterrupted(attackWithWhipAnimation);
             Audio.Play(Audio.whipClip, 0.7f);
+        }
 
+        private void UpdateAttack() {
             // Damage enemies in whip area.
-            float attackDuration = Visuals.animator.GetAnimationLength(attackWithWhipAnimation);
-            float timer = 0f;
-            HashSet<Enemy> hitEnemies = new HashSet<Enemy>();
+            int hitCount = Physics2D.OverlapBox(
+                (Vector2)transform.position + new Vector2Int(whipOffset.x * Visuals.facingDirection, whipOffset.y),
+                whipDamageArea,
+                0f,
+                _enemyOverlapFilter,
+                _enemyOverlapResults
+            );
 
-            while (timer < attackDuration) {
-                int hitCount = Physics2D.OverlapBox(
-                    (Vector2)transform.position + new Vector2Int(whipOffset.x * Visuals.facingDirection, whipOffset.y),
-                    whipDamageArea,
-                    0f,
-                    _enemyOverlapFilter,
-                    _enemyOverlapResults
-                );
-
-                for (int i = 0; i < hitCount; i++) {
-                    Collider2D hit = _enemyOverlapResults[i];
-                    if (hit == null || hit == Physics.Collider) {
-                        continue;
-                    }
-
-                    Enemy enemy = hit.GetComponentInParent<Enemy>();
-                    if (enemy == null || hitEnemies.Contains(enemy)) {
-                        continue;
-                    }
-
-                    enemy.Health.TakeDamage(whipDamage);
-                    hitEnemies.Add(enemy);
+            for (int i = 0; i < hitCount; i++) {
+                Collider2D hit = _enemyOverlapResults[i];
+                if (hit == null || hit == Physics.Collider) {
+                    continue;
                 }
 
-                timer += Time.deltaTime;
-                yield return null;
+                Enemy enemy = hit.GetComponentInParent<Enemy>();
+                if (enemy == null || _hitEnemies.Contains(enemy)) {
+                    continue;
+                }
+
+                enemy.Health.TakeDamage(whipDamage);
+                _hitEnemies.Add(enemy);
             }
-            
+
+            _attackTimer += Time.deltaTime;
+            if (_attackTimer >= _attackDuration) {
+                EndAttack();
+            }
+        }
+
+        private void EndAttack() {
             _isAttacking = false;
+            _hitEnemies = null;
         }
 
         public void EnteredDoorway(Exit door) {
@@ -415,7 +476,7 @@ namespace Spelunky {
         }
 
         private void BounceOffEnemy() {
-            velocity.y = _maxJumpVelocity;
+            requestedVelocity.y = _maxJumpVelocity;
             if (!ReferenceEquals(stateMachine.CurrentState, inAirState)) {
                 stateMachine.AttemptToChangeState(inAirState);
             }
@@ -435,7 +496,7 @@ namespace Spelunky {
         }
 
         private void ApplyKnockback(Vector2 knockback) {
-            velocity = knockback;
+            requestedVelocity = knockback;
             _knockbackTimer = knockbackDuration;
 
             if (!ReferenceEquals(stateMachine.CurrentState, inAirState)) {
@@ -460,18 +521,13 @@ namespace Spelunky {
         }
 
         public void BeginFallThroughPlatformWindow(float duration) {
-            if (_fallThroughCoroutine != null) {
-                StopCoroutine(_fallThroughCoroutine);
-            }
+            _fallThroughTimer?.Cancel();
 
-            _fallThroughCoroutine = StartCoroutine(FallThroughPlatformWindow(duration));
-        }
-
-        private IEnumerator FallThroughPlatformWindow(float duration) {
             Physics.collisionInfo.fallingThroughPlatform = true;
-            yield return new WaitForSeconds(duration);
-            Physics.collisionInfo.fallingThroughPlatform = false;
-            _fallThroughCoroutine = null;
+            _fallThroughTimer = TimerManager.Instance.CreateTimer(duration, () => {
+                Physics.collisionInfo.fallingThroughPlatform = false;
+                _fallThroughTimer = null;
+            });
         }
 
         // TODO: Make it so that we can show debug info for whatever entity we select.
@@ -480,8 +536,8 @@ namespace Spelunky {
                 "--- Player info ---",
                 "State: " + stateMachine.CurrentState.GetType().Name,
                 "--- Physics info --- ",
-                "Requested Velocity X: " + velocity.x,
-                "Requested Velocity Y: " + velocity.y,
+                "Requested Velocity X: " + requestedVelocity.x,
+                "Requested Velocity Y: " + requestedVelocity.y,
                 "Velocity X: " + Physics.Velocity.x,
                 "Velocity Y: " + Physics.Velocity.y,
                 "--- Physics Collision info --- ",

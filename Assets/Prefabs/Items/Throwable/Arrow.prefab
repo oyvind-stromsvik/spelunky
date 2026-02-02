@@ -149,7 +149,7 @@ Rigidbody2D:
   m_Constraints: 0
 --- !u!61 &5407424373036457380
 BoxCollider2D:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -179,7 +179,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -1, y: 3}
+  m_Offset: {x: 1, y: 3}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -204,6 +204,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colliderOffset: {x: 1, y: 3}
+  _colliderSize: {x: 6, y: 6}
   blockingMask:
     serializedVersion: 2
     m_Bits: 45312
@@ -239,3 +241,5 @@ MonoBehaviour:
   _flipWithPlayer: 1
   _faceVelocityDirection: 1
   _spriteTransform: {fileID: 3939687513495681285}
+  _throwVelocityMultiplier: 1
+  crushClip: {fileID: 0}

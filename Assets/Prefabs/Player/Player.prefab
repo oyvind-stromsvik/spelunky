@@ -187,7 +187,7 @@ Rigidbody2D:
   m_Constraints: 0
 --- !u!61 &61633986752685120
 BoxCollider2D:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -358,6 +358,9 @@ MonoBehaviour:
   _exitDoor: {fileID: 0}
   bomb: {fileID: 6430094435519817005, guid: 5d73f589b7d7d3b489523140e46bf32b, type: 3}
   rope: {fileID: 5904638784943168102, guid: 664121d23d46b3c43a145ba4c636c15f, type: 3}
+  throwAnimation: {fileID: 11400000, guid: 6f74157da76442746bb6e70d0df0161d, type: 2}
+  throwItemSpeed: 256
+  placeItemSpeed: 64
   enemyOverlapMask:
     serializedVersion: 2
     m_Bits: 131072
@@ -376,7 +379,7 @@ MonoBehaviour:
   sprinting: 0
   groundedGracePeriod: 0.05
   groundedGraceTimer: 0
-  velocity: {x: 0, y: 0}
+  requestedVelocity: {x: 0, y: 0}
   directionalInput: {x: 0, y: 0}
   recentlyJumped: 0
   _lastJumpTimer: 0
@@ -407,12 +410,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b52b14d97ee94fbb97a9a73a10d522fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colliderOffset: {x: 0, y: 6}
+  _colliderSize: {x: 8, y: 12}
   blockingMask:
     serializedVersion: 2
     m_Bits: 438528
   overlapMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 525312
   raycastsHitTriggers: 0
   canPushBlocks: 0
 --- !u!114 &-5236971530926676888
@@ -674,7 +679,7 @@ MonoBehaviour:
   holdPosition: {fileID: 4089474882472094158}
   pickupLayerMask:
     serializedVersion: 2
-    m_Bits: 81920
+    m_Bits: 65536
   pickupRadius: 12
 --- !u!1 &2126011458856051525
 GameObject:

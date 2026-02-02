@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 namespace Spelunky {
@@ -24,10 +23,15 @@ namespace Spelunky {
         private bool _noGravity;
         private bool _hasPaste;
         private bool _isStuck;
+        private bool _initialized;
+
+        private Timer _armTimer;
+        private Timer _explodeTimer;
 
         public bool CanBePickedUp => !_isHeld && _hasBeenThrown;
         public Vector2Int HoldOffset => _holdOffset;
         public bool FlipWithPlayer => _flipWithPlayer;
+        public float ThrowVelocityMultiplier => 1f;
 
         protected override void Awake() {
             base.Awake();
@@ -39,16 +43,11 @@ namespace Spelunky {
         }
 
         private void Start() {
-            StartCoroutine(DelayedExplosion());
+            StartDelayedExplosion();
+            _initialized = true;
         }
 
-        protected override void Update() {
-            if (_isHeld || _isStuck) {
-                return;
-            }
-
-            base.Update();
-        }
+        public override bool IsTickActive => _initialized && !_isHeld && !_isStuck;
 
         protected override void ApplyGravity() {
             if (_noGravity) {
@@ -87,25 +86,37 @@ namespace Spelunky {
             Velocity = velocity;
         }
 
-        private IEnumerator DelayedExplosion() {
-            yield return new WaitForSeconds(timeToExplode - bombTimerClip.length);
+        private void StartDelayedExplosion() {
+            float armDelay = timeToExplode - bombTimerClip.length;
+            _armTimer = TimerManager.Instance.CreateTimer(armDelay, OnArmTimerComplete);
+        }
 
+        private void OnArmTimerComplete() {
             Visuals.animator.Play("BombArmed");
 
             audioSource.clip = bombTimerClip;
             audioSource.Play();
 
-            yield return new WaitForSeconds(bombTimerClip.length);
-
-            Explode();
+            _explodeTimer = TimerManager.Instance.CreateTimer(bombTimerClip.length, Explode);
         }
 
         public void Explode(float delay = 0f) {
-            StartCoroutine(DoExplode(delay));
+            if (delay > 0f) {
+                TimerManager.Instance.CreateTimer(delay, DoExplode);
+            } else {
+                DoExplode();
+            }
         }
 
-        private IEnumerator DoExplode(float delay = 0f) {
-            yield return new WaitForSeconds(delay);
+        private void Explode() {
+            DoExplode();
+        }
+
+        private void DoExplode() {
+            // Cancel any pending timers
+            _armTimer?.Cancel();
+            _explodeTimer?.Cancel();
+
             Instantiate(explosion, transform.position + new Vector3(0, 4, 0), Quaternion.identity);
             Destroy(gameObject);
         }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Spelunky {
 
-    public class ArrowTrap : MonoBehaviour {
+    public class ArrowTrap : MonoBehaviour, ITickable {
 
         [SerializeField] private ThrowableItem arrowPrefab;
         [SerializeField] private Transform firePoint;
@@ -17,11 +17,18 @@ namespace Spelunky {
         private Vector2 RayOrigin => firePoint != null ? firePoint.position : transform.position;
         private Vector2 RayDirection => new Vector2(fireDirection, 0);
 
-        private void Update() {
-            if (_hasFired) {
-                return;
-            }
+        private void OnEnable() {
+            EntityManager.Instance?.Register(this);
+        }
 
+        private void OnDisable() {
+            EntityManager.Instance?.Unregister(this);
+        }
+
+        // ITickable implementation
+        public bool IsTickActive => !_hasFired;
+
+        public void Tick() {
             RaycastHit2D hit = Physics2D.Raycast(RayOrigin, RayDirection, rayDistance, detectMask);
             if (hit.collider != null) {
                 Fire();
