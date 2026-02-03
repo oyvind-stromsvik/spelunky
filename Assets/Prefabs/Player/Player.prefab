@@ -522,7 +522,7 @@ MonoBehaviour:
   player: {fileID: 0}
   crawlAnimation: {fileID: 11400000, guid: d2cebce78f19f4148bab90958c8c09a0, type: 2}
   pushAnimation: {fileID: 11400000, guid: 9f3cd1084409d2d4ca687652e8158210, type: 2}
-  runAnimation: {fileID: 11400000, guid: 00ac863637ab2894b9b0a52b37627aa6, type: 2}
+  runAnimation: {fileID: 11400000, guid: 770902eba7cfd3d4986df950af4f7163, type: 2}
   duckAnimation: {fileID: 11400000, guid: 513897d347e7c844f96202212307ba9a, type: 2}
   idleAnimation: {fileID: 11400000, guid: 3fadc1b286ce4a04da6c781831e6727e, type: 2}
   lookUpAnimation: {fileID: 11400000, guid: e253dfd7beaedb547a541b2592891c1d, type: 2}
@@ -605,7 +605,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  crawlToHangAnimation: {fileID: 11400000, guid: 8be92b1340f4fc6438cb2052c3f53a64,
+  crawlToHangAnimation: {fileID: 11400000, guid: caeeadcd25d81d540a288e4111b0510a,
     type: 2}
 --- !u!114 &-6787339454029924957
 MonoBehaviour:
