@@ -21,6 +21,8 @@ namespace Spelunky {
         public EntityManager EntityManager { get; private set; }
         public TimerManager TimerManager { get; private set; }
 
+        public bool IsGameOver { get; private set; }
+
         public override void Awake() {
             base.Awake();
             CreateSubManagers();
@@ -109,6 +111,10 @@ namespace Spelunky {
         }
 
         private void Update() {
+            if (IsGameOver) {
+                return;
+            }
+
             // ===== 1. INPUT PHASE =====
             // Read input, update directional input
             EntityManager.EarlyTick();
@@ -128,6 +134,25 @@ namespace Spelunky {
             // ===== 5. TIMER PHASE =====
             // Process all active timers
             TimerManager.Tick();
+        }
+
+        public void HandlePlayerDeath(Player player) {
+            Debug.Log("GameManager: Player has died, handling game over...");
+            
+            if (IsGameOver) {
+                return;
+            }
+
+            IsGameOver = true;
+
+            int score = 0;
+            if (player != null && player.Inventory != null) {
+                score = player.Inventory.goldAmount;
+            }
+            
+            Debug.Log($"GameManager: Player score at death: {score}");
+
+            GameOverUI.ShowGameOver(score);
         }
 
         public void SpawnPlayer(Vector3 position) {

@@ -104,6 +104,7 @@ namespace Spelunky {
         private float _attackTimer;
         private float _attackDuration;
         private HashSet<Enemy> _hitEnemies;
+        private bool _isDead;
 
         /// <summary>
         /// Helper property to access the current state as a player-specific State.
@@ -391,20 +392,22 @@ namespace Spelunky {
             _exitDoor = null;
         }
 
-        public void Splat() {
-            stateMachine.AttemptToChangeState(splatState);
-        }
-
         public bool IsCrushable => true;
 
         public void Crush() {
             if (!ReferenceEquals(stateMachine.CurrentState, splatState)) {
-                Splat();
+                Health.TakeDamage(Health.CurrentHealth);
             }
         }
 
         private void OnHealthChanged() {
+            Debug.Log("Player health changed: " + Health.CurrentHealth);
             if (Health.CurrentHealth <= 0) {
+                if (!_isDead) {
+                    _isDead = true;
+                    GameManager.Instance?.HandlePlayerDeath(this);
+                }
+
                 stateMachine.AttemptToChangeState(splatState);
             }
         }

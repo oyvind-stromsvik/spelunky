@@ -414,7 +414,7 @@ MonoBehaviour:
   _colliderSize: {x: 8, y: 12}
   blockingMask:
     serializedVersion: 2
-    m_Bits: 438528
+    m_Bits: 307456
   overlapMask:
     serializedVersion: 2
     m_Bits: 525312
