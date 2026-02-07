@@ -26,14 +26,13 @@ namespace Spelunky {
         public LayerMask riderMask = ~0;
         public LayerMask obstacleMask = ~0;
 
-        private const float TopSurfaceTolerance = 0.5f;
-
         private BoxCollider2D _collider;
         private Vector2Int _pixelPosition;
         private Vector2 _subPixelRemainder;
         private Vector2Int _direction;
 
         public Vector2Int LastStep { get; private set; }
+        public Vector2 Velocity => isActive ? (Vector2)_direction * speed : Vector2.zero;
 
         private ContactFilter2D _contactFilter;
         private ContactFilter2D _obstacleFilter;
@@ -125,8 +124,6 @@ namespace Spelunky {
                     break;
                 }
 
-                GetRidersOnTop();
-
                 _pixelPosition += step;
                 LastStep = step;
                 SyncTransform();
@@ -141,8 +138,14 @@ namespace Spelunky {
                 MoveAttachedEntity(_attachedEntities[i], step);
             }
 
-            for (int i = 0; i < _ridersOnTop.Count; i++) {
-                MoveRidingEntity(_ridersOnTop[i], step);
+            for (int i = _ridersOnTop.Count - 1; i >= 0; i--) {
+                EntityPhysics rider = _ridersOnTop[i];
+                if (rider == null) {
+                    _ridersOnTop.RemoveAt(i);
+                    continue;
+                }
+
+                MoveRidingEntity(rider, step);
             }
 
             Vector2 overlapSize = GetOverlapSize();
@@ -187,10 +190,11 @@ namespace Spelunky {
                 return;
             }
 
+            _movedEntities.Add(otherPhysics);
+
             otherPhysics.collisionContext.isAttached = true;
             otherPhysics.collisionContext.attachedPlatform = this;
-            otherPhysics.collisionContext.externalDelta = step;
-            otherPhysics.Move(Vector2.zero);
+            otherPhysics.collisionContext.externalDelta += step;
         }
 
         /// <summary>
@@ -204,8 +208,7 @@ namespace Spelunky {
 
             otherPhysics.collisionContext.groundedOverride = true;
             otherPhysics.collisionContext.groundColliderOverride = _collider;
-            otherPhysics.collisionContext.externalDelta = step;
-            otherPhysics.Move(Vector2.zero);
+            otherPhysics.collisionContext.externalDelta += step;
         }
 
         /// <summary>
@@ -215,68 +218,19 @@ namespace Spelunky {
         /// <param name="otherPhysics"></param>
         /// <param name="step"></param>
         private void MoveEntityInFront(EntityPhysics otherPhysics, Vector2Int step) {
-            // if (step.x != 0 && IsBlockInAir(otherPhysics)) {
-            //     return;
-            // }
-
             _movedEntities.Add(otherPhysics);
 
             otherPhysics.collisionContext.externalDelta = step;
             otherPhysics.Move(Vector2.zero);
 
-            // if (otherPhysics.collisionInfo.colliderVertical == _collider) {
-            //     otherPhysics.collisionInfo.down = false;
-            //     otherPhysics.collisionInfo.colliderVertical = null;
-            // }
+            if (otherPhysics.collisionInfo.colliderVertical == _collider) {
+                otherPhysics.collisionInfo.down = false;
+                otherPhysics.collisionInfo.colliderVertical = null;
+            }
 
             if (IsBlocked(otherPhysics, step)) {
                 HandleBlockedEntity(otherPhysics);
             }
-        }
-
-        private void GetRidersOnTop() {
-            _ridersOnTop.Clear();
-
-            Vector2 topCheckSize = new Vector2(Mathf.Max(1f, _collider.size.x + 0.5f), 2f);
-            Vector2 topCheckPos = _pixelPosition + _collider.offset + new Vector2(0f, _collider.size.y / 2f + 0.5f);
-
-            int hitCount = Physics2D.OverlapBox(
-                topCheckPos,
-                topCheckSize,
-                0f,
-                _contactFilter,
-                _overlapResults
-            );
-
-            if (hitCount == 0) {
-                return;
-            }
-
-            for (int i = 0; i < hitCount; i++) {
-                Collider2D hit = _overlapResults[i];
-                if (hit == null || hit == _collider) {
-                    continue;
-                }
-
-                EntityPhysics otherPhysics = hit.GetComponent<EntityPhysics>();
-                if (otherPhysics == null) {
-                    continue;
-                }
-
-                if (IsRidingPlatform(otherPhysics) || IsOnTop(otherPhysics)) {
-                    _ridersOnTop.Add(otherPhysics);
-                }
-            }
-        }
-
-        private bool IsOnTop(EntityPhysics otherPhysics) {
-            float platformTop = _collider.bounds.max.y;
-            float otherBottom = otherPhysics.Collider.bounds.min.y;
-            return otherBottom >= platformTop - TopSurfaceTolerance;
-        }
-
-        private bool IsRidingPlatform(EntityPhysics otherPhysics) {
-            return otherPhysics.collisionInfo.down && otherPhysics.collisionInfo.colliderVertical == _collider;
         }
 
         private Vector2 GetOverlapSize() {
@@ -334,14 +288,6 @@ namespace Spelunky {
             }
         }
 
-        private static bool IsBlockInAir(EntityPhysics otherPhysics) {
-            if (otherPhysics == null || otherPhysics.collisionInfo.down) {
-                return false;
-            }
-
-            return otherPhysics.GetComponent<Block>() != null;
-        }
-
         public void RegisterAttached(EntityPhysics otherPhysics) {
             if (otherPhysics == null) {
                 return;
@@ -350,6 +296,8 @@ namespace Spelunky {
             if (!_attachedEntities.Contains(otherPhysics)) {
                 _attachedEntities.Add(otherPhysics);
             }
+
+            otherPhysics.SetAttachedPlatform(this);
         }
 
         public void UnregisterAttached(EntityPhysics otherPhysics) {
@@ -358,6 +306,33 @@ namespace Spelunky {
             }
 
             _attachedEntities.Remove(otherPhysics);
+            otherPhysics.SetAttachedPlatform(null);
+        }
+
+        public void RegisterRider(EntityPhysics otherPhysics) {
+            if (otherPhysics == null) {
+                return;
+            }
+
+            if (!_ridersOnTop.Contains(otherPhysics)) {
+                _ridersOnTop.Add(otherPhysics);
+            }
+        }
+
+        public void UnregisterRider(EntityPhysics otherPhysics) {
+            if (otherPhysics == null) {
+                return;
+            }
+
+            _ridersOnTop.Remove(otherPhysics);
+        }
+
+        public bool IsRiderRegistered(EntityPhysics otherPhysics) {
+            if (otherPhysics == null) {
+                return false;
+            }
+
+            return _ridersOnTop.Contains(otherPhysics) || _attachedEntities.Contains(otherPhysics);
         }
 
         /// <summary>

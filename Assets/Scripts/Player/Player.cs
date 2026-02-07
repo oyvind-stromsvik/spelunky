@@ -82,7 +82,6 @@ namespace Spelunky {
         // entirely sure how to refactor that so that.
         // This is the velocity we want to apply to the player this frame.
         [HideInInspector] public Vector2 requestedVelocity;
-        private float _velocityXSmoothing;
         [HideInInspector] public Vector2 directionalInput;
         private float _speed;
 
@@ -212,14 +211,13 @@ namespace Spelunky {
             }
 
             float targetVelocityX = directionalInput.x * _speed;
-            // TODO: This means we have a horizontal velocity for many seconds after letting go of the input. This tiny
-            // velocity apparently can cause us to get dragged after enemies. It's of course the collision detection
-            // that needs to be fixed and not the fact that we have deceleration on our movement, but I don't think I
-            // understand what's going on here so I should try to understand it. Currently it doesn't really do what I
-            // want. I don't want us to have a lingering velocity for many seconds after we stop moving. I want this to
-            // just simulate some slight acceleration and deceleration, maybe over a second or something? And then we
-            // also need to be able to affect this when we introduce ice which should be slippery.
-            requestedVelocity.x = Mathf.SmoothDamp(requestedVelocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+            if (_speed <= 0f || accelerationTime <= 0f) {
+                requestedVelocity.x = targetVelocityX;
+            }
+            else {
+                float maxDelta = (_speed / accelerationTime) * Time.deltaTime;
+                requestedVelocity.x = Mathf.MoveTowards(requestedVelocity.x, targetVelocityX, maxDelta);
+            }
 
             requestedVelocity.y += _gravity * Time.deltaTime;
 
@@ -538,6 +536,8 @@ namespace Spelunky {
             string[] debugInfo = {
                 "--- Player info ---",
                 "State: " + stateMachine.CurrentState.GetType().Name,
+                "Position X: " + transform.position.x,
+                "Position Y: " + transform.position.y,
                 "--- Physics info --- ",
                 "Requested Velocity X: " + requestedVelocity.x,
                 "Requested Velocity Y: " + requestedVelocity.y,
@@ -554,6 +554,27 @@ namespace Spelunky {
             };
             for (int i = 0; i < debugInfo.Length; i++) {
                 GUI.Label(new Rect(8, 100 + 16 * i, 300, 22), debugInfo[i]);
+            }
+
+            MovingPlatform ridingPlatform = null;
+            if (Physics.collisionInfo.colliderVertical != null) {
+                ridingPlatform = Physics.collisionInfo.colliderVertical.GetComponent<MovingPlatform>();
+            }
+
+            string[] platformDebugInfo = {
+                "--- Platform info ---",
+                "Standing on MovingPlatform: " + (ridingPlatform != null),
+                "Platform name: " + (ridingPlatform != null ? ridingPlatform.name : "n/a"),
+                "Platform last step: " + (ridingPlatform != null ? ridingPlatform.LastStep.ToString() : "n/a"),
+                "Platform has rider: " + (ridingPlatform != null && ridingPlatform.IsRiderRegistered(Physics)),
+                "Hanging from: " + (ReferenceEquals(stateMachine.CurrentState, hangingState) && hangingState.colliderToHangFrom != null
+                    ? hangingState.colliderToHangFrom.name
+                    : "n/a")
+            };
+
+            int platformStartY = 100 + 16 * debugInfo.Length + 8;
+            for (int i = 0; i < platformDebugInfo.Length; i++) {
+                GUI.Label(new Rect(8, platformStartY + 16 * i, 300, 22), platformDebugInfo[i]);
             }
         }
 

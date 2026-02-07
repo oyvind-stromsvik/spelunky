@@ -83,6 +83,14 @@ namespace Spelunky {
         private Collider2D[] _overlapEventResults = new Collider2D[32];
         private HashSet<Collider2D> _overlapsLastFrame = new HashSet<Collider2D>();
         private HashSet<Collider2D> _overlapsThisFrame = new HashSet<Collider2D>();
+        private MovingPlatform _currentPlatform;
+        private MovingPlatform _currentAttachedPlatform;
+        private Collider2D _attachedPlatformCollider;
+
+        public void SetAttachedPlatform(MovingPlatform platform) {
+            _currentAttachedPlatform = platform;
+            _attachedPlatformCollider = platform != null ? platform.GetComponent<Collider2D>() : null;
+        }
 
         private void Reset() {
             // First time I've tried setting up layermasks in code.
@@ -129,6 +137,18 @@ namespace Spelunky {
         private void Awake() {
             Collider = GetComponent<BoxCollider2D>();
             SetupContactFilters();
+        }
+
+        private void OnDisable() {
+            if (_currentPlatform != null) {
+                _currentPlatform.UnregisterRider(this);
+                _currentPlatform = null;
+            }
+            if (_currentAttachedPlatform != null) {
+                _currentAttachedPlatform.UnregisterAttached(this);
+                _currentAttachedPlatform = null;
+                _attachedPlatformCollider = null;
+            }
         }
 
         private void SetupContactFilters() {
@@ -238,7 +258,7 @@ namespace Spelunky {
 
             collisionInfoLastFrame = collisionInfo;
             collisionInfo.Reset();
-
+            
             Vector2 totalDelta = moveDelta + collisionContext.externalDelta;
             RequestedVelocity = Time.deltaTime > 0f ? totalDelta / Time.deltaTime : Vector2.zero;
 
@@ -275,10 +295,48 @@ namespace Spelunky {
                 collisionInfo.becameGroundedThisFrame = true;
             }
 
-            ApplyCollisionContextOverrides();
+            // Check if an attached entity is being crushed by the platform pushing it into a wall.
+            // The entity's own velocity is zero while hanging, so any collision in the push direction
+            // means the platform is sandwiching the entity against a solid.
+            if (_currentAttachedPlatform != null && collisionContext.externalDelta != Vector2Int.zero) {
+                bool blockedByPush =
+                    (collisionContext.externalDelta.x > 0 && collisionInfo.right) ||
+                    (collisionContext.externalDelta.x < 0 && collisionInfo.left) ||
+                    (collisionContext.externalDelta.y > 0 && collisionInfo.up) ||
+                    (collisionContext.externalDelta.y < 0 && collisionInfo.down);
 
+                if (blockedByPush) {
+                    if (!TryQueueAttachedPlatformDislodge(collisionContext.externalDelta)) {
+                        ICrushable crushable = GetComponent<ICrushable>();
+                        if (crushable != null && crushable.IsCrushable) {
+                            crushable.Crush();
+                        }
+                    }
+                }
+            }
+
+            ApplyCollisionContextOverrides();
+            UpdatePlatformRiderRegistration();
             FireCollisionEvents();
             UpdateOverlapEvents();
+        }
+
+        private bool TryQueueAttachedPlatformDislodge(Vector2Int pushDelta) {
+            if (pushDelta.y == 0) {
+                return false;
+            }
+
+            Player player = GetComponent<Player>();
+            if (player == null) {
+                return false;
+            }
+
+            if (!ReferenceEquals(player.stateMachine.CurrentState, player.hangingState)) {
+                return false;
+            }
+
+            int direction = pushDelta.y > 0 ? 1 : -1;
+            return player.hangingState.TryQueueMovingPlatformDislodge(direction);
         }
 
         private void MoveX(int pixelsX, float moveDeltaX) {
@@ -371,6 +429,7 @@ namespace Spelunky {
             Vector2 checkPos = checkPosition + Collider.offset;
             Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
             Vector2 ourBottom = checkPosition + Collider.offset - new Vector2(0, Collider.size.y / 2f);
+            Collider2D ignoredCollider = collisionContext.groundedOverride ? collisionContext.groundColliderOverride : _attachedPlatformCollider;
 
             int hitCount = Physics2D.OverlapBox(
                 checkPos,
@@ -387,6 +446,10 @@ namespace Spelunky {
                 Collider2D hit = _overlapResults[i];
 
                 if (hit == Collider) {
+                    continue;
+                }
+
+                if (hit == ignoredCollider) {
                     continue;
                 }
 
@@ -437,6 +500,7 @@ namespace Spelunky {
             // Use a shrunk size to detect actual overlap, not edge-touching
             Vector2 checkPosition = nextPosition + Collider.offset;
             Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
+            Collider2D ignoredCollider = collisionContext.groundedOverride ? collisionContext.groundColliderOverride : _attachedPlatformCollider;
 
             int hitCount = Physics2D.OverlapBox(
                 checkPosition,
@@ -453,6 +517,10 @@ namespace Spelunky {
                 Collider2D hit = _overlapResults[i];
 
                 if (hit == Collider) {
+                    continue;
+                }
+
+                if (hit == ignoredCollider) {
                     continue;
                 }
 
@@ -489,6 +557,7 @@ namespace Spelunky {
             // Use a shrunk size to detect actual overlap, not edge-touching
             Vector2 checkPosition = nextPosition + Collider.offset;
             Vector2 checkSize = Collider.size - Vector2.one * 0.5f;
+            Collider2D ignoredCollider = collisionContext.groundedOverride ? collisionContext.groundColliderOverride : _attachedPlatformCollider;
 
             int hitCount = Physics2D.OverlapBox(
                 checkPosition,
@@ -505,6 +574,10 @@ namespace Spelunky {
                 Collider2D hit = _overlapResults[i];
 
                 if (hit == Collider) {
+                    continue;
+                }
+
+                if (hit == ignoredCollider) {
                     continue;
                 }
 
@@ -605,6 +678,27 @@ namespace Spelunky {
             }
 
             collisionContext.Reset();
+        }
+
+        private void UpdatePlatformRiderRegistration() {
+            MovingPlatform platform = null;
+            if (collisionInfo.down && collisionInfo.colliderVertical != null) {
+                platform = collisionInfo.colliderVertical.GetComponentInParent<MovingPlatform>();
+            }
+
+            if (_currentPlatform == platform) {
+                return;
+            }
+
+            if (_currentPlatform != null) {
+                _currentPlatform.UnregisterRider(this);
+            }
+
+            _currentPlatform = platform;
+
+            if (_currentPlatform != null) {
+                _currentPlatform.RegisterRider(this);
+            }
         }
 
         private void UpdateOverlapEvents() {

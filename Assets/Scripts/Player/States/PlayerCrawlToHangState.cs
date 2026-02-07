@@ -11,6 +11,9 @@ namespace Spelunky {
 
         public SpriteAnimation crawlToHangAnimation;
 
+        private Collider2D _colliderToHangFrom;
+        private MovingPlatform _movingPlatform;
+
         public override bool CanEnterState() {
             // Find the collider we're going to grab on to.
             Vector3 offset = new Vector3(-6 * player.Visuals.facingDirection, 1, 0);
@@ -19,12 +22,19 @@ namespace Spelunky {
                 return false;
             }
 
-            player.hangingState.colliderToHangFrom = hit.collider;
+            _colliderToHangFrom = hit.collider;
+            player.hangingState.colliderToHangFrom = _colliderToHangFrom;
 
             return true;
         }
 
         public override void EnterState() {
+            _movingPlatform = _colliderToHangFrom != null
+                ? _colliderToHangFrom.GetComponent<MovingPlatform>()
+                : null;
+            if (_movingPlatform != null) {
+                _movingPlatform.RegisterAttached(player.Physics);
+            }
             StartCoroutine(CrawlToHang());
         }
 
@@ -38,6 +48,14 @@ namespace Spelunky {
             yield return new WaitForSeconds(player.Visuals.animator.GetAnimationLength(crawlToHangAnimation));
 
             player.stateMachine.AttemptToChangeState(player.hangingState);
+        }
+
+        public override void ExitState() {
+            if (_movingPlatform != null) {
+                _movingPlatform.UnregisterAttached(player.Physics);
+            }
+            _movingPlatform = null;
+            _colliderToHangFrom = null;
         }
 
     }

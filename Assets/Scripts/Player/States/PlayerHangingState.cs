@@ -17,6 +17,8 @@ namespace Spelunky {
         private MovingPlatform _movingPlatform;
         private Vector2 _hangOffset;
         private int _movingPlatformDislodgeDirection;
+        private bool _pendingMovingPlatformDislodge;
+        private int _pendingMovingPlatformDislodgeDirection;
 
         public override bool CanEnterState() {
             // We can't enter this state without something to hang from.
@@ -32,7 +34,17 @@ namespace Spelunky {
         }
 
         public override void EnterState() {
-            Vector2 hangPosition = new Vector2(transform.position.x, colliderToHangFrom.transform.position.y + 6);
+            Vector2 hangPosition = new Vector2(transform.position.x, colliderToHangFrom.transform.position.y + 4);
+            Bounds hangBounds = colliderToHangFrom.bounds;
+            BoxCollider2D playerCollider = player.Physics.Collider;
+            Vector2 playerExtents = playerCollider.bounds.extents;
+            Vector2 offsetWorld = Vector2.Scale(playerCollider.offset, player.transform.lossyScale);
+            bool hangOnLeft = player.transform.position.x <= hangBounds.center.x;
+            float targetCenterX = hangOnLeft
+                ? hangBounds.min.x - playerExtents.x
+                : hangBounds.max.x + playerExtents.x;
+            hangPosition.x = targetCenterX - offsetWorld.x;
+
             if (player.Visuals.isFacingRight) {
                 if (colliderToHangFrom.transform.position.x < player.transform.position.x) {
                     player.Visuals.FlipCharacter();
@@ -51,6 +63,8 @@ namespace Spelunky {
             player.Physics.SetPosition(hangPosition);
             _movingPlatform = colliderToHangFrom.GetComponent<MovingPlatform>();
             _hangOffset = hangPosition - (Vector2)colliderToHangFrom.transform.position;
+            _pendingMovingPlatformDislodge = false;
+            _pendingMovingPlatformDislodgeDirection = 0;
             if (_movingPlatform != null) {
                 _movingPlatform.RegisterAttached(player.Physics);
             }
@@ -106,6 +120,23 @@ namespace Spelunky {
             velocity = Vector2.zero;
         }
 
+        public override void ChangePlayerVelocityAfterMove(ref Vector2 velocity) {
+            if (!_pendingMovingPlatformDislodge) {
+                return;
+            }
+
+            int movingPlatformDislodgeDirection = _pendingMovingPlatformDislodgeDirection;
+            _pendingMovingPlatformDislodge = false;
+            _pendingMovingPlatformDislodgeDirection = 0;
+
+            if (movingPlatformDislodgeDirection < 0) {
+                player.stateMachine.AttemptToChangeState(player.groundedState);
+            }
+            else if (movingPlatformDislodgeDirection > 0) {
+                player.stateMachine.AttemptToChangeState(player.inAirState);
+            }
+        }
+
         public override void OnAttackInputDown() {
             base.OnAttackInputDown();
             // If we attack while hanging we should fall.
@@ -147,12 +178,29 @@ namespace Spelunky {
             }
 
             float expectedY = colliderToHangFrom.transform.position.y + _hangOffset.y;
-            float deltaY = player.transform.position.y - expectedY;
+            // Account for pending platform carry that hasn't been applied yet.
+            // UpdateState runs before Physics.Move, so externalDelta is still pending.
+            float actualY = player.transform.position.y + player.Physics.collisionContext.externalDelta.y;
+            float deltaY = actualY - expectedY;
             if (Mathf.Abs(deltaY) < 0.5f) {
                 return false;
             }
 
             direction = deltaY > 0f ? -1 : 1;
+            return true;
+        }
+
+        public bool TryQueueMovingPlatformDislodge(int direction) {
+            if (direction == 0 || _movingPlatform == null) {
+                return false;
+            }
+
+            if (!ReferenceEquals(player.stateMachine.CurrentState, this)) {
+                return false;
+            }
+
+            _pendingMovingPlatformDislodge = true;
+            _pendingMovingPlatformDislodgeDirection = direction;
             return true;
         }
 
@@ -162,6 +210,8 @@ namespace Spelunky {
             }
             _movingPlatform = null;
             colliderToHangFrom = null;
+            _pendingMovingPlatformDislodge = false;
+            _pendingMovingPlatformDislodgeDirection = 0;
         }
 
     }
